@@ -9,6 +9,10 @@ span.speed-slider-padding {
   display: table-cell;
 }
 
+.viewer #playControls #playSpeedExpander div.play-speed.accented-tab {
+  display:none;
+}
+
 /*https://simeydotme.github.io/jQuery-ui-Slider-Pips/*/
 span.ui-slider-handle.ui-corner-all.ui-state-default {
   background: #E8800C;

@@ -1,5 +1,5 @@
 //Sidebar "class"
-function Sidebar () {
+function Sidebar() {
     //Private variables
     var videoContainers = ["#leftPlayerContainer","#rightPlayersContainer"];
     var mainVideoIndex = 0;

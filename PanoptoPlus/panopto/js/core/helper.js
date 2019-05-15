@@ -8,8 +8,8 @@
  * jQuery helper function to get querystring parameter
  * @param {string} name name of querystring parameter
  */
-$.urlParam = function (name) {
-    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.search);
+$.urlParam = function (url, name) {
+    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(url);
     return (results !== null) ? results[1] || 0 : false;
 }
 

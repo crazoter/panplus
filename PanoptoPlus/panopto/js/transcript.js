@@ -1,7 +1,7 @@
 /**
  * Transcript class manages the retrieval and caching of transcripts.
  */
-function Transcript(data) {
+function Transcript(fullData) {
     /**
      * Format (JSON):
      * {
@@ -34,27 +34,99 @@ function Transcript(data) {
         }
      */
     //Initialize data
-    this.data = [];
-    if (data.Error) {
-        throw new Error("Failed to obtain Transcript. Error Message: " + data.ErrorMessage);
-    } else {
-        //Important keys: EventTargetType, Data, Time
-        for (var i = 0; i < data.Events.length; i++) {
-            var obj = data.Events[i];
-            if (obj.EventTargetType === "MachineTranscript") {
-                this.data.push({time: obj.Time, text: obj.Data});
+    var data = [];
+    if (fullData) {
+        if (fullData.Error) {
+            throw new Error("Failed to obtain Transcript. Error Message: " + fullData.ErrorMessage);
+        } else {
+            //Important keys: EventTargetType, Data, Time
+            for (var i = 0; i < fullData.Events.length; i++) {
+                var obj = fullData.Events[i];
+                if (obj.EventTargetType === "MachineTranscript") {
+                    data.push({time: obj.Time, text: obj.Data});
+                }
             }
         }
     }
-    //More functions
+
+    this.getData = function() { return data; }
+    this.setData = function(d) { data = d; }
+
+    /**
+     * Generate VTTCue based on data
+     * https://iandevlin.com/blog/2015/02/javascript/dynamically-adding-text-tracks-to-html5-video/
+     * @param {Number} index index to access
+     * @param {Number} flashDelay time to hide previous subtitle and show next. Default is 0.2s.
+     * @param {Number} lastIndexDuration time to show last subtitle. Default is 10s.
+     */
+    this.getVttCue = function(index, flashDelay = 0.2, lastIndexDuration = 10) {
+        if (index >= 0 && index < data.length) {
+            if (index !== data.length - 1) {
+                return new VTTCue(data[index].time, data[index+1].time - flashDelay, data[index].text);
+            } else {
+                //Since data has no end time and this is the last index, we'll just use a magic duration
+                return new VTTCue(data[index].time, data[index].time + lastIndexDuration, data[index].text);
+            }
+        } else {
+            throw new Error("Transcript out of bounds: Tried to access index " + index);
+        }
+    }
+
+    /**
+     * Convert to VTTCueArray for subtitling
+     * @param {Number} flashDelay time to hide previous subtitle and show next. Default is 0.2s.
+     * @param {Number} lastIndexDuration time to show last subtitle. Default is 10s.
+     */
+    this.toVTTCueArray = function(flashDelay, lastIndexDuration) {
+        var result = [];
+        for (var i = 0; i < data.length; i++)
+            result.push(this.getVttCue(i, flashDelay, lastIndexDuration));
+        return result;
+    }
 }
-Transcript.get = function() {
-    return new Promise(function(resolve) {
+//Closure to support private static variable
+(function() {
+    /**Problem: Multiple parts of our code needs the transcript. 
+     * We don't want to call the AJAX function multiple times, so everytime it is required and it's not ready, we add it to callbacks
+     * Once it's ready, we call all these callbacks as required.
+     * http://api.jquery.com/category/callbacks-object/
+     */
+    var callbacks = $.Callbacks();
+    var cachedTranscript = null;
+    var isGettingTranscript = false;
+    var key = 'transcript-' + $.urlParam(document.forms[0].action, "id");
+
+    Transcript.get = function() {
+        return new Promise(function(resolve) {
+            //TODO: add extension storage
+            if (cachedTranscript) {
+                return resolve(cachedTranscript);
+            } else if (isGettingTranscript) {
+                callbacks.add(function() {
+                    return resolve(cachedTranscript);
+                });
+            } else {
+                isGettingTranscript = true;
+                chrome.storage.local.get([key],function(result) {
+                    if (result[key]) {
+                        console.log("Cache used");
+                        var transcript = new Transcript();
+                        transcript.setData(result[key]);
+                        return finishTranscriptGet(resolve, transcript);
+                    } else {
+                        return processTranscriptGet(resolve);
+                    }
+                });
+            }
+        });
+    }
+
+    var processTranscriptGet = function(resolve) {
         //Create injected function
         var injectedFunction = function() {
             //Need to redeclare this method because it's run on the webpage itself
-            $.urlParam = function (name) {
-                var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.search);
+            $.urlParam = function (url, name) {
+                var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(url);
                 return (results !== null) ? results[1] || 0 : false;
             };
             $.ajax({
@@ -62,9 +134,9 @@ Transcript.get = function() {
                 url: window.location.origin+"/Panopto/Pages/Viewer/Search/Results.aspx",
                 contentType: 'application/x-www-form-urlencoded; charset=utf-8',
                 data: {
-                    id: $.urlParam("id"),
+                    id: $.urlParam(document.forms[0].action, "id"),
                     type: "",
-                    query: "ssfs",
+                    query: "",
                     notesUser: "",
                     channelName: "",
                     refreshAuthCookie: true,
@@ -84,8 +156,19 @@ Transcript.get = function() {
         bridge.request().then(data => {
             //Process data
             var transcript = new Transcript(data);
-            //store transcript in chrome.storage if necessary
-            return resolve(transcript);
+            //Save
+            var kvp = {};
+            kvp[key] = transcript.getData();
+            chrome.storage.local.set(kvp, function(){
+                console.log("Saved " + key);
+            });
+            return finishTranscriptGet(resolve, transcript);
         });
-    });
-}
+    }
+
+    var finishTranscriptGet = function(resolve, transcript) {
+        cachedTranscript = transcript;
+        callbacks.fire();
+        return resolve(transcript);
+    }
+})();

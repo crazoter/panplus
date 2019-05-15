@@ -3,10 +3,7 @@
     "version": "1.0.0",
     "description": "Improve your webcasting experience!",
     "manifest_version": 2,
-    "permissions": ["tabs", 
-        "*://nuscast.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=*",
-        "*://med.weblecture.nus.edu.sg/Panopto/Pages/Viewer.aspx?id=*",
-        "*://luminus.nus.edu.sg/iframe/lti-launch/panopto*"],
+    "permissions": ["tabs", "storage"],
     "content_scripts": [
         {
             "matches": ["*://nuscast.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=*",
@@ -22,6 +19,7 @@
                 "panopto/js/ui/speed-slider.js",
                 "panopto/js/ui/sidebar.js",
                 "panopto/js/transcript.js",
+                "panopto/js/ui/subtitles.js",
                 "panopto/js/init.js"
             ],
             "css": [
