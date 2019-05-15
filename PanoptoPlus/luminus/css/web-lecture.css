@@ -1,0 +1,16 @@
+/*Override CSS to overlay Luminus' header with Panopto's and make more space for it*/
+header.full-screen-header[_ngcontent-c31] {
+    position: absolute;
+    height: 33px;
+    z-index: 2;
+    align-items: baseline;
+}
+
+header.full-screen-header[_ngcontent-c31] small[_ngcontent-c31] {
+    margin-top: 1px;
+}
+
+section.full-screen-body[_ngcontent-c31] {
+    top: 0px;
+    height: 100%;
+}

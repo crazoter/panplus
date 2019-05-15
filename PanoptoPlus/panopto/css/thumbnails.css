@@ -1,0 +1,27 @@
+/*Thumbnails*/
+/*Overriding existing thumbnail CSS by Panopto*/
+ol#thumbnailList {
+    height: 50px;
+    position: absolute;
+    padding-top: 0px;
+    padding-bottom: 10px;
+    bottom: -5px;
+}
+.viewer .thumbnail-strip li.thumbnail, .viewer .thumbnail-strip li.thumbnail img {
+    height: 32px;
+    webkit-box-shadow: rgba(0, 0, 0, 0.7) 0px 2px 2px 0;
+    -moz-box-shadow: rgba(0, 0, 0, 0.7) 0px 2px 2px 0;
+    box-shadow: rgba(0, 0, 0, 0.7) 0px 2px 2px 0;
+}
+.viewer .thumbnail-strip .thumbnail div.thumbnail-timestamp {
+    bottom: 5px;
+    font-size: 0.6em;
+    font-weight: bold;
+    padding: 2px 0 0 0;
+    background-color: transparent;
+    color: darkgray;
+    position: relative;
+    text-align: center;
+}
+
+

@@ -1,0 +1,48 @@
+{
+    "name": "Panopto Plus",
+    "version": "1.0.0",
+    "description": "Improve your webcasting experience!",
+    "manifest_version": 2,
+    "permissions": ["tabs", 
+        "*://nuscast.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=*",
+        "*://med.weblecture.nus.edu.sg/Panopto/Pages/Viewer.aspx?id=*",
+        "*://luminus.nus.edu.sg/iframe/lti-launch/panopto*"],
+    "content_scripts": [
+        {
+            "matches": ["*://nuscast.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=*",
+                "*://med.weblecture.nus.edu.sg/Panopto/Pages/Viewer.aspx?id=*",
+                "*://luminus.nus.edu.sg/iframe/lti-launch/panopto*"],
+            "js": [
+                "libs/jquery-3.4.1.min.js",
+                "libs/jquery-ui/jquery-ui-1.12.1.min.js",
+                "libs/jquery-ui-slider-pips/jquery-ui-slider-pips.min.js",
+                "panopto/js/core/helper.js",
+                "panopto/js/core/context-bridge.js",
+                "panopto/js/core/template.js",
+                "panopto/js/ui/speed-slider.js",
+                "panopto/js/ui/sidebar.js",
+                "panopto/js/transcript.js",
+                "panopto/js/init.js"
+            ],
+            "css": [
+                "libs/jquery-ui/css/jquery-ui.structure.min.css",
+                "libs/jquery-ui/css/jquery-ui.theme.min.css",
+                "libs/jquery-ui/css/jquery-ui.min.css",
+                "libs/jquery-ui-slider-pips/jquery-ui-slider-pips.min.css",
+                "panopto/css/speed-slider.css",
+                "panopto/css/thumbnails.css"
+            ],
+            "all_frames": true
+        },
+        {
+            "matches": ["*://luminus.nus.edu.sg/modules/*/web-lectures"],
+            "css": [
+                "luminus/css/web-lecture.css"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        "panopto/templates/sidebar.html",
+        "panopto/templates/speed-slider.html"
+    ]
+}
