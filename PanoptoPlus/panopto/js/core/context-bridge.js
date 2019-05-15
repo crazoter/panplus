@@ -1,43 +1,47 @@
 /**
  * ContextBridge class for setting up linkages between the isolated code environment and the actual code environment of the user
+ * @param {function} func the function to be injected into the page.
  * @param {string} eventHandle the string used for triggering & detecting events for this particular bridge
- * @param {function} func the function to be executed
+ * @param {function} eventHandler the function called whenever the eventHandle is triggered. This function takes in 1 parameter.
  */
 function ContextBridge(func, eventHandle, eventHandler) {
+    //public object variables
     this.func = func;
     this.eventHandle = eventHandle;
     this.eventHandler = eventHandler;
     this.script = null;
 
-    this.injectScript = function(actualCode) {
-        this.script = document.createElement('script');
-        this.script.textContent = actualCode;
-        //(document.head||document.documentElement).appendChild(this.script);
-        document.body.appendChild(this.script);
-    }
+    //private object variables
+    //"this" is different across various contexts, we want to use self to ensure we're referring to this ContextBridge object
+    var self = this;
 
-    //Execute is a fire-and-forget event without the use of the event handler
-    //Untested Code
-    this.exec = function() {
-        var actualCode = '(' + func + ')();';
-        this.injectScript(actualCode);
-        this.script.remove();
+    /**
+     * private function to inject script into webpage
+     * @param {string} code code to be injected in string format
+     */
+    var injectScript = function(code) {
+        self.script = document.createElement('script');
+        self.script.textContent = code;
+        document.body.appendChild(self.script);
     }
-
-    this.buildConnectScript = function() {
+    /**
+     * private function to create script for bridge
+     */
+    var buildConnectScript = function() {
         var code = '(function() {var bridgeCall = ' + func + '; var bridgeCallback = function (detail) {' +
-        'document.dispatchEvent(new CustomEvent("' + this.eventHandle + '", {detail: detail})); };' +
+        'document.dispatchEvent(new CustomEvent("' + self.eventHandle + '", {detail: detail})); };' +
         'bridgeCall(); })();';
         return code;
     }
 
-    //Execute the function, and then return the data stored in the "connectData" variable to the context script
-    //This function itself returns a promise which returns the data.
-    //Use for a one time request & response.
+    /**
+     * Execute the function, and then return the data stored in the "connectData" variable to the context script
+     * This function itself returns a promise which returns the data.
+     * Use for a one time request & response.
+     */
     this.request = function() {
-        this.injectScript(this.buildConnectScript());
+        injectScript(buildConnectScript());
         this.script.remove();
-        var self = this;
         return new Promise(function(resolve) {
             document.addEventListener(self.eventHandle, function(e) {
                 self.close();
@@ -46,11 +50,23 @@ function ContextBridge(func, eventHandle, eventHandler) {
         });
     }
 
-    //Execute the function but instead of returning a Promise, uses the eventHandler callback function instead
-    //Use to build a persistent bridge.
-    //Untested Code
+    /**
+     * Execute is a fire-and-forget event without the use of the event handler
+     * Untested & Unused Code
+     */
+    this.exec = function() {
+        var actualCode = '(' + func + ')();';
+        injectScript(actualCode);
+        this.script.remove();
+    }
+
+    /**
+     * Execute the function but instead of returning a Promise, uses the eventHandler callback function instead
+     * Use to build a persistent bridge.
+     * Untested & Unused Code
+     */
     this.connect = function() {
-        this.injectScript(this.buildConnectScript());
+        injectScript(buildConnectScript());
         document.addEventListener(this.eventHandle, this.eventHandler);
     }
 

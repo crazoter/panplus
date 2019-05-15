@@ -8,11 +8,18 @@
             observer.disconnect();
             //Put initialization code here
             console.log("DOM loaded!");
+            //Init UI
             var sidebar = new Sidebar();
             sidebar.init();
             var speedSlider = new SpeedSlider();
             speedSlider.init();
-            Transcript.get().then(data => { console.log(data); });
+            //Init transcript
+            Transcript.get().then(data => { 
+                //Add subtitles
+                //Add Transcript sidebar
+                console.log(data); 
+            });
+            //Init silence trimming
         }
     });
     observer.observe(document, {subtree: true,attributes: true});
