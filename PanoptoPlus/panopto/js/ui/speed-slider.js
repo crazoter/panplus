@@ -13,17 +13,17 @@ function SpeedSlider() {
                 max: 5, 
                 value: 1, 
                 step: 0.1,
-                slide: function(event, ui) {
-                    $("video").each((index, video) => (video.playbackRate = ui.value));
-                    $("#playSpeedMultiplier").text(ui.value+"x");
-                },
-                change: function(event, ui) {
-                    $("video").each((index, video) => (video.playbackRate = ui.value));
-                    $("#playSpeedMultiplier").text(ui.value+"x");
-                },
+                slide: changePlaybackRate,
+                change: changePlaybackRate,
             })
             .slider('pips', {step: 1, rest: "label", suffix: "x"})
             .slider("float");
         });
+    }
+
+    var changePlaybackRate = function(event, ui) {
+        $("video").each((index, video) => (video.playbackRate = ui.value));
+        $("#playSpeedMultiplier").text(ui.value+"x");
+        Settings.setNormalPlaybackRate(ui.value);
     }
 }

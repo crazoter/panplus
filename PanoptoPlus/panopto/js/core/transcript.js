@@ -107,7 +107,7 @@ function Transcript(fullData) {
                 });
             } else {
                 isGettingTranscript = true;
-                chrome.storage.local.get([key],function(result) {
+                chrome.storage.local.get([key], (result) => {
                     if (result[key]) {
                         console.log("Cache used");
                         var transcript = new Transcript();
@@ -159,9 +159,7 @@ function Transcript(fullData) {
             //Save
             var kvp = {};
             kvp[key] = transcript.getData();
-            chrome.storage.local.set(kvp, function(){
-                console.log("Saved " + key);
-            });
+            chrome.storage.local.set(kvp, () => console.log("Saved " + key));
             return finishTranscriptGet(resolve, transcript);
         });
     }
@@ -169,6 +167,7 @@ function Transcript(fullData) {
     var finishTranscriptGet = function(resolve, transcript) {
         cachedTranscript = transcript;
         callbacks.fire();
+        callbacks.empty();
         return resolve(transcript);
     }
 })();
