@@ -13,6 +13,7 @@
                 "libs/jquery-3.4.1.min.js",
                 "libs/jquery-ui/jquery-ui-1.12.1.min.js",
                 "libs/jquery-ui-slider-pips/jquery-ui-slider-pips.min.js",
+                "libs/jsmpeg/jsmpeg-custom.min.js",
                 "libs/hark.bundle.js",
                 "panopto/js/core/settings.js",
                 "panopto/js/core/helper.js",
@@ -24,6 +25,8 @@
                 "panopto/js/ui/speed-slider.js",
                 "panopto/js/ui/sidebar.js",
                 "panopto/js/ui/subtitles.js",
+                "panopto/js/jsmpeg/voice-detector.js",
+                "panopto/js/jsmpeg/ts-tracker.js",
                 "panopto/js/init.js"
             ],
             "css": [

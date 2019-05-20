@@ -17,8 +17,13 @@
                 var subtitles = new Subtitles();
                 subtitles.init();
                 //Init silence trimming
-                var silenceShortener = new SilenceShortener();
-                silenceShortener.init();
+                //var silenceShortener = new SilenceShortener();
+                //silenceShortener.init();
+
+                var tsTracker = new TSTracker();
+                tsTracker.init();
+
+                console.log("FIN");
             });
         }
     });

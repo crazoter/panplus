@@ -1,7 +1,7 @@
 Panopto Plus
 
-#### Purpose
-Create a chrome extension to improve the webcasting experience for panopto. It will serve a few purposes:
+#### Purpose of this project
+To create a chrome extension to improve the webcasting experience for panopto. It will serve a few purposes:
 
 1. Improve the user interface of the webcast page. 
 
@@ -15,6 +15,9 @@ Create a chrome extension to improve the webcasting experience for panopto. It w
 3. Switch on Developer mode (top right corner).
 4. Select "Load Unpacked" and select the "PanoptoPlus" folder.
 5. The extension is loaded. Whenever you need to modify and test code, load the extension like in step 4 and reload the page.
+
+### Deployment Instructions
+The extension can be used as is by following the development instructions. However, the production distribution is not ready yet.
 
 ### Todo List
 __User Interface__
@@ -32,16 +35,20 @@ __User Interface__
 
 __Transcripts__
 * Extraction of transcripts [DONE]
-* Separation of interface & implementation¹
-* Conversion of transcripts to WebVTT tracks for subtitling²
+* Separation of interface & implementation [DONE, to verify]
+* Conversion of transcripts to WebVTT tracks for subtitling [DONE]
 * Conversion of transcripts to DOM in sidebar³
 
 __Silence Trimming__
 * Implementation⁴
 
+__Complete Conversion to ES6__
+* Implementation
+
+__Webpack for deployment__
+* Implementation
+
 ---
-¹Dependency Inversion Principle  
-² https://iandevlin.com/blog/2015/02/javascript/dynamically-adding-text-tracks-to-html5-video/  
 ³Will need to manage hundreds of transcript rows. Use something that can handle that: https://github.com/triceam/MegaList. Each transcript row also needs to be clickable and seek video to position.  
 ⁴ https://github.com/otalk/hark    
 

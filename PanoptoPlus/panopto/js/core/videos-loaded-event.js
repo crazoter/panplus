@@ -8,9 +8,9 @@ function VideosLoadedEvent() {}
     var callbacks = $.Callbacks();
     VideosLoadedEvent.subscribe = function(resolve) {
         if (!isWaiting) {
+            isWaiting = true;
             var videoDOMs = document.querySelectorAll("video");
             waitForVideoLoad(videoDOMs[0]);
-            isWaiting = true;
         }
         if (!isDone) callbacks.add(function() { resolve(); });
         else resolve();

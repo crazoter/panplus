@@ -32,6 +32,7 @@ function Subtitles() {
                     for (var i = 0; i < videoDOMs.length; i++) {
                         videoDOMs[i].textTracks[videoDOMs[i].textTracks.length - 1].mode = "showing";
                     }
+                    console.log("Subtitles loaded");
                 },500);
             }
         });

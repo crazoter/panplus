@@ -28,7 +28,8 @@ function ContextBridge(func, eventHandle, eventHandler) {
      * private function to create script for bridge
      */
     var buildConnectScript = function() {
-        var code = '(function() {var bridgeCall = ' + func + '; var bridgeCallback = function (detail) {' +
+        var code = '(() => { var bridgeCall = ' + func +
+        '; var bridgeCallback = function (detail) {' +
         'document.dispatchEvent(new CustomEvent("' + self.eventHandle + '", {detail: detail})); };' +
         'bridgeCall(); })();';
         return code;
@@ -42,6 +43,7 @@ function ContextBridge(func, eventHandle, eventHandler) {
     this.request = function() {
         injectScript(buildConnectScript());
         this.script.remove();
+        this.script = null;
         return new Promise(function(resolve) {
             document.addEventListener(self.eventHandle, function(e) {
                 self.close();
@@ -58,16 +60,18 @@ function ContextBridge(func, eventHandle, eventHandler) {
         var actualCode = '(' + func + ')();';
         injectScript(actualCode);
         this.script.remove();
+        this.script = null;
     }
 
     /**
      * Execute the function but instead of returning a Promise, uses the eventHandler callback function instead
      * Use to build a persistent bridge.
-     * Untested & Unused Code
      */
     this.connect = function() {
         injectScript(buildConnectScript());
         document.addEventListener(this.eventHandle, this.eventHandler);
+        this.script.remove();
+        this.script = null;
     }
 
     /**

@@ -15,7 +15,6 @@ function getMaxVolume (analyser, fftBins) {
   return maxVolume;
 }
 
-
 var audioContextType;
 if (typeof window !== 'undefined') {
   audioContextType = window.AudioContext || window.webkitAudioContext;

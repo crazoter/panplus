@@ -15,7 +15,11 @@ function Settings() {
      * @param {Boolean} silenceSkipEnabled 
      * @param {Number} silencePlaybackRate 
      */
-    function _Settings(subtitlesEnabled = true, normalPlaybackRate = 1.0, silenceSkipEnabled = true, silencePlaybackRate = 3.0, harkThreshold = -55) {
+    function _Settings(subtitlesEnabled = true, 
+        normalPlaybackRate = 1.0, 
+        silenceSkipEnabled = true, 
+        silencePlaybackRate = 3, 
+        harkThreshold = -50) {
         if (!initiated) {
             initiated = true;
             this.subtitlesEnabled = subtitlesEnabled;
@@ -33,7 +37,8 @@ function Settings() {
         return new Promise((resolve) => {
             if (!initiated) {
                 Settings.load().then((result) => {
-                    instance = result;
+                    instance = new _Settings();
+                    //instance = result;
                     initiated = true;
                     resolve(instance);
                 }).catch(() => {
@@ -91,7 +96,7 @@ function Settings() {
      */
     Settings.save = function() {
         var kvp = {};
-        kvp['settings'] = settings;
+        kvp['settings'] = instance;
         chrome.storage.local.set(kvp,() => {});
     }
 })();
