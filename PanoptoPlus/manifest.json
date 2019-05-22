@@ -7,14 +7,14 @@
     "content_scripts": [
         {
             "matches": ["*://nuscast.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=*",
-                "*://med.weblecture.nus.edu.sg/Panopto/Pages/Viewer.aspx?id=*",
+                "*://*.weblecture.nus.edu.sg/Panopto/Pages/Viewer.aspx?id=*",
                 "*://luminus.nus.edu.sg/iframe/lti-launch/panopto*"],
             "js": [
                 "libs/jquery-3.4.1.min.js",
                 "libs/jquery-ui/jquery-ui-1.12.1.min.js",
                 "libs/jquery-ui-slider-pips/jquery-ui-slider-pips.min.js",
-                "libs/jsmpeg/jsmpeg-custom.min.js",
-                "libs/hark.bundle.js",
+                "libs/phoboslab-jsmpeg/jsmpeg.min.js",
+                "libs/indutny-fft-js/fft.min.js",
                 "panopto/js/core/settings.js",
                 "panopto/js/core/helper.js",
                 "panopto/js/core/context-bridge.js",
@@ -25,6 +25,9 @@
                 "panopto/js/ui/speed-slider.js",
                 "panopto/js/ui/sidebar.js",
                 "panopto/js/ui/subtitles.js",
+                "panopto/js/jsmpeg/offline-decoder.js",
+                "panopto/js/jsmpeg/offline-mp2-wasm.js",
+                "panopto/js/jsmpeg/offline-mp2.js",
                 "panopto/js/jsmpeg/voice-detector.js",
                 "panopto/js/jsmpeg/ts-tracker.js",
                 "panopto/js/init.js"

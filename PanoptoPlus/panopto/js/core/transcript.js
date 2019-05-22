@@ -94,7 +94,9 @@ function Transcript(fullData) {
     var callbacks = $.Callbacks();
     var cachedTranscript = null;
     var isGettingTranscript = false;
-    var key = 'transcript-' + $.urlParam(document.forms[0].action, "id");
+    if (document.forms[0]) {
+        var key = 'transcript-' + $.urlParam(document.forms[0].action, "id");
+    } else throw new Error("Transcript.js: Unable to get webcast ID");
 
     Transcript.get = function() {
         return new Promise(function(resolve) {

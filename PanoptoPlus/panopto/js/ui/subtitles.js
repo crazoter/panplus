@@ -22,6 +22,10 @@ function Subtitles() {
             var cueArray = transcript.toVTTCueArray();
             for (var i = 0; i < videoDOMs.length; i++) {
                 var cueArray = transcript.toVTTCueArray();
+                console.log(cueArray.length + " Subtitle cues detected");
+                if (cueArray.length == 0 && Settings.getSubtitlesEnabled) {
+                    alert("No subtitles available for this webcast.");
+                }
                 var track = videoDOMs[i].addTextTrack("captions", "English", "en");
                 for (var j = 0; j < cueArray.length; j++) {
                     track.addCue(cueArray[j]);

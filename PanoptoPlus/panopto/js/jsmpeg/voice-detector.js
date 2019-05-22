@@ -3,32 +3,26 @@ VoiceDetector = function() {
     this.results = [];
 
     VoiceDetector.prototype.onDecoderReady = function(decoder) {
+        debugger;
         while (decoder.decode()) {};
-        onFinishedProcessing(results);
+        if (this.onFinishedProcessing) this.onFinishedProcessing(this.results);
+        else throw new Error("onFinishedProcessing callback not established");
     };
 
-    VoiceDetector.prototype.process = function(sampleRate, left, right) {
-        //Do FTT
-        this.gain.gain.value = this.volume;
-    
-        var buffer = this.context.createBuffer(2, left.length, sampleRate);
-        buffer.getChannelData(0).set(left);
-        buffer.getChannelData(1).set(right);
-    
-        var source = this.context.createBufferSource();
-        source.buffer = buffer;
-        source.connect(this.destination);
-    
-        var now = this.context.currentTime;
-        var duration = buffer.duration;
-        if (this.startTime < now) {
-            this.startTime = now;
-            this.wallclockStartTime = JSMpeg.Now();
-        }
-    
-        source.start(this.startTime);
-        this.startTime += duration;
-        this.wallclockStartTime += duration;
+    VoiceDetector.prototype.process = function(sampleRate, left, right, timestamp) {
+        //Do fast fourier transform fft
+        //Sampling rate usually going to be around 44100
+        //2048 is the fft size, our fft library needs the size to be a power of 2
+        //Meaning of fft size: https://www.spectraplus.com/DT_help/fft_size.htm
+        //We don't really need a high frequency resolution
+        /*
+        var fft = new FFT(2048);
+
+        //Perform fft on both left and right (speakers)
+        const leftOutput = fft.createComplexArray();
+        fft.realTransform(leftOutput, left);
+        const rightOutput = fft.createComplexArray();
+        fft.realTransform(rightOutput, right);*/
     };
 
     VoiceDetector.prototype.finishedProcessing = function() {

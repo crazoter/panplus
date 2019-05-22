@@ -9,23 +9,15 @@
             //Put initialization code here
             console.log("DOM loaded!");
             Settings.initialize().then((instance) => {
-                //Init UI
-                var sidebar = new Sidebar();
-                sidebar.init();
-                var speedSlider = new SpeedSlider();
-                speedSlider.init();
-                var subtitles = new Subtitles();
-                subtitles.init();
-                //Init silence trimming
-                //var silenceShortener = new SilenceShortener();
-                //silenceShortener.init();
-
-                var tsTracker = new TSTracker();
-                tsTracker.init();
+                new Sidebar().init();
+                new SpeedSlider().init();
+                new Subtitles().init();
+                new TSTracker().init();
 
                 console.log("FIN");
             });
         }
     });
     observer.observe(document, {subtree: true,attributes: true});
+    new TSTracker().init();
 })();

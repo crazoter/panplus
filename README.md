@@ -35,7 +35,7 @@ __User Interface__
 
 __Transcripts__
 * Extraction of transcripts [DONE]
-* Separation of interface & implementation [DONE, to verify]
+* Separation of interface & implementation [Separate subtitle source]
 * Conversion of transcripts to WebVTT tracks for subtitling [DONE]
 * Conversion of transcripts to DOM in sidebar³
 

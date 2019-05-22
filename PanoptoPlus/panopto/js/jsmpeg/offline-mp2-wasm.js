@@ -75,22 +75,34 @@ MP2WASM.prototype.bufferWrite = function(buffers) {
 };
 
 MP2WASM.prototype.decode = function() {
-    var pos = this.bits.index >> 3;
-    if (pos >= this.bits.byteLength) {
+	if (!this.decoder) {
+        throw new Error("OfflineMP2Audio decoder not found error");
+    }	
+
+    var decodedBytes = this.functions._mp2_decoder_decode(this.decoder);
+    if (decodedBytes === 0) {
         return false;
     }
 
-    var decoded = this.decodeFrame(this.left, this.right);
-    this.bits.index = (pos + decoded) << 3;
-    if (!decoded) {
-        return false;
+    if (!this.sampleRate) {
+        this.sampleRate = this.functions._mp2_decoder_get_sample_rate(this.decoder);
     }
 
     if (this.destination) {
-        this.destination.process(this.sampleRate, this.left, this.right, this.getCurrentTime());
+        // Create a Float32 View into the modules output channel data
+        var leftPtr = this.functions._mp2_decoder_get_left_channel_ptr(this.decoder),
+            rightPtr = this.functions._mp2_decoder_get_right_channel_ptr(this.decoder);
+
+        var leftOffset = leftPtr / Float32Array.BYTES_PER_ELEMENT,
+            rightOffset = rightPtr / Float32Array.BYTES_PER_ELEMENT;
+
+        var left = this.instance.heapF32.subarray(leftOffset, leftOffset + MP2WASM.SAMPLES_PER_FRAME),
+            right = this.instance.heapF32.subarray(rightOffset, rightOffset + MP2WASM.SAMPLES_PER_FRAME);
+
+        this.destination.process(this.sampleRate, left, right, this.getCurrentTime());
     }
 
-    this.advanceDecodedTime(this.left.length / this.sampleRate);
+    this.advanceDecodedTime(MP2WASM.SAMPLES_PER_FRAME / this.sampleRate);
 
     //Modified callback with modified time
     if (this.onDecodeCallback) {

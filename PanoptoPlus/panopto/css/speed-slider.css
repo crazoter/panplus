@@ -9,7 +9,7 @@ span.speed-slider-padding {
   display: table-cell;
 }
 
-.viewer #playControls #playSpeedExpander div.play-speed.accented-tab {
+.viewer #playControls #playSpeedExpander div.play-speed.accented-tab, .viewer #viewerContent #rightPane #playControls #playSpeedExpander div.play-speed {
   display:none;
 }
 
