@@ -1,15 +1,11 @@
+/**
+ * The TSTracker class injects code into the page to detect when a TS file is loaded.
+ */
 TSTracker = (function() {
-    //Load wasmModule
-    var TSTracker = function() {
-        this.wasmModuleLoadedCallbacks = $.Callbacks();
-        if (JSMpeg.WASMModule.IsSupported()) {
-            this.wasmModule = new JSMpeg.WASMModule();
-            this.wasm = JSMpeg.Base64ToArrayBuffer(JSMpeg.WASM_BINARY_INLINED);
-            this.wasmModule.loadFromBuffer(this.wasm, this.startLoading.bind(this));
-        }
-        this.wasmModuleLoaded = false;
-    }
-
+    var TSTracker = function() {};
+    /**
+     * Initialization, setup a bridge to detect which TS files are loaded
+     */
     TSTracker.prototype.init = function() {
         var self = this;
         VideosLoadedEvent.subscribe(() => {
@@ -18,58 +14,53 @@ TSTracker = (function() {
                 //Make use of the flowplayer on the website to keep us updated on TS files are in use
                 flowplayer().engine.hlsjs.observer.addListener("hlsFragLoading",(callbackId, details) => {
                     console.log("hlsFragLoading: " + details.frag.url);
-                    bridgeCallback(details.frag.url);
+                    //Make the request in the webpage environment in case there are any CORS issues
+                    var req = new XMLHttpRequest();
+                    req.open("GET", details.frag.url, true);
+                    req.responseType = "arraybuffer";
+                    req.onload = function(e) {
+                        bridgeCallback(req.response);
+                    };
+                    req.send();
                 });
             };
             var callback = async function(event) {
-                if (self.wasmModuleLoaded) self.processURL(event.detail);
-                else self.wasmModuleLoadedCallbacks.add(() => self.processURL(event.detail));
+                self.processURL(event.detail);
             };
             var ctxBridge = new ContextBridge(injectedFunc, "TsTrackingEvent", callback);
             ctxBridge.connect();
         });
     };
 
-    TSTracker.prototype.processURL = function(url) {
-        debugger;
-        //Process TS file URL using jsmpeg project, but only the audio portion
-        //Code lifted from player.js constructor function
-        var jsmpegOptions, sourceAjax, demuxerTS, mp2Audio, audioOut;
-        jsmpegOptions = {};
-        sourceAjax = new JSMpeg.Source.Ajax(url, jsmpegOptions);
-        demuxerTS = new JSMpeg.Demuxer.TS(jsmpegOptions);
+    TSTracker.prototype.processURL = function(arraybuffer) {
+        return;
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var source = audioCtx.createBufferSource();
 
-        //Checks for whether or not webassembly can be used is already done above
-        jsmpegOptions.wasmModule = this.wasmModule;
-
-        //Extending decoders to allow for audio processing ASAP.
-        //The term "Offline" is borrowed from https://developer.mozilla.org/en-US/docs/Web/API/OfflineAudioContext
-        mp2Audio = jsmpegOptions.wasmModule ? 
-            new OfflineMP2AudioWASM(jsmpegOptions) : 
-            new OfflineMP2Audio(jsmpegOptions);
-        
-        //Creating my own VoiceDetector class because the audioOut used in the library is irrelevant to my needs
-        audioOut = new VoiceDetector();
-
-        //Using the library's callback system
-        sourceAjax.connect(demuxerTS);          
-        demuxerTS.connect(JSMpeg.Demuxer.TS.STREAM.AUDIO_1, mp2Audio);
-        mp2Audio.connect(audioOut);
-        sourceAjax.start();
-
-        audioOut.finishedProcessing((results) => {
-            //Setup cue 
+        //https://stackoverflow.com/questions/33902299/using-jquery-ajax-to-download-a-binary-file
+        //var req = new XMLHttpRequest();
+        //req.open("GET", url, true);
+        //req.responseType = "arraybuffer";
+        //req.onload = function(e) {
+        //This will be a AAC LC file
+        var audioByteStream = WebModule["MPEG2TS"].toByteStream(
+            WebModule["MPEG2TS"].demux(new Uint8Array(arraybuffer),0).AUDIO_TS_PACKET
+        );
+        //Some browsers may not support AAC but chrome does
+        audioCtx.decodeAudioData(Uint8ArrayToArrayBuffer(audioByteStream), function(buffer) {
+            //debugger;
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+            },
+        function(err){ 
+            //debugger;
+            console.log("Error with decoding audio data" + err.err); 
         });
+        debugger;
+            //debugger;
+        //};
+        //req.send();
     }
-
-    /**
-     * Called once WASMModule is loaded if Webassembly is supported
-     */
-    TSTracker.prototype.startLoading = function() {
-        this.wasmModuleLoaded = true;
-        this.wasmModuleLoadedCallbacks.fire();
-        this.wasmModuleLoadedCallbacks.empty();
-    };
 
     return TSTracker;
 })();

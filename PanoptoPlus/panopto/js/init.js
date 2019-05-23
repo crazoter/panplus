@@ -1,3 +1,4 @@
+//This is basically main(...){}
 //This is the same as function init() {...} init();
 (function init() {
     //Wait for page load
@@ -13,11 +14,9 @@
                 new SpeedSlider().init();
                 new Subtitles().init();
                 new TSTracker().init();
-
                 console.log("FIN");
             });
         }
     });
     observer.observe(document, {subtree: true,attributes: true});
-    new TSTracker().init();
 })();

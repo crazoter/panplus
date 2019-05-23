@@ -1,26 +1,17 @@
 /**
  * Promise/Callback for code that need the videos to be loaded before execution
  */
-function VideosLoadedEvent() {}
-(function() {
-    var isWaiting = false;
-    var isDone = false;
-    var callbacks = $.Callbacks();
-    VideosLoadedEvent.subscribe = function(resolve) {
-        if (!isWaiting) {
-            isWaiting = true;
-            var videoDOMs = document.querySelectorAll("video");
-            waitForVideoLoad(videoDOMs[0]);
-        }
-        if (!isDone) callbacks.add(function() { resolve(); });
-        else resolve();
-    }
+let VideosLoadedEvent = (() => {
+    //private static variables
+    let isWaiting = false;
+    let isDone = false;
+    let callbacks = $.Callbacks();
 
     /**
-     * Wait for video to load. This is detected by the change in src.
+     * Private static function. Wait for video to load. This is detected by the change in src.
      * @param {DOM} videoDOM DOM of 1 video element
      */
-    var waitForVideoLoad = function(videoDOM) {
+    function waitForVideoLoad(videoDOM) {
         var observer = new MutationObserver(function() {
             //Verify all videos have been loaded
             var videoDOMs = document.querySelectorAll("video");
@@ -43,4 +34,18 @@ function VideosLoadedEvent() {}
         });
         observer.observe(videoDOM, { attributes: true });
     };
+
+    class VideosLoadedEvent {
+        static subscribe(resolve) {
+            if (!isWaiting) {
+                isWaiting = true;
+                var videoDOMs = document.querySelectorAll("video");
+                waitForVideoLoad.call(this, videoDOMs[0]);
+            }
+            if (!isDone) callbacks.add(function() { resolve(); });
+            else resolve();
+        }
+    }
+
+    return VideosLoadedEvent;
 })();

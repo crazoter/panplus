@@ -16,9 +16,18 @@ $.urlParam = function (url, name) {
 /**
  * Helper function to help implementation of interfaces (refer to examples/example-interface.js)
  */
-resolvePrecept = function(interfaceName) {
+function resolvePrecept(interfaceName) {
     var interfaceName = interfaceName;
     return function unimplementedInterfaceError(value) {
         throw new Error(interfaceName +  ' ' + value +  ' requires an implementation.');
     };
+}
+
+/**
+ * Helper function to convert uint8Array to array buffer
+ * https://stackoverflow.com/questions/37228285/uint8array-to-array-buffer
+ * @param {Uint8Array} array 
+ */
+function Uint8ArrayToArrayBuffer(array) {
+    return array.buffer.slice(array.byteOffset, array.byteLength + array.byteOffset);
 }

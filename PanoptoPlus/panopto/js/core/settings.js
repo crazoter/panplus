@@ -1,9 +1,7 @@
 /**
  * Singleton class
  */
-function Settings() {
-    throw new Error("Please use Settings.requestInstance to initialize Settings.");
-}
+function Settings() { throw new Error("Please use Settings.requestInstance to initialize Settings."); }
 (function() {
     var initiated = false;
     var instance = null;

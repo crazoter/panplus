@@ -1,4 +1,5 @@
 //Sidebar "class"
+'use strict';
 function Sidebar() {
     //Private variables
     var videoContainers = ["#leftPlayerContainer","#rightPlayersContainer"];

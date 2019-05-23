@@ -17,7 +17,7 @@ function Subtitles() {
      * Load videos with subtitle tracks and show subtitles.
      */
     var loadSubtitles = function() {
-        Transcript.get().then(transcript => {
+        TranscriptRequester.get(new TranscriptSourcePanopto()).then(transcript => {
             var videoDOMs = document.querySelectorAll("video");
             var cueArray = transcript.toVTTCueArray();
             for (var i = 0; i < videoDOMs.length; i++) {

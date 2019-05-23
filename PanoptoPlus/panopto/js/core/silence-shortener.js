@@ -1,3 +1,6 @@
+/**
+ * Basic implementation of silence trimming, no longer in use
+ */
 function SilenceShortener() {
     this.init = function() {
         VideosLoadedEvent.subscribe(() => { 
