@@ -57,6 +57,8 @@
     ],
     "web_accessible_resources": [
         "panopto/templates/sidebar.html",
-        "panopto/templates/speed-slider.html"
+        "panopto/templates/speed-slider.html",
+        "libs/indutny-fft-js/fft.min.js",
+        "panopto/js/jsmpeg/vad-audio-worklet-processor.js"
     ]
 }

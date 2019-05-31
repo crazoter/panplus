@@ -12,6 +12,7 @@ function Sidebar() {
         //Get template
         Template.get('sidebar.html').then((template) => {
             //Append template to left pane DOM
+            //# = id
             $("#leftPane").prepend(template);
             //http://api.jqueryui.com/tabs/#event-activate
             $("#sidebar-tabs").tabs({
