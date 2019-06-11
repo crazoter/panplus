@@ -45,6 +45,31 @@ let VideosLoadedEvent = (() => {
             if (!isDone) callbacks.add(function() { resolve(); });
             else resolve();
         }
+
+        /**
+         * Return all videoDOMs, primary video and secondary video.
+         * Primary video refers to the video that the subtitles (and silence cues) are synced to in terms of timestamp.
+         * If there is only 1 video stream, then the secondary video is undefined.
+         */
+        static getVideosElements() {
+            let videoDOMs = document.querySelectorAll("video");
+            //We want to ensure that both subtitles are synced. The transcript timestamps that we got are based on the one that starts earlier.
+            //Thus, get the videoDOM with the lowest currentTime.
+            let mainVideoIndex = 0;
+            let min = videoDOMs[0].currentTime;
+            for (let i = 1; i < videoDOMs.length; i++) {
+                if (videoDOMs[i].currentTime < min) {
+                    mainVideoIndex = i;
+                    min = videoDOMs[i].currentTime;
+                }
+            }
+            return {
+                all: videoDOMs,
+                primaryVideoIndex: mainVideoIndex,
+                primaryVideo: videoDOMs[mainVideoIndex],
+                secondaryVideo: videoDOMs[mainVideoIndex^1]
+            };
+        }
     }
 
     return VideosLoadedEvent;

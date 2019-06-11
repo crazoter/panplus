@@ -30,7 +30,7 @@
                 "panopto/js/transcript/transcript-source-panopto.js",
                 "panopto/js/transcript/transcript-requester.js",
                 "panopto/js/core/videos-loaded-event.js",
-                "panopto/js/core/silence-shortener.js",
+                "panopto/js/ui/silence-cue-manager.js",
                 "panopto/js/ui/speed-slider.js",
                 "panopto/js/ui/sidebar.js",
                 "panopto/js/ui/subtitles.js",
@@ -44,7 +44,8 @@
                 "libs/jquery-ui/css/jquery-ui.min.css",
                 "libs/jquery-ui-slider-pips/jquery-ui-slider-pips.min.css",
                 "panopto/css/speed-slider.css",
-                "panopto/css/thumbnails.css"
+                "panopto/css/thumbnails.css",
+                "panopto/css/subtitles.css"
             ],
             "all_frames": true
         },

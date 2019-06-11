@@ -31,3 +31,11 @@ function resolvePrecept(interfaceName) {
 function Uint8ArrayToArrayBuffer(array) {
     return array.buffer.slice(array.byteOffset, array.byteLength + array.byteOffset);
 }
+
+/**
+ * Sleep for ms milliseconds
+ * @param {Number} ms 
+ */
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

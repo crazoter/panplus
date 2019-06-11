@@ -13,10 +13,11 @@
                 new Sidebar().init();
                 new SpeedSlider().init();
                 new Subtitles().init();
+                new SilenceCueManager().init();
                 new TSTracker().init();
                 console.log("FIN");
             });
         }
     });
-    observer.observe(document, {subtree: true,attributes: true});
+    observer.observe(document, {subtree: true, attributes: true});
 })();

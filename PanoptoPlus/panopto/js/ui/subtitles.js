@@ -11,34 +11,61 @@ function Subtitles() {
          * 3. The video may actually be playing (super unlikely though)
          */
         VideosLoadedEvent.subscribe(() => { loadSubtitles(); });
-    }
+    };
 
     /**
      * Load videos with subtitle tracks and show subtitles.
      */
-    var loadSubtitles = function() {
-        TranscriptRequester.get(new TranscriptSourcePanopto()).then(transcript => {
-            var videoDOMs = document.querySelectorAll("video");
-            var cueArray = transcript.toVTTCueArray();
-            for (var i = 0; i < videoDOMs.length; i++) {
-                var cueArray = transcript.toVTTCueArray();
-                console.log(cueArray.length + " Subtitle cues detected");
-                if (cueArray.length == 0 && Settings.getSubtitlesEnabled) {
-                    alert("No subtitles available for this webcast.");
-                }
-                var track = videoDOMs[i].addTextTrack("captions", "English", "en");
-                for (var j = 0; j < cueArray.length; j++) {
-                    track.addCue(cueArray[j]);
-                }
-                //Set to show subtitles after a brief delay (Doesn't work without delay, this is a hotfix)
-                window.setTimeout(function() { 
-                    var videoDOMs = document.querySelectorAll("video");
-                    for (var i = 0; i < videoDOMs.length; i++) {
-                        videoDOMs[i].textTracks[videoDOMs[i].textTracks.length - 1].mode = "showing";
+    var loadSubtitles = async function() {
+        let transcript = await TranscriptRequester.get(new TranscriptSourcePanopto());
+        let cueArray = transcript.toVTTCueArray();
+        console.log(cueArray.length + " Subtitle cues detected");
+        //Stop if there are no cues in the first place
+        if (cueArray.length == 0 && Settings.getSubtitlesEnabled) {
+            alert("No subtitles available for this webcast.");
+            return;
+        }
+        let elements = VideosLoadedEvent.getVideosElements();
+        //Add track(s) for video(s)
+        let tracks = [];
+        for (var i = 0; i < elements.all.length; i++) {
+            tracks.push(elements.all[i].addTextTrack("captions", "English", "en"));
+        }
+        //Add cues only for main video
+        for (let j = 0; j < cueArray.length; j++) {
+            tracks[elements.primaryVideoIndex].addCue(cueArray[j]);
+        }
+        //If 2 videos, sync by adding cue to currentTime when the cue is played.
+        if (elements.all.length === 2) {
+            let otherVideoIndex = elements.primaryVideoIndex ^ 1;
+            tracks[elements.primaryVideoIndex].oncuechange = function () {
+                //function is embedded in the code here because of the need to access previous variables for performance reasons
+                let cues = tracks[elements.primaryVideoIndex].activeCues;
+                //console.log(cues);
+                if (cues.length > 0) {
+                    //Entered into a new cue
+                    if (tracks[otherVideoIndex].cues.getCueById(cues[0].startTime) === null) {
+                        //Add cue with offset only if it hasn't already been added
+                        let offset = elements.secondaryVideo.currentTime - elements.primaryVideo.currentTime;
+                        let cue = new VTTCue(cues[0].startTime + offset, 
+                            cues[0].endTime + offset, 
+                            cues[0].text);
+                        cue.id = cues[0].startTime;
+                        tracks[otherVideoIndex].addCue(cue);
                     }
-                    console.log("Subtitles loaded");
-                },500);
-            }
-        });
+                }
+            };
+        } else if (videoDOMs.length > 2) {
+            alert("Extension currently doesn't support subtitling of more than 2 video streams.");
+        }
+
+        //Set to show subtitles after a brief delay (Doesn't work without delay, this is a hotfix)
+        await sleep(500);
+
+        //Show track(s)
+        for (let i = 0; i < tracks.length; i++)
+            tracks[i].mode = "showing";
+
+        console.log("Subtitles loaded");
     };
 }

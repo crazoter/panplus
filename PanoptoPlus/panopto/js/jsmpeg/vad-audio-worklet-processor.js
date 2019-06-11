@@ -4,40 +4,103 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
     // Custom AudioParams can be defined with this static getter.
     static get parameterDescriptors() {
         //return [{}];
-        return [{ name: 'vad', defaultValue: 1 }];
+        //https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4142156/
+        //Voice Threshold: Magnitude threshold for determining if there is speech
+        //Silence Time Threshold: "ticks" before determining if transitioned from speech to no speech
+        //firstBin/lastBin: bin range to analyze
+        //initial bin queue: bumps up bin that threshold was crossed, optimize checking of magnitude.
+        //2 queues, 1 for each channel, also same concept
+        //binSamplesThreshold: threshold for removing a bin or a channel
+        return [
+            { name: 'voiceThreshold', defaultValue: 16 },//4*4
+            { name: 'silenceTimeThreshold', defaultValue: 3 },
+            { name: 'firstBin', defaultValue: 1 },
+            { name: 'lastBin', defaultValue: 42 },
+            { name: 'initialBinQueues', defaultValue: null },
+            { name: 'binSamplesThreshold', defaultValue: 1024 }
+       ];
     }
 
     constructor() {
         // The super constructor call is required.
         super();
-        this.samplesCounted = 0;
+        //variables
+        //2 channels
+        //Assume sample rate is 48,000 Hz, precision of 1 FFT freq. bucket is 93.75 Hz
+        //https://dsp.stackexchange.com/questions/2818/extracting-frequencies-from-fft
+        //For most phonemes, almost all of the energy is contained in the 100 – 4000 Hz range
+        //https://en.wikipedia.org/wiki/Sampling_(signal_processing)#Speech_sampling
+        //We'd effectively only need to analyze the data from buffer[1] - buffer[42]
+        this.windowSize = 512;
+        this.fft = new FFTJS(this.windowSize);
+        this.fftOut = this.fft.createComplexArray();
+        this.buffer = [new Float32Array(this.windowSize), new Float32Array(this.windowSize)];
+        this.bufferIndex = 0;
+        this.speakingHistory = 0;
+        this.results = [];
+        this.max = 0;
 
         //On over and request for 
         this.port.onmessage = (function(event) {
             this.resultsRequested = true;
+            this.port.postMessage({results: this.results, max: this.max});
         }).bind(this);
     }
 
+    //Inputs of length 128, buffer size of 512
+    //https://en.wikipedia.org/wiki/Voice_frequency "In telephony, the usable voice frequency band ranges from approximately 300 Hz to 3400 Hz."
+    //https://en.wikipedia.org/wiki/Sampling_(signal_processing)#Speech_sampling
+    //inputs[n][m] is a Float32Array of audio samples for the mth channel of the nth input. 
     process(inputs, outputs, parameters) {
-        this.samplesCounted++;
-        this.port.postMessage({a: inputs, b: outputs, c: parameters,d: currentTime});
-        /*
-        const input = inputs[0];
-        const output = outputs[0];
-        const gain = parameters.gain;
-        for (let channel = 0; channel < input.length; ++channel) {
-            const inputChannel = input[channel];
-            const outputChannel = output[channel];
-            if (gain.length === 1) {
-                for (let i = 0; i < inputChannel.length; ++i)
-                outputChannel[i] = inputChannel[i] * gain[0];
-            } else {
-                for (let i = 0; i < inputChannel.length; ++i)
-                outputChannel[i] = inputChannel[i] * gain[i];
+        if (this.bufferIndex >= this.windowSize) {
+            //process
+            let isSpeaking = false;
+            mainloop:
+            for (var i = 0; i < this.buffer.length; i++) {
+                this.fft.realTransform(this.fftOut, this.buffer[i]);
+                //Todo: 2 level LRU optimization
+                for (var j = parameters.firstBin; j <= parameters.lastBin; j++) {
+                    if (this.calculateFftBinMagnitudeSq(this.fftOut, j) > parameters.voiceThreshold) {
+                        if (this.speakingHistory === 0) {
+                            this.changedSpeech(true);
+                        }
+                        this.speakingHistory = parameters.silenceTimeThreshold;
+                        isSpeaking = true;
+                        break mainloop;
+                    }
+                }
             }
-        }*/
+            if (!isSpeaking && this.speakingHistory > 0) {
+                this.speakingHistory--;
+                if (this.speakingHistory === 0) {
+                    this.changedSpeech(false);
+                }
+            }
+            //"clear" for reuse buffer
+            this.bufferIndex = 0;
+        }
+
+        //concat to buffer, use set because this is Float32Array
+        for (var i = 0; i < inputs[0].length; i++) {
+            this.buffer[i].set(inputs[0][i], this.bufferIndex);
+        }
+        this.bufferIndex += inputs[0][0].length;
 
         return true;
+    }
+
+    calculateFftBinMagnitudeSq(complexArray, binIndex) {
+        //don't sqrt for efficiency
+        binIndex *= 2;
+        let magnitude = complexArray[binIndex]*complexArray[binIndex] +
+        complexArray[binIndex+1]*complexArray[binIndex+1];
+        if (this.max < magnitude) this.max = magnitude;
+        //real*real + imaginary*imaginary
+        return magnitude;
+    }
+
+    changedSpeech(startedSpeech) {
+        this.results.push({isSpeaking: startedSpeech, time: currentTime});
     }
 }
 
