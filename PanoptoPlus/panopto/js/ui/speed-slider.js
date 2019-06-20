@@ -10,7 +10,7 @@ function SpeedSlider() {
             //Initialize Slider
             $("#speed-slider").slider({
                 min: 0.5, 
-                max: 8, 
+                max: 7, 
                 value: 1, 
                 step: 0.1,
                 slide: changePlaybackRate,

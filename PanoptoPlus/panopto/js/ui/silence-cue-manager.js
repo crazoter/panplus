@@ -30,16 +30,17 @@ let SilenceCueManager = (() => {
                     //Calculate offset and skip if necessary
                     //Note: This may cause a desync between the two videos. However, this is just speculation and hasn't been verified.
                     let offset = cues[0].endTime - cues[0].startTime;
+                    
                     if (elements.secondaryVideo != null) {
                         elements.secondaryVideo.currentTime += offset;
                     }
                     elements.primaryVideo.currentTime += offset;
-                    console.log(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}`);
+                    console.log(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}, reduced by: ${offset}`);
                 }
             };
 
             //Enable track
-            await sleep(500);
+            await sleep(1000);
 
             SilenceCueManager.cueTrack.mode = "hidden";
         };

@@ -22,7 +22,7 @@ function Subtitles() {
         console.log(cueArray.length + " Subtitle cues detected");
         //Stop if there are no cues in the first place
         if (cueArray.length == 0 && Settings.getSubtitlesEnabled) {
-            alert("No subtitles available for this webcast.");
+            //alert("No subtitles available for this webcast.");
             return;
         }
         let elements = VideosLoadedEvent.getVideosElements();
