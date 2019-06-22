@@ -35,22 +35,21 @@ __User Interface__
 
 __Transcripts__
 * Extraction of transcripts [DONE]
-* Separation of interface & implementation [Separate subtitle source]
+* Separation of interface & implementation [DONE]
 * Conversion of transcripts to WebVTT tracks for subtitling [DONE]
 * Conversion of transcripts to DOM in sidebar³
 
 __Silence Trimming__
-* Implementation⁴
+* Implementation [DONE, NEEDS IN-DEPTH TESTING]
 
 __Complete Conversion to ES6__
-* Implementation
+* Implementation [PARTIAL CONVERSION DONE. KIV, NOT PRIORITY]
 
 __Webpack for deployment__
 * Implementation
 
 ---
 ³Will need to manage hundreds of transcript rows. Use something that can handle that: https://github.com/triceam/MegaList. Each transcript row also needs to be clickable and seek video to position.  
-⁴ https://github.com/otalk/hark    
 
 
 ### Interesting Keep In View (KIV) Concepts
@@ -82,13 +81,3 @@ https://nuscast.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=e8d44d91-652d-4e41-8
 b) Single video webcasts
 https://nuscast.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=626cd545-dfb4-4a8a-ae05-a9d8007dd2f8
 
-
-### Bibliography
-https://stackoverflow.com/questions/2844565/is-there-a-javascript-jquery-dom-change-listener
-https://stackoverflow.com/questions/35023051/making-javascript-function-inaccessible-from-console
-https://stackoverflow.com/questions/9515704/insert-code-into-the-page-context-using-a-content-script
-https://www.phpied.com/3-ways-to-define-a-javascript-class/
-https://stackoverflow.com/questions/7694501/class-vs-static-method-in-javascript
-https://stackoverflow.com/questions/1279957/how-to-move-an-element-into-another-element?rq=1
-https://stackoverflow.com/questions/15873904/adding-complex-html-using-a-chrome-content-script
-https://medium.freecodecamp.org/how-to-create-a-chrome-extension-part-1-ad2a3a77541

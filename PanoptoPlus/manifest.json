@@ -21,7 +21,6 @@
                 "libs/uupaa/mpeg2ts/MPEG2TSDemuxer.js",
                 "libs/uupaa/mpeg2ts/MPEG2TSNALUnit.js",
                 "libs/uupaa/mpeg2ts/MPEG2TS.js",
-                "panopto/js/core/order-statistic-tree.js",
                 "panopto/js/core/settings.js",
                 "panopto/js/core/helper.js",
                 "panopto/js/core/context-bridge.js",
