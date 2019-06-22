@@ -55,7 +55,7 @@ let ContextBridge = (function() {
          * Untested & Unused Code
          */
         exec() {
-            injectScript.call(this, `(${func})();`);
+            injectScript.call(this, `(${this.func})();`);
             this.script.remove();
             this.script = null;
         }

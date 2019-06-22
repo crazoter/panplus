@@ -21,6 +21,7 @@
                 "libs/uupaa/mpeg2ts/MPEG2TSDemuxer.js",
                 "libs/uupaa/mpeg2ts/MPEG2TSNALUnit.js",
                 "libs/uupaa/mpeg2ts/MPEG2TS.js",
+                "panopto/js/core/order-statistic-tree.js",
                 "panopto/js/core/settings.js",
                 "panopto/js/core/helper.js",
                 "panopto/js/core/context-bridge.js",
@@ -34,8 +35,8 @@
                 "panopto/js/ui/speed-slider.js",
                 "panopto/js/ui/sidebar.js",
                 "panopto/js/ui/subtitles.js",
-                "panopto/js/jsmpeg/voice-detector.js",
                 "panopto/js/jsmpeg/ts-tracker.js",
+                "panopto/js/ui/logger-disabler.js",
                 "panopto/js/init.js"
             ],
             "css": [

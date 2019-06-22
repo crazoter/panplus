@@ -22,22 +22,53 @@ let SilenceCueManager = (() => {
 
             //Todo: add cached cues here
 
-            //Todo: add setting configs to influence playback rate
-            SilenceCueManager.cueTrack.oncuechange = function () {
-                let cues = SilenceCueManager.cueTrack.activeCues;
-                //If on enter
-                if (cues.length > 0) {
-                    //Calculate offset and skip if necessary
-                    //Note: This may cause a desync between the two videos. However, this is just speculation and hasn't been verified.
-                    let offset = cues[0].endTime - cues[0].startTime;
-                    
-                    if (elements.secondaryVideo != null) {
-                        elements.secondaryVideo.currentTime += offset;
+            //Inject function into user page to access Panopto object
+            var injectedFunc = () => {
+                //There's no way to create a texttrack with id and insert it into the video. Thus, we'll have to do this the old fashioned way
+                //let cueTrack = document.getElementsByTagName("video")[0].textTracks.getTrackById("SilenceCueTrack");
+                let textTrackList =  document.getElementsByTagName("video")[0].textTracks;
+                let cueTrack = null;
+                for (let i = 0; i < textTrackList.length; i++) {
+                    if (textTrackList[i].label === "silenceCues") {
+                        cueTrack = textTrackList[i];
+                        break;
                     }
-                    elements.primaryVideo.currentTime += offset;
-                    console.log(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}, reduced by: ${offset}`);
                 }
-            };
+                //Units are in seconds
+                const videoDOMs = document.getElementsByTagName("video");
+                const hasMultipleVideos = videoDOMs.length > 1;
+                const FAST_JUMP_THRESHOLD = 0.04;
+                const DESYNC_LIMIT = 10;
+                let lastSynced = 0;
+                //Todo: add setting configs to influence playback rate
+                cueTrack.oncuechange = function () {
+                    let cues = cueTrack.activeCues;
+                    //Add an additional prevTime variable to prevent getting stuck
+                    let prevTime = 0;
+                    //If on enter
+                    if (cues.length > 0) {
+                        //Calculate offset and skip if necessary
+                        //Prefer fast jump by currentTime. However, can cause desyncing if multiple streams involved.
+                        let offset = cues[0].endTime - cues[0].startTime;
+                        if (!hasMultipleVideos || lastSynced < DESYNC_LIMIT || offset < FAST_JUMP_THRESHOLD) {
+                            for (let i = 0; i < videoDOMs.length; i++)
+                                videoDOMs[i].currentTime += offset;
+                            lastSynced += offset;
+                        } else if (lastSynced > DESYNC_LIMIT && prevTime < cues[0].endTime) {
+                            //Call Panopto's API to reposition and avoid desync issue
+                            //Panopto's implementation can be a bit laggy though, so only call if it runs the risk of desync
+                            //However this lag is warranted because it helps to prevent weird issues
+                            prevTime = cues[0].endTime;
+                            Panopto.Viewer.Viewer.position(cues[0].endTime);
+                            lastSynced = 0;
+                            console.info("Synced using Panopto API");
+                        }
+                        console.info(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}, reduced by: ${cues[0].endTime - cues[0].startTime}`, `sync time: ${lastSynced}`);
+                    }
+                };
+            }
+            let ctxBridge = new ContextBridge(injectedFunc);
+            ctxBridge.exec();
 
             //Enable track
             await sleep(1000);
