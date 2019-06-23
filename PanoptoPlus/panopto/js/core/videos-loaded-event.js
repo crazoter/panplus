@@ -1,5 +1,5 @@
 /**
- * Promise/Callback for code that need the videos to be loaded before execution
+ * @file Promise/Callback for code that need the videos to be loaded before execution
  */
 let VideosLoadedEvent = (() => {
     //private static variables
@@ -9,6 +9,8 @@ let VideosLoadedEvent = (() => {
 
     /**
      * Private static function. Wait for video to load. This is detected by the change in src.
+     * @private
+     * @static
      * @param {DOM} videoDOM DOM of 1 video element
      */
     async function waitForVideoLoad() {
@@ -20,8 +22,12 @@ let VideosLoadedEvent = (() => {
         videosLoaded();
     };
 
+    /**
+     * Verify all videos have been loaded, else return video to await for
+     * @private
+     * @static
+     */
     function verifyVideoLoad() {
-        //Verify all videos have been loaded, else return video to await for
         var videoDOMs = document.querySelectorAll("video");
         for (var i = 0; i < videoDOMs.length; i++) {
             if (videoDOMs[i].src == "") {
@@ -31,6 +37,11 @@ let VideosLoadedEvent = (() => {
         return null;
     }
 
+    /**
+     * private static function to call when videos are loaded
+     * @private
+     * @static
+     */
     function videosLoaded() {
         isDone = true;
         callbacks.fire();
@@ -38,7 +49,14 @@ let VideosLoadedEvent = (() => {
         console.log("Videos Loaded");
     }
 
+    /**
+     * @file Class that manages the Promise/Callback for code that need the videos to be loaded before execution
+     */
     class VideosLoadedEvent {
+        /**
+         * Subscribe to event when videos are loaded
+         * @param {Function} resolve resolve method for promise
+         */
         static subscribe(resolve) {
             if (!isWaiting) {
                 isWaiting = true;

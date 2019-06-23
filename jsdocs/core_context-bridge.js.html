@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/context-bridge.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/context-bridge.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Content scripts live in an isolated world, allowing a content script to makes changes to its JavaScript environment without conflicting with the page or additional content scripts. 
+ * This class is designed to help facilitate communication between the two "worlds".
+ * https://developer.chrome.com/extensions/content_scripts
+ */
+let ContextBridge = (() => {
+    /**
+     * private function to inject script into webpage
+     * @param {string} code code to be injected in string format
+     */
+    function injectScript(code) {
+        this.script = document.createElement('script');
+        this.script.textContent = code;
+        document.body.appendChild(this.script);
+    }
+    /**
+     * private function to wrap function with additional code to be injected
+     */
+    function buildConnectScript() {
+        return `(() => { var bridgeCall = ${this.func}
+        ; var bridgeCallback = function (detail) {
+        document.dispatchEvent(new CustomEvent("${this.eventHandle}", {detail: detail})); };
+        bridgeCall(); })();`;
+    }
+    class ContextBridge {
+        /**
+         * ContextBridge class for setting up linkages between the isolated code environment and the actual code environment of the user
+         * @param {function} func the function to be injected into the page.
+         * @param {string} eventHandle the string used for triggering &amp; detecting events for this particular bridge
+         * @param {function} eventHandler the function called whenever the eventHandle is triggered. This function takes in 1 parameter.
+         */
+        constructor(func, eventHandle, eventHandler) {
+            //public object variables
+            this.func = func;
+            this.eventHandle = eventHandle;
+            this.eventHandler = eventHandler;
+            this.script = null;
+        }
+
+        /**
+         * Execute the function, and then return the data stored in the "connectData" variable to the context script
+         * This function itself returns a promise which returns the data.
+         * Use for a one time request &amp; response.
+         */
+        request() {
+            injectScript.call(this, buildConnectScript.call(this));
+            this.script.remove();
+            this.script = null;
+            return new Promise((resolve) => {
+                document.addEventListener(this.eventHandle, (e) => {
+                    this.close();
+                    return resolve(e.detail);
+                });
+            });
+        }
+
+        /**
+         * Execute is a fire-and-forget event without the use of the event handler
+         */
+        exec() {
+            injectScript.call(this, `(${this.func})();`);
+            this.script.remove();
+            this.script = null;
+        }
+
+        /**
+         * Execute the function but instead of returning a Promise, uses the eventHandler callback function instead.
+         * Use to build a persistent bridge.
+         */
+        connect() {
+            injectScript.call(this, buildConnectScript.call(this));
+            document.addEventListener(this.eventHandle, this.eventHandler);
+            this.script.remove();
+            this.script = null;
+        }
+
+        /**
+         * Clean-up, remove scripts and event listeners. This is automatically handled if you used request or exec. 
+         * However, if you used connect (which establishes a connection), then you may want to call close() to terminate the connection.
+         */
+        close() {
+            if (this.script != null) {
+                this.script.remove();
+            }
+            if (this.eventHandle != null &amp;&amp; this.eventListenerHandler != null) {
+                document.removeEventListener(this.eventHandle, this.eventListenerHandler);
+            }
+        }
+    }
+
+    return ContextBridge;
+})();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADAudioWorkletProcessor.html">VADAudioWorkletProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Mon Jun 24 2019 03:01:44 GMT+0800 (Singapore Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

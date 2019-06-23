@@ -1,6 +1,8 @@
-//This is basically main(...){}
-//This is the same as function init() {...} init();
-(function init() {
+/**
+ * @file This is basically main(...){}
+ * @global
+ */
+(() => {
     //Wait for page load
     MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
     var observer = new MutationObserver(function(mutations, observer) {

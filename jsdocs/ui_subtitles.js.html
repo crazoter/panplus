@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ui/subtitles.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ui/subtitles.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Subtitles, includes code that will load the transcript, then inject the subtitles as cues into the first video's texttrack.
+ * If there is a second video, then when the cue is reached, the subtitle will be injected into the second video.
+ * This is to circumvent the issue of the variable offset between the 1st and 2nd video currentTime.
+ */
+let Subtitles = (() => {
+    /**
+     * Subtitles, includes code that will load the transcript, then inject the subtitles as cues into the first video's texttrack.
+     * If there is a second video, then when the cue is reached, the subtitle will be injected into the second video.
+     * This is to circumvent the issue of the variable offset between the 1st and 2nd video currentTime.
+     */
+    class Subtitles {
+        /**
+         * Constructor is empty
+         */
+        constructor() {}
+
+        /**
+         * Init: initialize subtitles
+         */
+        init() {
+            //Add subtitles
+            /**
+             * At this point, a few issues may occur:
+             * 1. Only one video DOM exists (when there are actually 2)
+             * 2. The video DOM(s) do not have their src ready i.e. anything you do to the video may be undone
+             * 3. The video may actually be playing (super unlikely though)
+             */
+            VideosLoadedEvent.subscribe(() => { this.loadSubtitles(); });
+        }
+
+        /**
+         * Load videos with subtitle tracks and show subtitles.
+         */
+        async loadSubtitles() {
+            let transcript = await TranscriptRequester.get(new TranscriptSourcePanopto());
+            let cueArray = transcript.toVTTCueArray();
+            console.log(cueArray.length + " Subtitle cues detected");
+            //Stop if there are no cues in the first place
+            if (cueArray.length == 0 &amp;&amp; Settings.getSubtitlesEnabled) {
+                $("#sidebar-tab-pg-2").html("No transcript &amp; subtitles available for this webcast.");
+                //alert("No subtitles available for this webcast.");
+                return;
+            }
+            let elements = VideosLoadedEvent.getVideosElements();
+            //Add track(s) for video(s)
+            let tracks = [];
+            for (var i = 0; i &lt; elements.all.length; i++) {
+                tracks.push(elements.all[i].addTextTrack("captions", "English", "en"));
+            }
+            //Add cues only for main video
+            for (let j = 0; j &lt; cueArray.length; j++) {
+                tracks[elements.primaryVideoIndex].addCue(cueArray[j]);
+            }
+            //If 2 videos, sync by adding cue to currentTime when the cue is played.
+            if (elements.all.length === 2) {
+                let otherVideoIndex = elements.primaryVideoIndex ^ 1;
+                tracks[elements.primaryVideoIndex].oncuechange = function () {
+                    //function is embedded in the code here because of the need to access previous variables for performance reasons
+                    let cues = tracks[elements.primaryVideoIndex].activeCues;
+                    //console.log(cues);
+                    if (cues.length > 0) {
+                        //Entered into a new cue
+                        if (tracks[otherVideoIndex].cues.getCueById(cues[0].startTime) === null) {
+                            //Add cue with offset only if it hasn't already been added
+                            let offset = elements.secondaryVideo.currentTime - elements.primaryVideo.currentTime;
+                            let cue = new VTTCue(cues[0].startTime + offset, 
+                                cues[0].endTime + offset, 
+                                cues[0].text);
+                            cue.id = cues[0].startTime;
+                            tracks[otherVideoIndex].addCue(cue);
+                        }
+                    }
+                };
+            } else if (videoDOMs.length > 2) {
+                alert("Extension currently doesn't support subtitling of more than 2 video streams.");
+            }
+
+            //Set to show subtitles after a brief delay (Doesn't work without delay, this is a hotfix)
+            let showing = true;
+            do {
+                showing = true;
+                await sleep(500);
+                //Show track(s)
+                for (let i = 0; i &lt; tracks.length; i++)
+                    tracks[i].mode = "showing";
+                await sleep(200);
+                //verify tracks are indeed showing
+                for (let i = 0; i &lt; tracks.length; i++)
+                    showing &amp;= tracks[i].mode === "showing";
+            } while(!showing);
+
+            console.log("Subtitles loaded");
+        }
+    }
+    return Subtitles;
+})();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADAudioWorkletProcessor.html">VADAudioWorkletProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Mon Jun 24 2019 03:01:44 GMT+0800 (Singapore Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

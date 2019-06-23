@@ -1,11 +1,13 @@
 let SilenceCueManager = (() => {
     class SilenceCueManager {
         /**
-         * Add Silence Cues
-         * Init: initialize cached silence cues
+         * Constructor is empty
          */
         constructor() {}
 
+        /**
+         * Initialize Silence Cue Manager.
+         */
         init() {
             VideosLoadedEvent.subscribe(() => { 
                 this.loadSilenceCues(); 
@@ -50,10 +52,10 @@ let SilenceCueManager = (() => {
                         //Calculate offset and skip if necessary
                         //Prefer fast jump by currentTime. However, can cause desyncing if multiple streams involved.
                         let offset = cues[0].endTime - cues[0].startTime;
+                        lastSynced += offset;
                         if (!hasMultipleVideos || lastSynced < DESYNC_LIMIT || offset < FAST_JUMP_THRESHOLD) {
                             for (let i = 0; i < videoDOMs.length; i++)
                                 videoDOMs[i].currentTime += offset;
-                            lastSynced += offset;
                         } else if (lastSynced > DESYNC_LIMIT && prevTime < cues[0].endTime) {
                             //Call Panopto's API to reposition and avoid desync issue
                             //Panopto's implementation can be a bit laggy though, so only call if it runs the risk of desync
@@ -70,10 +72,19 @@ let SilenceCueManager = (() => {
             let ctxBridge = new ContextBridge(injectedFunc);
             ctxBridge.exec();
 
-            //Enable track
-            await sleep(1000);
+            //Set to show tracks after a brief delay (Doesn't work without delay, this is a hotfix)
+            let showing = true;
+            do {
+                showing = true;
+                await sleep(500);
+                //Show track(s)
+                SilenceCueManager.cueTrack.mode = "hidden";
+                await sleep(200);
+                //Verify tracks are indeed not hidden
+                showing &= SilenceCueManager.cueTrack.mode === "hidden";
+            } while(!showing);
 
-            SilenceCueManager.cueTrack.mode = "hidden";
+            console.log("Silence Cues loaded");
         };
 
         /**

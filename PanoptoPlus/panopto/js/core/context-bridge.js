@@ -1,11 +1,9 @@
 /**
- * ContextBridge class for setting up linkages between the isolated code environment and the actual code environment of the user
- * @param {function} func the function to be injected into the page.
- * @param {string} eventHandle the string used for triggering & detecting events for this particular bridge
- * @param {function} eventHandler the function called whenever the eventHandle is triggered. This function takes in 1 parameter.
+ * @file Content scripts live in an isolated world, allowing a content script to makes changes to its JavaScript environment without conflicting with the page or additional content scripts. 
+ * This class is designed to help facilitate communication between the two "worlds".
+ * https://developer.chrome.com/extensions/content_scripts
  */
-let ContextBridge = (function() {
-  
+let ContextBridge = (() => {
     /**
      * private function to inject script into webpage
      * @param {string} code code to be injected in string format
@@ -16,7 +14,7 @@ let ContextBridge = (function() {
         document.body.appendChild(this.script);
     }
     /**
-     * private function to create script for bridge
+     * private function to wrap function with additional code to be injected
      */
     function buildConnectScript() {
         return `(() => { var bridgeCall = ${this.func}
@@ -25,6 +23,12 @@ let ContextBridge = (function() {
         bridgeCall(); })();`;
     }
     class ContextBridge {
+        /**
+         * ContextBridge class for setting up linkages between the isolated code environment and the actual code environment of the user
+         * @param {function} func the function to be injected into the page.
+         * @param {string} eventHandle the string used for triggering & detecting events for this particular bridge
+         * @param {function} eventHandler the function called whenever the eventHandle is triggered. This function takes in 1 parameter.
+         */
         constructor(func, eventHandle, eventHandler) {
             //public object variables
             this.func = func;
@@ -52,7 +56,6 @@ let ContextBridge = (function() {
 
         /**
          * Execute is a fire-and-forget event without the use of the event handler
-         * Untested & Unused Code
          */
         exec() {
             injectScript.call(this, `(${this.func})();`);
@@ -61,7 +64,7 @@ let ContextBridge = (function() {
         }
 
         /**
-         * Execute the function but instead of returning a Promise, uses the eventHandler callback function instead
+         * Execute the function but instead of returning a Promise, uses the eventHandler callback function instead.
          * Use to build a persistent bridge.
          */
         connect() {
@@ -72,7 +75,8 @@ let ContextBridge = (function() {
         }
 
         /**
-         * Clean-up, remove scripts and event listeners
+         * Clean-up, remove scripts and event listeners. This is automatically handled if you used request or exec. 
+         * However, if you used connect (which establishes a connection), then you may want to call close() to terminate the connection.
          */
         close() {
             if (this.script != null) {

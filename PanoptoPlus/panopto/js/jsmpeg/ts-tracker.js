@@ -1,8 +1,14 @@
 /**
- * The TSTracker class injects code into the page to detect when a TS file is loaded.
+ * @file The TSTracker class injects code into the page to detect when a TS file is loaded. Currently also handles processing of TS files to detect silences.
  */
 TSTracker = (() => {
+    /**
+     * The TSTracker class injects code into the page to detect when a TS file is loaded. Currently also handles processing of TS files to detect silences.
+     */
     class TSTracker {
+        /**
+         * Constructor is empty
+         */
         constructor() {}
 
         /**
@@ -147,6 +153,9 @@ TSTracker = (() => {
                 (err) => { console.log("Error with decoding audio data" + err.err); });
         }
 
+        /**
+         * Wait for noise sample, only proceed after noise has been processed
+         */
         waitForNoiseSample() {
             return new Promise((resolve) => {
                 this.noiseReferenceCallbacks.add(function() { resolve(); });
@@ -233,7 +242,8 @@ TSTracker = (() => {
         }
 
         /**
-         * 
+         * @deprecated
+         * Used to process silent sections using raw data
          * @param {Object} data {results: Array of distances, interval: Interval between each calculated distance}
          */
         processSilentSections(startTime, data, threshold) {
@@ -255,6 +265,11 @@ TSTracker = (() => {
             return silentSections;
         }
         
+        /**
+         * Used to generate csv data for processing later in R.
+         * @param {Number} startTime Starting time of the TS file
+         * @param {Array} data {results: Array of distances, interval: Interval between each calculated distance}
+         */
         logDataForR(startTime, data) {
             for (let i = 0; i < data.results.length; i++) {
                 this.timeArr.push(+(startTime * data.interval * i).toFixed(1));
@@ -289,6 +304,10 @@ TSTracker = (() => {
         }
     }
 
+    /**
+     * An enumeration of various message types that can be sent between the main thread and the audio worklet.
+     * @enum {Object}
+     */
     TSTracker.MessageEnums = {
         INITIALIZATION_PARAMS: 0,
         INITIALIZATION_SUCCESS: 1,

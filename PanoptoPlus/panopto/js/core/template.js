@@ -1,10 +1,14 @@
 /**
- * Template class
+ * @file Template class
  */
 let Template = (() => {
+    /**
+     * Template class
+     */
     class Template {
         /**
          * Get the template in HTML format and convert it into DOM for manipulation and insertion into the page.
+         * @static
          * @param {string} fileName The filename of the template in panopto/templates. Use the full name with extension e.g. "sidebar.html".
          * @returns {DOM} DOM of the HTML file
          */

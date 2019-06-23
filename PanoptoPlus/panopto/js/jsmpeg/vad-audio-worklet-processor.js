@@ -1,3 +1,7 @@
+/**
+ * @file Audio Worklet to process TS files. Code is included here as they are needed (this code is run in a worklet). var FFT remains until better solution is found.
+ */
+
 //FFT.js
 var FFTJS=function(t){function r(e){if(i[e])return i[e].exports;var o=i[e]={i:e,l:!1,exports:{}};return t[e].call(o.exports,o,o.exports,r),o.l=!0,o.exports}var i={};return r.m=t,r.c=i,r.i=function(t){return t},r.d=function(t,i,e){r.o(t,i)||Object.defineProperty(t,i,{configurable:!1,enumerable:!0,get:e})},r.n=function(t){var i=t&&t.__esModule?function(){return t.default}:function(){return t};return r.d(i,"a",i),i},r.o=function(t,r){return Object.prototype.hasOwnProperty.call(t,r)},r.p="",r(r.s=0)}([function(t,r,i){"use strict";function e(t){if(this.size=0|t,this.size<=1||0!=(this.size&this.size-1))throw new Error("FFT size must be a power of two and bigger than 1");this._csize=t<<1;for(var r=new Array(2*this.size),i=0;i<r.length;i+=2){var e=Math.PI*i/this.size;r[i]=Math.cos(e),r[i+1]=-Math.sin(e)}this.table=r;for(var o=0,n=1;this.size>n;n<<=1)o++;this._width=o%2==0?o-1:o,this._bitrev=new Array(1<<this._width);for(var s=0;s<this._bitrev.length;s++){this._bitrev[s]=0;for(var a=0;a<this._width;a+=2){var h=this._width-a-2;this._bitrev[s]|=(s>>>a&3)<<h}}this._out=null,this._data=null,this._inv=0}t.exports=e,e.prototype.fromComplexArray=function(t,r){for(var i=r||new Array(t.length>>>1),e=0;e<t.length;e+=2)i[e>>>1]=t[e];return i},e.prototype.createComplexArray=function(){for(var t=new Array(this._csize),r=0;r<t.length;r++)t[r]=0;return t},e.prototype.toComplexArray=function(t,r){for(var i=r||this.createComplexArray(),e=0;e<i.length;e+=2)i[e]=t[e>>>1],i[e+1]=0;return i},e.prototype.completeSpectrum=function(t){for(var r=this._csize,i=r>>>1,e=2;e<i;e+=2)t[r-e]=t[e],t[r-e+1]=-t[e+1]},e.prototype.transform=function(t,r){if(t===r)throw new Error("Input and output buffers must be different");this._out=t,this._data=r,this._inv=0,this._transform4(),this._out=null,this._data=null},e.prototype.realTransform=function(t,r){if(t===r)throw new Error("Input and output buffers must be different");this._out=t,this._data=r,this._inv=0,this._realTransform4(),this._out=null,this._data=null},e.prototype.inverseTransform=function(t,r){if(t===r)throw new Error("Input and output buffers must be different");this._out=t,this._data=r,this._inv=1,this._transform4();for(var i=0;i<t.length;i++)t[i]/=this.size;this._out=null,this._data=null},e.prototype._transform4=function(){var t,r,i=this._out,e=this._csize,o=this._width,n=1<<o,s=e/n<<1,a=this._bitrev;if(4===s)for(t=0,r=0;t<e;t+=s,r++){var h=a[r];this._singleTransform2(t,h,n)}else for(t=0,r=0;t<e;t+=s,r++){var f=a[r];this._singleTransform4(t,f,n)}var u=this._inv?-1:1,_=this.table;for(n>>=2;n>=2;n>>=2){s=e/n<<1;var l=s>>>2;for(t=0;t<e;t+=s)for(var p=t+l,v=t,c=0;v<p;v+=2,c+=n){var d=v,m=d+l,y=m+l,b=y+l,w=i[d],g=i[d+1],z=i[m],T=i[m+1],x=i[y],A=i[y+1],C=i[b],E=i[b+1],F=w,I=g,M=_[c],R=u*_[c+1],O=z*M-T*R,P=z*R+T*M,j=_[2*c],S=u*_[2*c+1],J=x*j-A*S,k=x*S+A*j,q=_[3*c],B=u*_[3*c+1],D=C*q-E*B,G=C*B+E*q,H=F+J,K=I+k,L=F-J,N=I-k,Q=O+D,U=P+G,V=u*(O-D),W=u*(P-G),X=H+Q,Y=K+U,Z=H-Q,$=K-U,tt=L+W,rt=N-V,it=L-W,et=N+V;i[d]=X,i[d+1]=Y,i[m]=tt,i[m+1]=rt,i[y]=Z,i[y+1]=$,i[b]=it,i[b+1]=et}}},e.prototype._singleTransform2=function(t,r,i){var e=this._out,o=this._data,n=o[r],s=o[r+1],a=o[r+i],h=o[r+i+1],f=n+a,u=s+h,_=n-a,l=s-h;e[t]=f,e[t+1]=u,e[t+2]=_,e[t+3]=l},e.prototype._singleTransform4=function(t,r,i){var e=this._out,o=this._data,n=this._inv?-1:1,s=2*i,a=3*i,h=o[r],f=o[r+1],u=o[r+i],_=o[r+i+1],l=o[r+s],p=o[r+s+1],v=o[r+a],c=o[r+a+1],d=h+l,m=f+p,y=h-l,b=f-p,w=u+v,g=_+c,z=n*(u-v),T=n*(_-c),x=d+w,A=m+g,C=y+T,E=b-z,F=d-w,I=m-g,M=y-T,R=b+z;e[t]=x,e[t+1]=A,e[t+2]=C,e[t+3]=E,e[t+4]=F,e[t+5]=I,e[t+6]=M,e[t+7]=R},e.prototype._realTransform4=function(){var t,r,i=this._out,e=this._csize,o=this._width,n=1<<o,s=e/n<<1,a=this._bitrev;if(4===s)for(t=0,r=0;t<e;t+=s,r++){var h=a[r];this._singleRealTransform2(t,h>>>1,n>>>1)}else for(t=0,r=0;t<e;t+=s,r++){var f=a[r];this._singleRealTransform4(t,f>>>1,n>>>1)}var u=this._inv?-1:1,_=this.table;for(n>>=2;n>=2;n>>=2){s=e/n<<1;var l=s>>>1,p=l>>>1,v=p>>>1;for(t=0;t<e;t+=s)for(var c=0,d=0;c<=v;c+=2,d+=n){var m=t+c,y=m+p,b=y+p,w=b+p,g=i[m],z=i[m+1],T=i[y],x=i[y+1],A=i[b],C=i[b+1],E=i[w],F=i[w+1],I=g,M=z,R=_[d],O=u*_[d+1],P=T*R-x*O,j=T*O+x*R,S=_[2*d],J=u*_[2*d+1],k=A*S-C*J,q=A*J+C*S,B=_[3*d],D=u*_[3*d+1],G=E*B-F*D,H=E*D+F*B,K=I+k,L=M+q,N=I-k,Q=M-q,U=P+G,V=j+H,W=u*(P-G),X=u*(j-H),Y=K+U,Z=L+V,$=N+X,tt=Q-W;if(i[m]=Y,i[m+1]=Z,i[y]=$,i[y+1]=tt,0!==c){if(c!==v){var rt=N,it=-Q,et=K,ot=-L,nt=-u*X,st=-u*W,at=-u*V,ht=-u*U,ft=rt+nt,ut=it+st,_t=et+ht,lt=ot-at,pt=t+p-c,vt=t+l-c;i[pt]=ft,i[pt+1]=ut,i[vt]=_t,i[vt+1]=lt}}else{var ct=K-U,dt=L-V;i[b]=ct,i[b+1]=dt}}}},e.prototype._singleRealTransform2=function(t,r,i){var e=this._out,o=this._data,n=o[r],s=o[r+i],a=n+s,h=n-s;e[t]=a,e[t+1]=0,e[t+2]=h,e[t+3]=0},e.prototype._singleRealTransform4=function(t,r,i){var e=this._out,o=this._data,n=this._inv?-1:1,s=2*i,a=3*i,h=o[r],f=o[r+i],u=o[r+s],_=o[r+a],l=h+u,p=h-u,v=f+_,c=n*(f-_),d=l+v,m=p,y=-c,b=l-v,w=p,g=c;e[t]=d,e[t+1]=0,e[t+2]=m,e[t+3]=y,e[t+4]=b,e[t+5]=0,e[t+6]=w,e[t+7]=g}}]);
 //Cached line coefficients for faster calculation
@@ -5,6 +9,10 @@ let LINE_COEFFS={"jReciprocal":[0,1,0.5,0.3333333333333333,0.25,0.2,0.1666666666
 let SUMMED_LINE_COEFFS={"jReciprocal":[0,1,1.5,1.8333333333333333,2.083333333333333,2.283333333333333,2.4499999999999997,2.5928571428571425,2.7178571428571425,2.8289682539682537,2.9289682539682538,3.0198773448773446,3.103210678210678,3.180133755133755,3.251562326562327,3.3182289932289937,3.3807289932289937,3.439552522640758,3.4951080781963135,3.547739657143682,3.597739657143682,3.6453587047627294,3.690813250217275,3.73429151108684,3.7759581777535067,3.8159581777535068,3.854419716215045,3.8914567532520823,3.927171038966368,3.9616537975870574,3.9949871309203906,4.02724519543652,4.05849519543652,4.08879822573955,4.118209990445433,4.146781419016861,4.174559196794639,4.201586223821666,4.22790201329535,4.2535430389363755,4.278543038936376,4.302933282838815,4.326742806648339,4.349998620601827,4.3727258933290996,4.394948115551322,4.416687245986104,4.4379638417307845,4.4587971750641175,4.4792053383294235,4.499205338329423,4.518813181466678,4.538043950697447,4.556911875225749,4.575430393744267,4.593612211926086,4.611469354783229,4.6290132144323515,4.646254593742697,4.6632037462850695,4.679870412951736,4.696263855574687,4.712392887832752,4.7282659037057675,4.7438909037057675,4.759275519090383,4.774427034241898,4.789352407376227,4.804058289729168,4.818551043352357,4.832836757638071,4.846921264680325,4.860810153569214,4.8745087837062,4.888022297219713,4.901355630553047,4.914513525289889,4.927500538276902,4.940321051097415,4.9529792789455165,4.965479278945517],"log2jOverj":[0,0,0.5,1.0283208335737188,1.5283208335737188,1.9927064525511913,2.4235335360047174,2.824584239155804,3.199584239155804,3.5517981282049496,3.8839909376936856,4.198484721206167,4.497231596266264,4.7818808053540405,5.053834728358155,5.3142941013987235,5.5642941013987235,5.804733092060508,6.036395592140637,6.259970724427141,6.4760671291715095,6.685225101684784,6.88792653889557,7.084603145680657,7.275643249877372,7.461397497468361,7.642183640473787,7.81829058499836,7.989981832214703,8.157498418253585,8.321061438107202,8.480874222313231,8.637124222313231,8.789984650172578,8.939615910209353,9.086166853550639,9.22977588136848,9.37057191827737,9.508675273894307,9.644198407711288,9.777246610083472,9.907918610196107,10.036307120262268,10.162499323859992,10.286577315192657,10.408618495111094,10.52869592893842,10.646878670463476,10.763232055895166,10.87781797108119,10.990695094876685,11.101919121189852,11.211542961923334,11.319616932764148,11.426188923544954,11.531304554699949,11.635007321165263,11.73733872492254,11.838338397252326,11.93804421164829,12.036492388241765,12.133717590496895,12.229753014857973,12.324630473961147,12.418380473961147,12.511032286469277,12.602614015550465,12.693152660184163,12.782674172555492,12.8712035125088,12.958764698465156,13.045380855077898,13.131074257875708,13.21586637512064,13.299777907088599,13.382828822961876,13.465038395507186,13.546425233698029,13.627007313427033,13.706802006441933,13.785826107628026],"log2jSqOverj":[0,0,0.5,1.3373687095640867,2.3373687095640867,3.4156387251295377,4.529310580151966,5.655202245637831,6.780202245637831,7.896693858389947,9.000214485150146,10.088184223698097,11.15918056799617,12.212507807042027,13.247932914364617,14.265519189434903,15.265519189434903,16.248304629352685,17.214319880333445,18.164050836095075,19.09800395896391,20.01669216574705,20.92062536398805,21.810304180087456,22.686215893963258,23.548831906415618,24.39860627348786,25.235974983051946,26.06135574543164,26.87514813677718,27.677733980686224,28.469477886552383,29.250727886552383,30.02181612992869,30.78305960525525,31.534760870052967,32.277208773401256,33.0106791617435,33.7354355613845,34.45172983356793,35.159802799746714,35.859884835897624,36.55219643561199,37.23694874231251,37.91434405137107,38.58457628318586,39.247831428455434,39.90428796699121,40.55411726145916,41.19748392745108,41.83454618126825,42.46545616676316,43.09036026253548,43.70939937072045,44.32270918854558,44.93042046376678,45.53265923503011,46.129547058141384,46.72120121916338,47.307734935200756,47.88925754367556,48.46587468084216,49.03768845023934,49.60479758172942,50.16729758172942,50.72528087519713,51.278836939896145,51.82805243342732,52.37301131348031,52.91379495172752,53.45048224175338,53.98314970138515,54.51187156976603,55.03671989948814,55.557764644081665,56.075073741135945,56.58871319131023,57.09874713347431,57.60523791620352,58.10824616583755,58.60783085129913]}
 //Message enums for easier reading
 var MessageEnums = {INITIALIZATION_PARAMS: 0,INITIALIZATION_SUCCESS: 1,NOISE_RESULTS: 2,NORMAL_RESULTS: 3,REQUEST_RESULTS: 4,DEBUG: 5,DEBUG_HISTOGRAM: 6, RAW_DATA_RESULTS: 7, ERROR: 8};
+
+/**
+ * Audio Worklet to process TS files
+ */
 class VADAudioWorkletProcessor extends AudioWorkletProcessor {
     constructor() {
         //for some gdi reason the constructor node value is undefined. Instead I will use the messaging way to bring in the values lmao
@@ -19,8 +27,6 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
         //https://en.wikipedia.org/wiki/Sampling_(signal_processing)#Speech_sampling
         //We'd effectively only need to analyze the data from buffer[1] - buffer[42]
         
-
-
         //Take 30 samples for central limit theorem, then we can assume a normal distribution of values
         this.noiseSampleCount = 30; // 512 / 48000 * 30 = 320ms
         //Take 2 stddev distance (68-95-99.7 rule) for each value, 95% confidence level for the distance to be considered significant
@@ -174,8 +180,6 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
         }
     }
 
-    //ded this is returning NaN
-    //Could be the 2nd fft but if that is the case it would be p troublesome if it's an issue innate to fft
     /**
      * VAD section
      * https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4142156/
@@ -234,6 +238,12 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
         return lineFeatures;
     }
 
+    /**
+     * Use to convert a complex array to an array of magnitudes
+     * @param {Array} complexArray Refer to FFT.js documentation
+     * @param {Number} binCount number of bins
+     * @param {Array} magArr Array of magnitudes
+     */
     binsToMagnitudeArray(complexArray, binCount, magArr) {
         //this.log("binsToMagnitudeArray", [complexArray, binCount, magArr]);
         for (let i = 0; i < binCount; i++) {
@@ -243,6 +253,11 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
         //this.log("postBinsToMagnitudeArray", [complexArray, binCount, magArr]);
     }
 
+    /**
+     * Use to calculate line features (see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4142156/)
+     * @param {Array} magArr Array of magnitudes
+     * @param {Number} magArrLength 
+     */
     calculateLineFeatures(magArr, magArrLength) {
         let lineFeatures = [];
         //Get Fmean and L
@@ -313,10 +328,10 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
     }
 
     /**
-     * Compare the distance between sets of two line features. Idea is that the line features of a noise signal will be similar to that of the reference signal.
-     * Depreciated
-     * @param {Array[5]} lineFeatures1 Line features 1
-     * @param {Array[5]} lineFeatures2 Line features 2
+     * Calculate the distance between sets of two line features. Idea is that the line features of a noise signal will be similar to that of the reference signal.
+     * @deprecated
+     * @param {Array.<Number>} lineFeatures1 Line features 1 of length 5
+     * @param {Array.<Number>} lineFeatures2 Line features 2 of length 5
      */
     calculateDistanceMeasurement(lineFeatures1, lineFeatures2) {
         let sum = 0;
@@ -329,48 +344,83 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
         return sum;
     }
 
+    /**
+     * Check if the line features are within the "boundaries" of the noise reference signal
+     * @param {Array.<Number>} lineFeatures Line features of length 5 (variables that define the signal)
+     * @param {Array.<{Number, Number}>} boundsArr Array containing the lower and upper bounds of each line feature variable
+     */
     distanceOutsideBounds(lineFeatures, boundsArr) {
         let varExceeded = 0;
         for (let i = 0; i < lineFeatures.length; i++) {
-            if (lineFeatures[i] < boundsArr[i].lowerBound || lineFeatures[i] > boundsArr[i].upperBound)
+            if (lineFeatures[i] < boundsArr[i].lowerBound || lineFeatures[i] > boundsArr[i].upperBound) {
                 varExceeded++;
+                if (varExceeded >= this.variablesFailBeforeSignificant) break;
+            }
         }
         return varExceeded >= this.variablesFailBeforeSignificant;
     }
 
+    /**
+     * Calculate the magnitude for a specific FFT bin
+     * @param {Array} complexArray Refer to FFT.js documentation
+     * @param {Number} binIndex bin index in complex array
+     */
     calculateFftBinMagnitude(complexArray, binIndex) {
         ////this.log("calculateFftBinMagnitude", [complexArray, binIndex, binIndex*2, complexArray[binIndex]*complexArray[binIndex] + complexArray[binIndex+1]*complexArray[binIndex+1], Math.sqrt(complexArray[binIndex]*complexArray[binIndex] + complexArray[binIndex+1]*complexArray[binIndex+1])]);
         binIndex *= 2;
         return Math.sqrt(complexArray[binIndex]*complexArray[binIndex] + complexArray[binIndex+1]*complexArray[binIndex+1]);
     }
 
+    /**
+     * Calculate the lag time (basically the time spent buffering data to process it)
+     */
     calculateLagTime() {
         return this.fft1BinCount / this.sampleRate;
     }
 
     /**
-     * Depreciated as the threshold is now variant. Using recordDistance instead
+     * The threshold is now variant. Using recordDistance instead
      * Store into results upon changing speech
+     * @deprecated
      * @param {Boolean} startedSpeech isSpeaking
      */
     changedSpeech(startedSpeech) {
         this.results.push({isSpeaking: startedSpeech, time: currentTime - this.lagTime});
     }
 
+    /**
+     * Used to record distance for logging purposes
+     * @deprecated
+     * @param {Number} distance distance from calculateDistanceMeasurement
+     */
     recordDistance(distance) {
         this.results.push(distance);
     }
 
+    /**
+     * Used to record frequency of magnitudes for logging purposes
+     * @deprecated
+     * @param {Number} index magnitude used to help analyze which magnitudes were most frequent
+     */
     addToGraphData(index) {
         if (this.logGraphData[index] == null)
             this.logGraphData[index] = 0;
         this.logGraphData[index]++;
     }
+    /**
+     * Logging purposes
+     * @deprecated
+     */
     sendGraphData() {
         this.log("graphData", this.logGraphData);
         this.logSend(MessageEnums.DEBUG_HISTOGRAM);
     }
 
+    /**
+     * Used for logging purposes to communicate debug data from processor
+     * @param {*} key 
+     * @param {*} value 
+     */
     log(key, value) {
         //Define self so to avoid collision with "this\.log"
         let self = this;
@@ -380,6 +430,10 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
         self.logData.push({t: currentTime, k: key, v: value});
     }
 
+    /**
+     * Used to send debug logs (e.g. in the event of a crash).
+     * @param {MessageEnums} definedEnum 
+     */
     logSend(definedEnum = MessageEnums.DEBUG) {
         //Define self so to avoid collision with "this\.log"
         let self = this;
@@ -390,10 +444,16 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
         this.port.postMessage({data: self.logData, msgEnum: definedEnum});
     }
 
+    /**
+     * 
+     */
     logBeenSent() {
         return this.sentLog === true;
     }
 
+    /**
+     * In the event that logSend was called with MesssageEnums.ERROR, the worklet will cease processing the TS.
+     */
     errorOccurred() {
         return this.sentError;
     }

@@ -1,8 +1,10 @@
 /**
- * Transcript source using Panopto
+ * @file Transcript source using Panopto, responsible for retrieving the transcript data
  */
 let TranscriptSourcePanopto = (() => {
     /**
+     * @private
+     * @static
      * Private static function, declaration of function to inject on the page itself
      */
     function functionToInject() {
@@ -32,6 +34,8 @@ let TranscriptSourcePanopto = (() => {
     };
 
     /**
+     * @private
+     * @static
      * Private static function, Parse transcript to [{time: Number, text: String},...] format
      * @param {PanoptoTranscript} fullData Transcript in Panopto's format (see below)
      */
@@ -51,9 +55,15 @@ let TranscriptSourcePanopto = (() => {
         return data;
     }
 
+    /**
+     * Transcript source using Panopto
+     */
     class TranscriptSourcePanopto extends TranscriptSource {
         constructor() { super(); }
 
+        /**
+         * Overrides retrieve. Retrieves transcript from Panopto.
+         */
         retrieve() {
             return new Promise((resolve) => {
                 //Create bridge

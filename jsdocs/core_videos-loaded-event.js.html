@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/videos-loaded-event.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/videos-loaded-event.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Promise/Callback for code that need the videos to be loaded before execution
+ */
+let VideosLoadedEvent = (() => {
+    //private static variables
+    let isWaiting = false;
+    let isDone = false;
+    let callbacks = $.Callbacks();
+
+    /**
+     * Private static function. Wait for video to load. This is detected by the change in src.
+     * @private
+     * @static
+     * @param {DOM} videoDOM DOM of 1 video element
+     */
+    async function waitForVideoLoad() {
+        //MutationObserver suddenly stopped working so I'm going to use a more primitive method lmao
+        let sleepMs = 20;
+        while (verifyVideoLoad() != null) {
+            await sleep(sleepMs++);
+        }
+        videosLoaded();
+    };
+
+    /**
+     * Verify all videos have been loaded, else return video to await for
+     * @private
+     * @static
+     */
+    function verifyVideoLoad() {
+        var videoDOMs = document.querySelectorAll("video");
+        for (var i = 0; i &lt; videoDOMs.length; i++) {
+            if (videoDOMs[i].src == "") {
+                return videoDOMs[i];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * private static function to call when videos are loaded
+     * @private
+     * @static
+     */
+    function videosLoaded() {
+        isDone = true;
+        callbacks.fire();
+        callbacks.empty();
+        console.log("Videos Loaded");
+    }
+
+    /**
+     * @file Class that manages the Promise/Callback for code that need the videos to be loaded before execution
+     */
+    class VideosLoadedEvent {
+        /**
+         * Subscribe to event when videos are loaded
+         * @param {Function} resolve resolve method for promise
+         */
+        static subscribe(resolve) {
+            if (!isWaiting) {
+                isWaiting = true;
+                waitForVideoLoad.call(this);
+            }
+            if (!isDone) callbacks.add(function() { resolve(); });
+            else resolve();
+        }
+
+        /**
+         * Return all videoDOMs, primary video and secondary video.
+         * Primary video refers to the video that the subtitles (and silence cues) are synced to in terms of timestamp.
+         * If there is only 1 video stream, then the secondary video is undefined.
+         */
+        static getVideosElements() {
+            let videoDOMs = document.querySelectorAll("video");
+            //We want to ensure that both subtitles are synced. The transcript timestamps that we got are based on the one that starts earlier.
+            //Thus, get the videoDOM with the lowest currentTime.
+            let mainVideoIndex = 0;
+            let min = videoDOMs[0].currentTime;
+            for (let i = 1; i &lt; videoDOMs.length; i++) {
+                if (videoDOMs[i].currentTime &lt; min) {
+                    mainVideoIndex = i;
+                    min = videoDOMs[i].currentTime;
+                }
+            }
+            return {
+                all: videoDOMs,
+                primaryVideoIndex: mainVideoIndex,
+                primaryVideo: videoDOMs[mainVideoIndex],
+                secondaryVideo: videoDOMs[mainVideoIndex^1]
+            };
+        }
+    }
+
+    return VideosLoadedEvent;
+})();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADAudioWorkletProcessor.html">VADAudioWorkletProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Mon Jun 24 2019 03:01:44 GMT+0800 (Singapore Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

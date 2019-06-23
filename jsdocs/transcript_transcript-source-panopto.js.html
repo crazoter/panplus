@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: transcript/transcript-source-panopto.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: transcript/transcript-source-panopto.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Transcript source using Panopto, responsible for retrieving the transcript data
+ */
+let TranscriptSourcePanopto = (() => {
+    /**
+     * @private
+     * @static
+     * Private static function, declaration of function to inject on the page itself
+     */
+    function functionToInject() {
+        //Need to redeclare this method because it's run on the webpage itself
+        $.urlParam = function (url, name) {
+            var results = new RegExp('[\?&amp;]' + name + '=([^&amp;#]*)').exec(url);
+            return (results !== null) ? results[1] || 0 : false;
+        };
+        $.ajax({
+            type: "POST",
+            url: window.location.origin+"/Panopto/Pages/Viewer/Search/Results.aspx",
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            data: {
+                id: $.urlParam(document.forms[0].action, "id"),
+                type: "",
+                query: "",
+                notesUser: "",
+                channelName: "",
+                refreshAuthCookie: true,
+                deliveryRelative: true,
+                responseType: "json"
+            },
+            success: function(data) {
+                bridgeCallback(data);
+            }
+        });
+    };
+
+    /**
+     * @private
+     * @static
+     * Private static function, Parse transcript to [{time: Number, text: String},...] format
+     * @param {PanoptoTranscript} fullData Transcript in Panopto's format (see below)
+     */
+    function parse(fullData) {
+        if (!fullData || fullData.Error) {
+            if (!fullData) throw new Error("Failed to obtain Transcript, request failed");
+            throw new Error("Failed to obtain Transcript. Error Message: " + fullData.ErrorMessage);
+        }
+
+        let data = [];
+        for (let i = 0; i &lt; fullData.Events.length; i++) {
+            let obj = fullData.Events[i];
+            if (obj.EventTargetType === "MachineTranscript") {
+                data.push({time: obj.Time, text: obj.Data});
+            }
+        }
+        return data;
+    }
+
+    /**
+     * Transcript source using Panopto
+     */
+    class TranscriptSourcePanopto extends TranscriptSource {
+        constructor() { super(); }
+
+        /**
+         * Overrides retrieve. Retrieves transcript from Panopto.
+         */
+        retrieve() {
+            return new Promise((resolve) => {
+                //Create bridge
+                let bridge = new ContextBridge(functionToInject, "transcriptGetEvent");
+                //Perform one time request and process fullData
+                bridge.request().then(fullData => {
+                    resolve(parse(fullData));
+                });
+            });
+        }
+    }
+    return TranscriptSourcePanopto;
+})();
+
+/**
+ * Format (JSON):
+ * {
+    "Error": {boolean},
+    "ErrorMessage": {null||string?},
+    "Events": [
+        {
+            "AbsoluteTime": 0,
+            "Caption": "",
+            "CreatedDuringWebcast": {boolean},
+            "CreationDateTime": {string},
+            "CreationTime": {Number},
+            "Data": {null||string?},
+            "EventTargetType": {string},
+            "ID": {Number},
+            "IsQuestionList": {boolean},
+            "IsSessionPlaybackBlocking": {boolean},
+            "ObjectIdentifier": {string},
+            "ObjectPublicIdentifier": {string},
+            "ObjectSequenceNumber": {string},
+            "ObjectStreamID": {string},
+            "PublicId": {string},
+            "SessionID": {string},
+            "Time": {Number},
+            "Url": {null||string?},
+            "UserDisplayName": {null||string?},
+            "UserInvocationRequiredInUrl": {boolean},
+            "UserName": {string}
+        },...
+    }
+    */</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADAudioWorkletProcessor.html">VADAudioWorkletProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Mon Jun 24 2019 03:01:44 GMT+0800 (Singapore Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

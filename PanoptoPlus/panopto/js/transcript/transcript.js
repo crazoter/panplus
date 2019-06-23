@@ -1,5 +1,5 @@
 /**
- * Transcript class to hold the transcript
+ * @file Transcript class to hold the transcript
  */
 let Transcript = (() => {
     class Transcript {

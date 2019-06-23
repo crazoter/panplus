@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: transcript/transcript-requester.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: transcript/transcript-requester.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file TranscriptRequester class manages the retrieval and caching of transcripts.
+ */
+let TranscriptRequester = (() => {
+    const DEBUG_TRANSCRIPT_REQUEST = 1;
+    //Private static variables
+    /**Problem: Multiple parts of our code needs the transcript. 
+     * We don't want to call the AJAX function multiple times, so everytime it is required and it's not ready, we add it to callbacks
+     * Once it's ready, we call all these callbacks as required.
+     * http://api.jquery.com/category/callbacks-object/
+     */
+    let callbacks = $.Callbacks();
+    let cachedTranscript = null; //Transcript object
+    let isGettingTranscript = false;
+    let key = "";
+    //All panopto webcast websites have a form (the search bar)
+    if (document.forms[0]) { key = `transcript-${$.urlParam(document.forms[0].action, "id")}`; } 
+    else throw new Error("Transcript.js: Unable to get webcast ID");
+
+    /**
+     * private static function to process transcript get if cache doesn't hit
+     * @private
+     * @static
+     * @param {TranscriptSource} transcriptSrc transcript source
+     * @param {function} resolve resolve method for promise
+     */
+    function getTranscript(transcriptSrc, resolve) {
+        transcriptSrc.retrieve().then((data) => {
+            let kvp = {};
+            kvp[key] = data;
+            chrome.storage.local.set(kvp, () => console.log("Saved " + key));
+            return finishGettingTranscript(resolve, data);
+        });
+    }
+
+    /**
+     * private static method, helper class to abstract repeated stuff upon finish transcript get
+     * @private
+     * @static
+     * @param {function} resolve resolve function for promise
+     * @param {object} data processed data which can be packaged as a Transcript
+     */
+    function finishGettingTranscript(resolve, data) {
+        cachedTranscript = new Transcript(data);
+        callbacks.fire();
+        callbacks.empty();
+        return resolve(cachedTranscript);
+    }
+
+    /**
+     * TranscriptRequester class manages the retrieval and caching of transcripts.
+     */
+    class TranscriptRequester {
+        /**
+         * Constructor is empty
+         */
+        constructor() {}
+
+        /**
+         * Get transcript from transcript source and cache if needed
+         * @param {TranscriptSource} transcriptSrc Transcript source to get transcript from
+         */
+        static get(transcriptSrc) {
+            return new Promise(function(resolve) {
+                //If already requested, just use it
+                if (cachedTranscript) {
+                    return resolve(cachedTranscript);
+                } else if (isGettingTranscript) {
+                    //If in the process of retrieving, wait for it
+                    callbacks.add(() => {
+                        return resolve(cachedTranscript);
+                    });
+                } else {
+                    //Else, attempt to get transcript from cache
+                    isGettingTranscript = true;
+                    chrome.storage.local.get([key], (result) => {
+                        return result[key] &amp;&amp; !DEBUG_TRANSCRIPT_REQUEST 
+                            ? finishGettingTranscript(resolve, result[key])
+                            : getTranscript(transcriptSrc, resolve);
+                    });
+                }
+            });
+        }
+    }
+    return TranscriptRequester;
+})();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADAudioWorkletProcessor.html">VADAudioWorkletProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Mon Jun 24 2019 03:01:44 GMT+0800 (Singapore Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

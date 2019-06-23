@@ -1,8 +1,21 @@
-//Disable console.log (mostly by Panopto's object) to improve performance for user
-//Has potential to be a toggler but as per requirements now there's no need to add a toggle feature
+/**
+ * @file Disable console.log (mostly by Panopto's object) to improve performance for user.
+ * Has potential to be a toggler but as per requirements now there's no need to add a toggle feature
+ */
 LoggerDisabler = (() => {
+    /**
+     * Class to inject code to disable console.log (mostly by Panopto's object) to improve performance for user. Has potential to be a toggler but as per requirements now there's no need to add a toggle feature
+     */
     class LoggerDisabler {
-        constructor() {
+        /**
+         * Constructor is empty
+         */
+        constructor() {}
+        /**
+         * Initialize and inject function onto page context
+         */
+        init() {
+            //Inject script to toggle console.log
             //https://stackoverflow.com/questions/1215392/how-to-quickly-and-conveniently-disable-all-console-log-statements-in-my-code
             let injectedFunc = () => {
                 let logger = (() => {

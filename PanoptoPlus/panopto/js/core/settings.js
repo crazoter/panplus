@@ -1,6 +1,10 @@
 /**
- * Singleton class
+ * @file Singleton class
  */
+
+ /**
+  * @class Singleton Settings class to manage user settings. Constructor is private.
+  */
 function Settings() { throw new Error("Please use Settings.requestInstance to initialize Settings."); }
 (function() {
     var initiated = false;
@@ -8,6 +12,8 @@ function Settings() { throw new Error("Please use Settings.requestInstance to in
 
     /**
      * Private constructor
+     * @private
+     * @constructor
      * @param {Boolean} subtitlesEnabled 
      * @param {Number} normalPlaybackRate 
      * @param {Boolean} silenceSkipEnabled 
@@ -15,16 +21,12 @@ function Settings() { throw new Error("Please use Settings.requestInstance to in
      */
     function _Settings(subtitlesEnabled = true, 
         normalPlaybackRate = 1.0, 
-        silenceSkipEnabled = true, 
-        silencePlaybackRate = 3, 
-        harkThreshold = -50) {
+        silenceSkipEnabled = true) {
         if (!initiated) {
             initiated = true;
             this.subtitlesEnabled = subtitlesEnabled;
             this.normalPlaybackRate = normalPlaybackRate;
             this.silenceSkipEnabled = silenceSkipEnabled;
-            this.silencePlaybackRate = silencePlaybackRate;
-            this.harkThreshold = harkThreshold;
         }
     }
 
@@ -48,31 +50,22 @@ function Settings() { throw new Error("Please use Settings.requestInstance to in
             }
         });
     }
-
-    Settings.getSubtitlesEnabled = function() { return instance.subtitlesEnabled; }
-    Settings.getNormalPlaybackRate = function() { return instance.normalPlaybackRate; }
-    Settings.getSilenceSkipEnabled = function() { return instance.silenceSkipEnabled; }
-    Settings.getSilencePlaybackRate = function() { return instance.silencePlaybackRate; }
-    Settings.getHarkThreshold = function() { return instance.harkThreshold; }
-
+    /** * */ Settings.getSubtitlesEnabled = function() { return instance.subtitlesEnabled; }
+    /** * */ Settings.getNormalPlaybackRate = function() { return instance.normalPlaybackRate; }
+    /** * */ Settings.getSilenceSkipEnabled = function() { return instance.silenceSkipEnabled; }
+    /** *@param {Boolean} val */ 
     Settings.setSubtitlesEnabled = function(val) { 
         instance.subtitlesEnabled = val;
         Settings.save();
     }
+    /** *@param {Number} val */ 
     Settings.setNormalPlaybackRate = function(val) { 
         instance.normalPlaybackRate = val;
         Settings.save();
     }
+    /** *@param {Boolean} val */ 
     Settings.setSilenceSkipEnabled = function(val) { 
         instance.silenceSkipEnabled = val;
-        Settings.save();
-    }
-    Settings.setSilencePlaybackRate = function(val) { 
-        instance.silencePlaybackRate = val;
-        Settings.save();
-    }
-    Settings.setHarkThreshold = function(val) { 
-        instance.harkThreshold = val;
         Settings.save();
     }
     

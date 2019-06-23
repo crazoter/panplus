@@ -1,5 +1,5 @@
 /**
- * TranscriptRequester class manages the retrieval and caching of transcripts.
+ * @file TranscriptRequester class manages the retrieval and caching of transcripts.
  */
 let TranscriptRequester = (() => {
     const DEBUG_TRANSCRIPT_REQUEST = 1;
@@ -19,6 +19,9 @@ let TranscriptRequester = (() => {
 
     /**
      * private static function to process transcript get if cache doesn't hit
+     * @private
+     * @static
+     * @param {TranscriptSource} transcriptSrc transcript source
      * @param {function} resolve resolve method for promise
      */
     function getTranscript(transcriptSrc, resolve) {
@@ -32,6 +35,8 @@ let TranscriptRequester = (() => {
 
     /**
      * private static method, helper class to abstract repeated stuff upon finish transcript get
+     * @private
+     * @static
      * @param {function} resolve resolve function for promise
      * @param {object} data processed data which can be packaged as a Transcript
      */
@@ -42,8 +47,13 @@ let TranscriptRequester = (() => {
         return resolve(cachedTranscript);
     }
 
-    //Initialize data
+    /**
+     * TranscriptRequester class manages the retrieval and caching of transcripts.
+     */
     class TranscriptRequester {
+        /**
+         * Constructor is empty
+         */
         constructor() {}
 
         /**
