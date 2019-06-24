@@ -38,6 +38,7 @@ let TranscriptSourcePanopto = (() => {
      * @static
      * Private static function, Parse transcript to [{time: Number, text: String},...] format
      * @param {PanoptoTranscript} fullData Transcript in Panopto's format (see below)
+     * @returns {Array.<{time: Number, text: String}>} processed data which can be packaged as a Transcript.
      */
     function parse(fullData) {
         if (!fullData || fullData.Error) {
@@ -63,6 +64,7 @@ let TranscriptSourcePanopto = (() => {
 
         /**
          * Overrides retrieve. Retrieves transcript from Panopto.
+         * @returns {Promise} Promise with resolve of 1 parameter of Array.<{time: Number, text: String}>
          */
         retrieve() {
             return new Promise((resolve) => {

@@ -17,6 +17,7 @@ let Subtitles = (() => {
 
         /**
          * Init: initialize subtitles
+         * @returns {undefined}
          */
         init() {
             //Add subtitles
@@ -31,6 +32,7 @@ let Subtitles = (() => {
 
         /**
          * Load videos with subtitle tracks and show subtitles.
+         * @returns {undefined}
          */
         async loadSubtitles() {
             let transcript = await TranscriptRequester.get(new TranscriptSourcePanopto());

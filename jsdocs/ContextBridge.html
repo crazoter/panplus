@@ -30,6 +30,8 @@
     
         <h2><span class="attribs"><span class="type-signature"></span></span>ContextBridge<span class="signature">(func, eventHandle, eventHandler)</span><span class="type-signature"></span></h2>
         
+            <div class="class-description">ContextBridge class for setting up linkages between the isolated code environment and the actual code environment of the user.Use by first creating this class with a function (that you want to call in the actual code environment). Remember that code in this function will notbe able to access any variables or functions in the isolated code environment. Then, call request, exec or connect as required.</div>
+        
     
 </header>
 
@@ -38,6 +40,8 @@
     
         
 
+    
+    <h2>Constructor</h2>
     
 
     
@@ -101,7 +105,7 @@
 
             
 
-            <td class="description last">the function to be injected into the page.</td>
+            <td class="description last">the function to be injected into the page. To trigger the eventHandle (and eventHandler) from within this function, call bridgeCallback().</td>
         </tr>
 
     
@@ -114,7 +118,10 @@
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">String</span>
+|
+
+<span class="param-type">undefined</span>
 
 
             
@@ -124,7 +131,7 @@
 
             
 
-            <td class="description last">the string used for triggering & detecting events for this particular bridge</td>
+            <td class="description last">the string used for triggering & detecting events for this particular bridge. Only required if using request or connect.</td>
         </tr>
 
     
@@ -138,6 +145,9 @@
             
                 
 <span class="param-type">function</span>
+|
+
+<span class="param-type">undefined</span>
 
 
             
@@ -147,7 +157,7 @@
 
             
 
-            <td class="description last">the function called whenever the eventHandle is triggered. This function takes in 1 parameter.</td>
+            <td class="description last">the function called whenever the eventHandle is triggered (think of it as a callback). This function takes in 1 parameter. Only required if using connect.</td>
         </tr>
 
     
@@ -188,7 +198,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_context-bridge.js.html">core/context-bridge.js</a>, <a href="core_context-bridge.js.html#line32">line 32</a>
+        <a href="core_context-bridge.js.html">core/context-bridge.js</a>, <a href="core_context-bridge.js.html#line43">line 43</a>
     </li></ul></dd>
     
 
@@ -244,7 +254,7 @@
     
 
     
-    <h4 class="name" id="close"><span class="type-signature"></span>close<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="close"><span class="type-signature"></span>close<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
     
 
     
@@ -296,7 +306,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_context-bridge.js.html">core/context-bridge.js</a>, <a href="core_context-bridge.js.html#line81">line 81</a>
+        <a href="core_context-bridge.js.html">core/context-bridge.js</a>, <a href="core_context-bridge.js.html#line96">line 96</a>
     </li></ul></dd>
     
 
@@ -321,6 +331,24 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -332,7 +360,7 @@
     
 
     
-    <h4 class="name" id="connect"><span class="type-signature"></span>connect<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="connect"><span class="type-signature"></span>connect<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
     
 
     
@@ -384,7 +412,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_context-bridge.js.html">core/context-bridge.js</a>, <a href="core_context-bridge.js.html#line70">line 70</a>
+        <a href="core_context-bridge.js.html">core/context-bridge.js</a>, <a href="core_context-bridge.js.html#line84">line 84</a>
     </li></ul></dd>
     
 
@@ -409,6 +437,24 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -420,7 +466,7 @@
     
 
     
-    <h4 class="name" id="exec"><span class="type-signature"></span>exec<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="exec"><span class="type-signature"></span>exec<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
     
 
     
@@ -472,7 +518,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_context-bridge.js.html">core/context-bridge.js</a>, <a href="core_context-bridge.js.html#line60">line 60</a>
+        <a href="core_context-bridge.js.html">core/context-bridge.js</a>, <a href="core_context-bridge.js.html#line73">line 73</a>
     </li></ul></dd>
     
 
@@ -497,6 +543,24 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -508,7 +572,7 @@
     
 
     
-    <h4 class="name" id="request"><span class="type-signature"></span>request<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="request"><span class="type-signature"></span>request<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -560,7 +624,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_context-bridge.js.html">core/context-bridge.js</a>, <a href="core_context-bridge.js.html#line45">line 45</a>
+        <a href="core_context-bridge.js.html">core/context-bridge.js</a>, <a href="core_context-bridge.js.html#line57">line 57</a>
     </li></ul></dd>
     
 
@@ -585,6 +649,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Promise with resolve of 1 parameter of Object (depending on what was requested)
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -612,7 +698,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Mon Jun 24 2019 03:01:44 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Mon Jun 24 2019 12:00:05 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

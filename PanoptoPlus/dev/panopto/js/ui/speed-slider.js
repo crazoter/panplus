@@ -13,6 +13,7 @@ let SpeedSlider = (() => {
 
          /**
          * Init: initialize speed slider. First grabs slider template, then initializes.
+         * @returns {undefined}
          */
         init() {
             let changePlaybackRate = function(event, ui) {

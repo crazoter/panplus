@@ -5,7 +5,7 @@ let Transcript = (() => {
     class Transcript {
         /**
          * 
-         * @param {Object} data [{time: Number, text: String},...]
+         * @param {Array.<{time: Number, text: String}>} data Processed data from a TranscriptSource
          */
         constructor(data) {
             if (!data) throw new Error("Transcript data cannot be undefined");
@@ -18,6 +18,7 @@ let Transcript = (() => {
          * @param {Number} index index to access
          * @param {Number} flashDelay time to hide previous subtitle and show next. Default is 0.2s.
          * @param {Number} lastIndexDuration time to show last subtitle. Default is 10s.
+         * @returns {VTTCue|undefined} Returns VTTCue using data. Only returns undefined if out of bounds.
          */
         getVttCue(index, flashDelay = 0.2, lastIndexDuration = 10) {
             if (index >= 0 && index < this.data.length) {
@@ -36,6 +37,7 @@ let Transcript = (() => {
          * Convert to VTTCueArray for subtitling
          * @param {Number} flashDelay time to hide previous subtitle and show next. Default is 0.2s.
          * @param {Number} lastIndexDuration time to show last subtitle. Default is 10s.
+         * @returns {Array.<VTTCue>} Returns an array of VTTCues based on the data in this transcript
          */
         toVTTCueArray(flashDelay, lastIndexDuration) {
             var result = [];

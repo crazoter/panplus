@@ -30,6 +30,8 @@
     
         <h2><span class="attribs"><span class="type-signature"></span></span>SilenceCueManager<span class="signature">()</span><span class="type-signature"></span></h2>
         
+            <div class="class-description">Silence Cue Manager uses the texttrack system to keep track of when to jump in the event of silence, and subsequently handles the jump.</div>
+        
     
 </header>
 
@@ -38,6 +40,8 @@
     
         
 
+    
+    <h2>Constructor</h2>
     
 
     
@@ -93,7 +97,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line6">line 6</a>
+        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line12">line 12</a>
     </li></ul></dd>
     
 
@@ -149,7 +153,7 @@
     
 
     
-    <h4 class="name" id=".addSilenceCues"><span class="type-signature">(static) </span>addSilenceCues<span class="signature">(id, results)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".addSilenceCues"><span class="type-signature">(static) </span>addSilenceCues<span class="signature">(id, results)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
     
 
     
@@ -222,7 +226,7 @@
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">Array.&lt;{isSpeaking: Boolean, time: Number}></span>
 
 
             
@@ -232,7 +236,7 @@
 
             
 
-            <td class="description last">[{isSpeaking: Boolean, time: Number}, ...]</td>
+            <td class="description last">results from prociessing a TS file</td>
         </tr>
 
     
@@ -273,7 +277,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line107">line 107</a>
+        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line117">line 117</a>
     </li></ul></dd>
     
 
@@ -298,6 +302,24 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -309,7 +331,7 @@
     
 
     
-    <h4 class="name" id=".addSilentCue"><span class="type-signature">(static) </span>addSilentCue<span class="signature">(startTime, endTime)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".addSilentCue"><span class="type-signature">(static) </span>addSilentCue<span class="signature">(startTime, endTime)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
     
 
     
@@ -433,7 +455,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line144">line 144</a>
+        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line155">line 155</a>
     </li></ul></dd>
     
 
@@ -458,6 +480,24 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -469,7 +509,7 @@
     
 
     
-    <h4 class="name" id=".addToCache"><span class="type-signature">(static) </span>addToCache<span class="signature">(id, results)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".addToCache"><span class="type-signature">(static) </span>addToCache<span class="signature">(id, results)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
     
 
     
@@ -593,7 +633,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line153">line 153</a>
+        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line165">line 165</a>
     </li></ul></dd>
     
 
@@ -618,6 +658,24 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -629,7 +687,7 @@
     
 
     
-    <h4 class="name" id=".idToIndex"><span class="type-signature">(static) </span>idToIndex<span class="signature">(id)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".idToIndex"><span class="type-signature">(static) </span>idToIndex<span class="signature">(id)</span><span class="type-signature"> &rarr; {Number}</span></h4>
     
 
     
@@ -637,7 +695,7 @@
 
 
 <div class="description">
-    Convert id to index
+    Convert id to index (e.g. "00012.ts" to 12)
 </div>
 
 
@@ -730,7 +788,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line94">line 94</a>
+        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line103">line 103</a>
     </li></ul></dd>
     
 
@@ -755,6 +813,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    returns the number (i.e. index) of the TS file
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -766,7 +846,7 @@
     
 
     
-    <h4 class="name" id="init"><span class="type-signature"></span>init<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="init"><span class="type-signature"></span>init<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
     
 
     
@@ -818,7 +898,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line11">line 11</a>
+        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line18">line 18</a>
     </li></ul></dd>
     
 
@@ -843,6 +923,24 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -854,7 +952,7 @@
     
 
     
-    <h4 class="name" id="loadSilenceCues"><span class="type-signature">(async) </span>loadSilenceCues<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="loadSilenceCues"><span class="type-signature">(async) </span>loadSilenceCues<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
     
 
     
@@ -906,7 +1004,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line20">line 20</a>
+        <a href="ui_silence-cue-manager.js.html">ui/silence-cue-manager.js</a>, <a href="ui_silence-cue-manager.js.html#line28">line 28</a>
     </li></ul></dd>
     
 
@@ -931,6 +1029,24 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -958,7 +1074,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Mon Jun 24 2019 03:01:44 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Mon Jun 24 2019 12:00:05 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -12,6 +12,7 @@ let VideosLoadedEvent = (() => {
      * @private
      * @static
      * @param {DOM} videoDOM DOM of 1 video element
+     * @returns {undefined}
      */
     async function waitForVideoLoad() {
         //MutationObserver suddenly stopped working so I'm going to use a more primitive method lmao
@@ -26,6 +27,7 @@ let VideosLoadedEvent = (() => {
      * Verify all videos have been loaded, else return video to await for
      * @private
      * @static
+     * @returns {Video|null} Video element if found
      */
     function verifyVideoLoad() {
         var videoDOMs = document.querySelectorAll("video");
@@ -41,6 +43,7 @@ let VideosLoadedEvent = (() => {
      * private static function to call when videos are loaded
      * @private
      * @static
+     * @returns {undefined}
      */
     function videosLoaded() {
         isDone = true;
@@ -56,6 +59,7 @@ let VideosLoadedEvent = (() => {
         /**
          * Subscribe to event when videos are loaded
          * @param {Function} resolve resolve method for promise
+         * @returns {undefined}
          */
         static subscribe(resolve) {
             if (!isWaiting) {
@@ -70,6 +74,7 @@ let VideosLoadedEvent = (() => {
          * Return all videoDOMs, primary video and secondary video.
          * Primary video refers to the video that the subtitles (and silence cues) are synced to in terms of timestamp.
          * If there is only 1 video stream, then the secondary video is undefined.
+         * @return {{all: Array.<Video>, primaryVideoIndex: Number, primaryVideo: Video, secondaryVideo: Video}}
          */
         static getVideosElements() {
             let videoDOMs = document.querySelectorAll("video");

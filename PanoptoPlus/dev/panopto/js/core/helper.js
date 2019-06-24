@@ -8,6 +8,7 @@
  * jQuery helper function to get querystring parameter
  * @param {String} url url to retrieve querystring from
  * @param {String} name name of querystring parameter
+ * @returns {String} the querystring params
  */
 $.urlParam = function (url, name) {
     var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(url);
@@ -29,6 +30,7 @@ function resolvePrecept(interfaceName) {
  * Helper function to convert uint8Array to array buffer
  * https://stackoverflow.com/questions/37228285/uint8array-to-array-buffer
  * @param {Uint8Array} array array of data
+ * @returns {ArrayBuffer}
  */
 function Uint8ArrayToArrayBuffer(array) {
     return array.buffer.slice(array.byteOffset, array.byteLength + array.byteOffset);
@@ -37,6 +39,7 @@ function Uint8ArrayToArrayBuffer(array) {
 /**
  * Sleep for ms milliseconds
  * @param {Number} ms time in ms
+ * @returns {Promise} Promise that resolves after timeout
  */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

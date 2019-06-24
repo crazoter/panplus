@@ -1,4 +1,10 @@
+/**
+ * @file Silence Cue Manager uses the texttrack system to keep track of when to jump in the event of silence, and subsequently handles the jump.
+ */
 let SilenceCueManager = (() => {
+    /**
+     * Silence Cue Manager uses the texttrack system to keep track of when to jump in the event of silence, and subsequently handles the jump.
+     */
     class SilenceCueManager {
         /**
          * Constructor is empty
@@ -7,6 +13,7 @@ let SilenceCueManager = (() => {
 
         /**
          * Initialize Silence Cue Manager.
+         * @returns {undefined}
          */
         init() {
             VideosLoadedEvent.subscribe(() => { 
@@ -16,6 +23,7 @@ let SilenceCueManager = (() => {
 
         /**
          * Load videos with cues tracks and skip as necessary.
+         * @returns {undefined}
          */
         async loadSilenceCues() {
             let elements = VideosLoadedEvent.getVideosElements();
@@ -88,8 +96,9 @@ let SilenceCueManager = (() => {
         };
 
         /**
-         * Convert id to index
+         * Convert id to index (e.g. "00012.ts" to 12)
          * @param {String} id relurl of the TS file
+         * @returns {Number} returns the number (i.e. index) of the TS file
          */
         static idToIndex(id) {
             return parseInt(id.substr(0, id.length - 3));
@@ -102,7 +111,8 @@ let SilenceCueManager = (() => {
          * speaking -> !speaking: No modification
          * !speaking -> speaking: Addition of cue, !speaking = start time, speaking = end time
          * @param {String} id relurl of the TS file
-         * @param {Array} results [{isSpeaking: Boolean, time: Number}, ...]
+         * @param {Array.<{isSpeaking: Boolean, time: Number}>} results results from prociessing a TS file
+         * @returns {undefined}
          */
         static addSilenceCues(id, results) {
             let index = SilenceCueManager.idToIndex(id);
@@ -140,6 +150,7 @@ let SilenceCueManager = (() => {
          * Add silent cue for video to take action
          * @param {Number} startTime start of silence
          * @param {Number} endTime end of silence
+         * @returns {undefined}
          */
         static addSilentCue(startTime, endTime) {
             SilenceCueManager.cueTrack.addCue(new VTTCue(startTime, endTime, ""));
@@ -149,6 +160,7 @@ let SilenceCueManager = (() => {
          * Add results from TSTracker to cache
          * @param {String} id relurl of the TS file
          * @param {Array} results [{isSpeaking: Boolean, time: Number}, ...]
+         * @returns {undefined}
          */
         static addToCache(id, results) {
             //Save to map

@@ -13,6 +13,7 @@ LoggerDisabler = (() => {
         constructor() {}
         /**
          * Initialize and inject function onto page context
+         * @return {undefined}
          */
         init() {
             //Inject script to toggle console.log

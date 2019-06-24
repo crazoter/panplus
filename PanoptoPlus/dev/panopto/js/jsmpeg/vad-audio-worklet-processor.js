@@ -91,6 +91,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * @param {Float32Array} inputs inputs[n][m] is a Float32Array of audio samples for the mth channel of the nth input.
      * @param {Float32Array} outputs The output audio buffer that is to be consumed by the user agent
      * @param {Object} parameters A map of string keys and associated Float32Arrays. parameters["name"] corresponds to the automation values of the AudioParam named "name".
+     * @returns {undefined}
      */
     process(inputs, outputs, parameters) {
         if (this.errorOccurred()) return true;
@@ -108,6 +109,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * @param {Float32Array} outputs The output audio buffer that is to be consumed by the user agent
      * @param {Object} parameters A map of string keys and associated Float32Arrays. parameters["name"] corresponds to the automation values of the AudioParam named "name".
      * @param {Function} calledFunction function that is called with the buffer as an argument
+     * @returns {undefined}
      */
     bufferThenProcess(inputs, outputs, parameters, calledFunction) {
         if (this.continueBuffering) {
@@ -128,6 +130,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
     /**
      * Process & average some samples of noise (assume that the start of the webcast is noise) as reference.
      * @param {Object} parameters A map of string keys and associated Float32Arrays. parameters["name"] corresponds to the automation values of the AudioParam named "name".
+     * @returns {undefined}
      */
     processReference(parameters) {
         //this.log("refResults", this.results);
@@ -184,6 +187,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * VAD section
      * https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4142156/
      * @param {Boolean} checkForSpeech Check if speaking against reference.
+     * @returns {Array.<Array.<Number>>} array of line features, usually 2 line features of 5 variables
      */
     processData(parameters, checkForSpeech = true) {
         //process for both channels
@@ -243,6 +247,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * @param {Array} complexArray Refer to FFT.js documentation
      * @param {Number} binCount number of bins
      * @param {Array} magArr Array of magnitudes
+     * @returns {undefined} Passed by reference
      */
     binsToMagnitudeArray(complexArray, binCount, magArr) {
         //this.log("binsToMagnitudeArray", [complexArray, binCount, magArr]);
@@ -257,6 +262,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * Use to calculate line features (see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4142156/)
      * @param {Array} magArr Array of magnitudes
      * @param {Number} magArrLength 
+     * @returns {Array.<Number>} line feature, contains 5 variables/coefficients 
      */
     calculateLineFeatures(magArr, magArrLength) {
         let lineFeatures = [];
@@ -332,6 +338,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * @deprecated
      * @param {Array.<Number>} lineFeatures1 Line features 1 of length 5
      * @param {Array.<Number>} lineFeatures2 Line features 2 of length 5
+     * @returns {Number} distance
      */
     calculateDistanceMeasurement(lineFeatures1, lineFeatures2) {
         let sum = 0;
@@ -348,6 +355,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * Check if the line features are within the "boundaries" of the noise reference signal
      * @param {Array.<Number>} lineFeatures Line features of length 5 (variables that define the signal)
      * @param {Array.<{Number, Number}>} boundsArr Array containing the lower and upper bounds of each line feature variable
+     * @returns {Boolean} exceeded bounds
      */
     distanceOutsideBounds(lineFeatures, boundsArr) {
         let varExceeded = 0;
@@ -364,6 +372,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * Calculate the magnitude for a specific FFT bin
      * @param {Array} complexArray Refer to FFT.js documentation
      * @param {Number} binIndex bin index in complex array
+     * @returns {Number}
      */
     calculateFftBinMagnitude(complexArray, binIndex) {
         ////this.log("calculateFftBinMagnitude", [complexArray, binIndex, binIndex*2, complexArray[binIndex]*complexArray[binIndex] + complexArray[binIndex+1]*complexArray[binIndex+1], Math.sqrt(complexArray[binIndex]*complexArray[binIndex] + complexArray[binIndex+1]*complexArray[binIndex+1])]);
@@ -372,7 +381,8 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
     }
 
     /**
-     * Calculate the lag time (basically the time spent buffering data to process it)
+     * Calculate the lag time in ms (basically the time spent buffering data to process it)
+     * @returns {Number}
      */
     calculateLagTime() {
         return this.fft1BinCount / this.sampleRate;
@@ -383,6 +393,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * Store into results upon changing speech
      * @deprecated
      * @param {Boolean} startedSpeech isSpeaking
+     * @returns {undefined}
      */
     changedSpeech(startedSpeech) {
         this.results.push({isSpeaking: startedSpeech, time: currentTime - this.lagTime});
@@ -392,6 +403,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * Used to record distance for logging purposes
      * @deprecated
      * @param {Number} distance distance from calculateDistanceMeasurement
+     * @returns {undefined}
      */
     recordDistance(distance) {
         this.results.push(distance);
@@ -401,6 +413,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * Used to record frequency of magnitudes for logging purposes
      * @deprecated
      * @param {Number} index magnitude used to help analyze which magnitudes were most frequent
+     * @returns {undefined}
      */
     addToGraphData(index) {
         if (this.logGraphData[index] == null)
@@ -410,6 +423,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
     /**
      * Logging purposes
      * @deprecated
+     * @returns {undefined}
      */
     sendGraphData() {
         this.log("graphData", this.logGraphData);
@@ -420,6 +434,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
      * Used for logging purposes to communicate debug data from processor
      * @param {*} key 
      * @param {*} value 
+     * @returns {undefined}
      */
     log(key, value) {
         //Define self so to avoid collision with "this\.log"
@@ -432,7 +447,8 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
 
     /**
      * Used to send debug logs (e.g. in the event of a crash).
-     * @param {MessageEnums} definedEnum 
+     * @param {MessageEnums} definedEnum
+     * @returns {undefined}
      */
     logSend(definedEnum = MessageEnums.DEBUG) {
         //Define self so to avoid collision with "this\.log"
@@ -445,7 +461,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
     }
 
     /**
-     * 
+     * @returns {Boolean} if logSend was called
      */
     logBeenSent() {
         return this.sentLog === true;
@@ -453,6 +469,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
 
     /**
      * In the event that logSend was called with MesssageEnums.ERROR, the worklet will cease processing the TS.
+     * @returns {Boolean}
      */
     errorOccurred() {
         return this.sentError;

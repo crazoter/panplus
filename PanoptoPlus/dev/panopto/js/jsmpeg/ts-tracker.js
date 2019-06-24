@@ -13,6 +13,7 @@ TSTracker = (() => {
 
         /**
          * Initialization, setup a bridge to detect which TS files are loaded
+         * @returns {undefined}
          */
         init() {
             //return;//temporarily disable feature
@@ -131,6 +132,7 @@ TSTracker = (() => {
          * @param {Number} startTime start time of the TS file
          * @param {ArrayBuffer} arraybuffer array buffer, data
          * @param {Object} options {isNoiseSample: boolean, startProcessingFrom: relative time};
+         * @returns {undefined}
          */
         process(id, startTime, arraybuffer, options) {
             //https://stackoverflow.com/questions/8074152/is-there-a-way-to-use-the-web-audio-api-to-sample-audio-faster-than-real-time
@@ -155,6 +157,7 @@ TSTracker = (() => {
 
         /**
          * Wait for noise sample, only proceed after noise has been processed
+         * @returns {Promise} Promise with resolve with 0 parameters. Just waits for the noise reference to be created.
          */
         waitForNoiseSample() {
             return new Promise((resolve) => {
@@ -168,6 +171,7 @@ TSTracker = (() => {
          * @param {Number} startTime start time of the TS file
          * @param {ArrayBuffer} buffer array buffer, data
          * @param {Object} options {isNoiseSample: boolean, startProcessingFrom: relative time};
+         * @returns {undefined}
          */
         async postDecodeAudioData(id, startTime, buffer, options) {
             if (buffer.length <= 0) console.error("Buffer length 0");
@@ -237,6 +241,11 @@ TSTracker = (() => {
             processor.port.postMessage({msgEnum: 0, data: {noiseReferenceLineFeatures: this.noiseReferenceLineFeatures, sampleRate: buffer.sampleRate, options: options} });
         }
 
+        /**
+         * @deprecated
+         * Used to calculate threshold to define what noise and voice is
+         * @param {Array.<{results: Array.<Number>, interval: Number}>} data {results: Array of distances, interval: Interval between each calculated distance}
+         */
         calculateThreshold(data) {
             return 300;
         }
@@ -244,7 +253,7 @@ TSTracker = (() => {
         /**
          * @deprecated
          * Used to process silent sections using raw data
-         * @param {Object} data {results: Array of distances, interval: Interval between each calculated distance}
+         * @param {Array.<{results: Array.<Number>, interval: Number}>} data {results: Array of distances, interval: Interval between each calculated distance}
          */
         processSilentSections(startTime, data, threshold) {
             let silentSections = [];
@@ -286,7 +295,7 @@ TSTracker = (() => {
                 par(pch=22, col="red");heading = paste("type=","h");plot(myData$time, myData$dist, type="n", main=heading);lines(myData$time, myData$dist, type="h") 
                 */
                 debugger;
-                return dataCSV;
+                return dataCSV;//Only return something so they don't garbage collect my dataCSV
             }
         }
 
@@ -295,6 +304,7 @@ TSTracker = (() => {
          * @param {String} id relurl of the ts file being retrieved
          * @param {Number} startTime start time of the TS file
          * @param {Object} results array, [isSpeaking: true=was not speaking then started,false=was speaking then stopped, time: currentTime relative to start of TS file]
+         * @returns {undefined}
          */
         insertSilentSections(id, data) {
             //data.forEach(x => x.time += startTime);

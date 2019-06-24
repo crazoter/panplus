@@ -16,6 +16,7 @@ let Sidebar = (() => {
 
         /**
          * Init will initialize the sidebar. First grabs sidebar, prepends, then initializes tabs.
+         * @returns {undefined}
          */
         init() {
             const self = this;

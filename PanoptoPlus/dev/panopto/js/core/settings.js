@@ -72,6 +72,7 @@ function Settings() { throw new Error("Please use Settings.requestInstance to in
     /**
      * Load from chrome storage using Promises
      * KIV: segregated settings for each module
+     * @returns {Promise}
      */
     Settings.load = function() {
         return new Promise((resolve, reject) => {
@@ -84,6 +85,7 @@ function Settings() { throw new Error("Please use Settings.requestInstance to in
     
     /**
      * Saving of settings into chrome storage
+     * * @returns {undefined}
      */
     Settings.save = function() {
         var kvp = {};

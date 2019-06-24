@@ -22,7 +22,8 @@ let TranscriptRequester = (() => {
      * @private
      * @static
      * @param {TranscriptSource} transcriptSrc transcript source
-     * @param {function} resolve resolve method for promise
+     * @param {function} resolve Resolve of 1 parameter of Array.<{time: Number, text: String}>
+     * @return {undefined}
      */
     function getTranscript(transcriptSrc, resolve) {
         transcriptSrc.retrieve().then((data) => {
@@ -37,8 +38,9 @@ let TranscriptRequester = (() => {
      * private static method, helper class to abstract repeated stuff upon finish transcript get
      * @private
      * @static
-     * @param {function} resolve resolve function for promise
-     * @param {object} data processed data which can be packaged as a Transcript
+     * @param {function} resolve Resolve of 1 parameter of Array.<{time: Number, text: String}>
+     * @param {Array.<{time: Number, text: String}>} data processed data which can be packaged as a Transcript.
+     * @return {undefined}
      */
     function finishGettingTranscript(resolve, data) {
         cachedTranscript = new Transcript(data);
@@ -59,6 +61,7 @@ let TranscriptRequester = (() => {
         /**
          * Get transcript from transcript source and cache if needed
          * @param {TranscriptSource} transcriptSrc Transcript source to get transcript from
+         * @returns {Promise} promise to get the transcript using transcript source
          */
         static get(transcriptSrc) {
             return new Promise(function(resolve) {
