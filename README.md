@@ -11,10 +11,13 @@ To create a chrome extension to improve the webcasting experience for panopto. I
 
 ### Development Instructions
 1. Clone this git repository on your computer.
-2. Launch Google Chrome & put in "chrome://extensions" in the URL.
-3. Switch on Developer mode (top right corner).
-4. Select "Load Unpacked" and select the "PanoptoPlus" folder.
-5. The extension is loaded. Whenever you need to modify and test code, load the extension like in step 4 and reload the page.
+2. Navigate to the cloned repository and execute `npm install`.
+3. Launch Google Chrome & put in "chrome://extensions" in the URL.
+4. Switch on Developer mode (top right corner).
+5. Select "Load Unpacked" and select the "PanoptoPlus/dev" folder.
+6. The extension is loaded. Whenever you need to modify and test code, load the extension like in step 4 and reload the page.
+7. To build the documentation, execute `npm run make_docs`. Documentation uses jsdoc (refer to package.json).
+8. [IN DEVELOPMENT] To build the files for distribution, execute `npm run build`. Javascript files will be minified and placed in the dist folder for extension packaging. For developmental work, you can just stick with steps 3 - 6.
 
 ### Deployment Instructions
 The extension can be used as is by following the development instructions. However, the production distribution is not ready yet.

@@ -1,0 +1,11 @@
+{
+    "name": "panplus",
+    "devDependencies": {
+        "jsdoc": "^3.6.2",
+        "webpack": "^4.35.0"
+    },
+    "scripts": {
+        "make_docs": "jsdoc -d jsdocs/ -r PanoptoPlus/dev/",
+        "build": "webpack"
+    }
+}
