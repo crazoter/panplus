@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: ui/logger-disabler.js</title>
+    <title>JSDoc: Source: ui/delay-disabler.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: ui/logger-disabler.js</h1>
+    <h1 class="page-title">Source: ui/delay-disabler.js</h1>
 
     
 
@@ -27,14 +27,13 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @file Disable console.log (mostly by Panopto's object) to improve performance for user.
- * Has potential to be a toggler but as per requirements now there's no need to add a toggle feature
+ * @file Panopto's viewer implementation adds periodic delays (presumably between TS files) which greatly negatively affects the implementation.. This hack fixes that.
  */
-LoggerDisabler = (() => {
+DelayDisabler = (() => {
     /**
-     * Class to inject code to disable console.log (mostly by Panopto's object) to improve performance for user. Has potential to be a toggler but as per requirements now there's no need to add a toggle feature
+     * Panopto's viewer implementation adds periodic delays (presumably between TS files) which greatly negatively affects the implementation.. This hack fixes that.
      */
-    class LoggerDisabler {
+    class DelayDisabler {
         /**
          * Constructor is empty
          */
@@ -45,32 +44,32 @@ LoggerDisabler = (() => {
          */
         init() {
             //Inject script to toggle console.log
-            //https://stackoverflow.com/questions/1215392/how-to-quickly-and-conveniently-disable-all-console-log-statements-in-my-code
             let injectedFunc = () => {
-                let logger = (() => {
-                    let oldConsoleLog = null;
-                    let pub = {};
-
-                    pub.enableLogger =  () => {
-                        if(oldConsoleLog == null)
-                            return;
-                        window['console']['log'] = oldConsoleLog;
-                    };
-
-                    pub.disableLogger = () => {
-                        oldConsoleLog = console.log;
-                        window['console']['log'] = () => {};
-                    };
-
-                    return pub;
-                })();
-                logger.disableLogger();
+                let firedGetYourShitTogether = false;
+                //I hate this method, but it's our hack in the bag
+                let videoDOMs = Array.from(document.getElementsByTagName("video"));
+                Panopto.Core.Logger.log = ((msg) => {
+                    if (msg.indexOf("player changed play state to {1}") > -1) {
+                        //playstate: 1: playing (or at least supposed to be), 2: paused
+                        if (!firedGetYourShitTogether &amp;&amp; Panopto.Viewer.Viewer.playState() === 1 &amp;&amp; videoDOMs.some((video) => video.paused)) {
+                            firedGetYourShitTogether = true;
+                            //Supposed to be playing but video is paused?!
+                            //Get your shit together
+                            console.log("get your shit together");
+                            window.setTimeout(function(){
+                                Panopto.Viewer.Viewer.togglePlaying();
+                                Panopto.Viewer.Viewer.togglePlaying();
+                                firedGetYourShitTogether = false;
+                            }, 5);
+                        }
+                    }
+                });
             };
             let ctxBridge = new ContextBridge(injectedFunc);
             ctxBridge.exec();
         }
     }
-    return LoggerDisabler;
+    return DelayDisabler;
 })();</code></pre>
         </article>
     </section>

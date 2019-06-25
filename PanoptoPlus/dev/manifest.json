@@ -34,6 +34,7 @@
                 "panopto/js/ui/sidebar.js",
                 "panopto/js/ui/subtitles.js",
                 "panopto/js/ui/logger-disabler.js",
+                "panopto/js/ui/delay-disabler.js",
                 "panopto/js/jsmpeg/ts-tracker.js",
                 "panopto/js/init.js"
             ],

@@ -17,7 +17,8 @@
                 new Subtitles().init();
                 new SilenceCueManager().init();
                 new TSTracker().init();
-                new LoggerDisabler();
+                new LoggerDisabler().init();
+                new DelayDisabler().init();
                 console.log("FIN");
             });
         }

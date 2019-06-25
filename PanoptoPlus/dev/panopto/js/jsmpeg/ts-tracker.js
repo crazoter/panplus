@@ -220,6 +220,8 @@ TSTracker = (() => {
                             offlineCtx.startRendering().then((buffer) => {
                                 //Once finished, request results from processor
                                 processor.port.postMessage({msgEnum: TSTracker.MessageEnums.REQUEST_RESULTS});
+                            }).catch((err) => {
+                                console.error("TSTracker offlineCtx.startRendering", err);
                             });
                             break;
                         case TSTracker.MessageEnums.DEBUG: 
