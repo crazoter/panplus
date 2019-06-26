@@ -50,6 +50,9 @@ let SilenceCueManager = (() => {
                 const FAST_JUMP_THRESHOLD = 0.04;
                 const DESYNC_LIMIT = 10;
                 let lastSynced = 0;
+                let totalTimeSaved = 0;
+                let startTime = Date.now();
+                let elapsedTime = 0;
                 //Todo: add setting configs to influence playback rate
                 cueTrack.oncuechange = function () {
                     let cues = cueTrack.activeCues;
@@ -60,6 +63,7 @@ let SilenceCueManager = (() => {
                         //Calculate offset and skip if necessary
                         //Prefer fast jump by currentTime. However, can cause desyncing if multiple streams involved.
                         let offset = cues[0].endTime - cues[0].startTime;
+                        totalTimeSaved += offset;
                         lastSynced += offset;
                         if (!hasMultipleVideos || lastSynced < DESYNC_LIMIT || offset < FAST_JUMP_THRESHOLD) {
                             for (let i = 0; i < videoDOMs.length; i++)
@@ -71,9 +75,12 @@ let SilenceCueManager = (() => {
                             prevTime = cues[0].endTime;
                             Panopto.Viewer.Viewer.position(cues[0].endTime);
                             lastSynced = 0;
-                            console.info("Synced using Panopto API");
+                            //console.info("Synced using Panopto API");
                         }
-                        console.info(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}, reduced by: ${cues[0].endTime - cues[0].startTime}`, `sync time: ${lastSynced}`);
+                        elapsedTime = (Date.now() - startTime) / 1000;
+                        //console.info(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}, reduced by: ${cues[0].endTime - cues[0].startTime}`, `sync time: ${lastSynced}`);
+                        console.info(`Time saved: ${totalTimeSaved.toFixed(4)}`, `elapsed: ${elapsedTime}`, `multipler rate: ${(1 + totalTimeSaved / elapsedTime).toFixed(2)}x`);
+                        
                     }
                 };
             }

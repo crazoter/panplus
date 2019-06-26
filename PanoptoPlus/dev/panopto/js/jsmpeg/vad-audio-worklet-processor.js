@@ -32,7 +32,7 @@ class VADAudioWorkletProcessor extends AudioWorkletProcessor {
         //Take 2 stddev distance (68-95-99.7 rule) for each value, 95% confidence level for the distance to be considered significant
         //http://www.growingknowing.com/GKStatsBookNormalTable1.html
         //array of 5 to allow for customization of distance across the different variables
-        this.stddevDistance = [2.3, 2.3, 2.3, 2.3, 2.3];
+        this.stddevDistance = [2.37, 2.37, 2.37, 2.37, 2.37];
         //Number of variables that must exceed before considered speech or not noise
         this.variablesFailBeforeSignificant = 3;
         this.firstBin = 0;

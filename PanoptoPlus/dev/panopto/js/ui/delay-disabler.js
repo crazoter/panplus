@@ -20,22 +20,30 @@ DelayDisabler = (() => {
                 let firedToggle = false;
                 //I hate this method, but it's our hack in the bag
                 let videoDOMs = Array.from(document.getElementsByTagName("video"));
+                let repeatableFunction = () => {
+                    if (!firedToggle && Panopto.Viewer.Viewer.playState() === 1 && videoDOMs.some((video) => video.paused)) {
+                        //Supposed to be playing but video is paused?!
+                        //lol...
+                        firedToggle = true;
+                        videoDOMs.forEach((video) => {
+                            video.play();
+                        });
+                        Panopto.Viewer.Viewer.setPlayState(1);
+                        console.info("Delay quickfix triggered");
+                        window.setTimeout(function() {
+                            firedToggle = false;
+                            repeatableFunction();
+                        }, 10);
+                    }
+                };
                 Panopto.Core.Logger.log = ((msg) => {
-                    if (msg.indexOf("player changed play state to {1}") > -1) {
+                    console.info(msg);
+                    if (msg.indexOf("player changed play state to {1}") > -1 || msg.indexOf("player changed play state to 2") > -1) {
                         //playstate: 1: playing (or at least supposed to be), 2: paused
-                        if (!firedToggle && Panopto.Viewer.Viewer.playState() === 1 && videoDOMs.some((video) => video.paused)) {
-                            firedToggle = true;
-                            //Supposed to be playing but video is paused?!
-                            //lol...
-                            //console.info("TRIGGERED");
-                            window.setTimeout(function(){
-                                Panopto.Viewer.Viewer.togglePlaying();
-                                Panopto.Viewer.Viewer.togglePlaying();
-                                firedToggle = false;
-                            }, 10);
-                        }
+                        repeatableFunction();
                     }
                 });
+                console.info("Delay disabler initialized");
             };
             let ctxBridge = new ContextBridge(injectedFunc);
             ctxBridge.exec();

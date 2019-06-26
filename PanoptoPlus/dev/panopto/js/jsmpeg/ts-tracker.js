@@ -20,6 +20,7 @@ TSTracker = (() => {
             var self = this;
             this.timeArr = [];
             this.distanceArr = [];
+            this.processedTSFilesMap = {}; //Prevent duplicate processing
             //this.OSTree = new OrderStatisticTree();
             //this.samplesBeforeCalculatingThreshold = 
             this.noiseReferenceLineFeatures = null;
@@ -106,7 +107,6 @@ TSTracker = (() => {
                     players[0].engine.hlsjs.observer.addListener("hlsFragLoading",(callbackId, details) => {
                         if (!noiseSampleRequested) {
                             noiseTSParameters(details.frag.url).then((params) => {
-                                console.log("params", params);
                                 if (params) {
                                     request(params.url, details.frag, params.options);
                                     noiseSampleRequested = true;
@@ -119,7 +119,11 @@ TSTracker = (() => {
 
                 var ctxBridge = new ContextBridge(injectedFunc, "TsTrackingEvent", (event) => {
                     if (event != undefined && event.detail != undefined && event.detail.data != undefined) {
-                        self.process(event.detail.frag.relurl, event.detail.frag.start, event.detail.data, event.detail.options);
+                        if (!self.processedTSFilesMap[event.detail.frag.relurl] || event.detail.options.isNoiseSample) {
+                            self.processedTSFilesMap[event.detail.frag.relurl] = 1;
+                            self.process(event.detail.frag.relurl, event.detail.frag.start, event.detail.data, event.detail.options);
+
+                        }
                     }
                 });
                 ctxBridge.connect();
@@ -152,7 +156,7 @@ TSTracker = (() => {
                         });
                     }
                 },
-                (err) => { console.log("Error with decoding audio data" + err.err); });
+                (err) => { console.error("Error with decoding audio data" + err.err); });
         }
 
         /**
@@ -191,7 +195,6 @@ TSTracker = (() => {
                 if (event.data) {
                     switch (event.data.msgEnum) {
                         case TSTracker.MessageEnums.NORMAL_RESULTS:
-                            //debugger;
                             event.data.data.results.forEach(x => x.time += startTime);
                             this.insertSilentSections(id, event.data.data.results);
                             break;
@@ -205,8 +208,7 @@ TSTracker = (() => {
                             //this.insertSilentSections(id, silentSections);
                             break;
                         case TSTracker.MessageEnums.NOISE_RESULTS: 
-                            //debugger;
-                            console.log("TSTracker NOISE RES: ", event.data.data);
+                            console.info("TSTracker NOISE RES: ", event.data.data);
                             if (!event.data.data || !event.data.data.results) throw new Error("Invalid noise reference line features");
                             this.noiseReferenceLineFeatures = event.data.data.results;
                             this.noiseReferenceCallbacks.fire();
