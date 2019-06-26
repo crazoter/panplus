@@ -15,10 +15,24 @@ DelayDisabler = (() => {
          * @return {undefined}
          */
         init() {
-            //Inject script to toggle console.log
             let injectedFunc = () => {
                 let firedToggle = false;
                 //I hate this method, but it's our hack in the bag
+                //Temporarily disable delay on click or on spacebar
+                let tmpDisable = () => {
+                    console.info("Tmp disable");
+                    firedToggle = true;
+                    window.setTimeout(() => {firedToggle = false}, 10);
+                }
+                $(window).keypress((e) => {
+                    if (e.which === 32) {
+                        tmpDisable();
+                    }
+                });
+                $("#playButton").click((e) => {
+                    tmpDisable();
+                });
+                
                 let videoDOMs = Array.from(document.getElementsByTagName("video"));
                 let repeatableFunction = () => {
                     if (!firedToggle && Panopto.Viewer.Viewer.playState() === 1 && videoDOMs.some((video) => video.paused)) {
@@ -40,7 +54,9 @@ DelayDisabler = (() => {
                     console.info(msg);
                     if (msg.indexOf("player changed play state to {1}") > -1 || msg.indexOf("player changed play state to 2") > -1) {
                         //playstate: 1: playing (or at least supposed to be), 2: paused
-                        repeatableFunction();
+                        window.setTimeout(() => {
+                            repeatableFunction();
+                        }, 1);
                     }
                 });
                 console.info("Delay disabler initialized");
