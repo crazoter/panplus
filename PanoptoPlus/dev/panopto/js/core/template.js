@@ -15,7 +15,7 @@ let Template = (() => {
         static get(fileName) {
             return new Promise(function(resolve) {
                 $.ajax({
-                    url: chrome.extension.getURL(`/panopto/templates/${fileName}`),
+                    url: chrome.runtime.getURL(`/panopto/templates/${fileName}`),
                     success: function(data) {
                         //data is the HTML file in string format. $.parseHTML refers to https://api.jquery.com/jQuery.parseHTML/
                         //$ is shorthand for jQuery

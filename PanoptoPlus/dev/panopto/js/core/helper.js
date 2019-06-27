@@ -37,6 +37,25 @@ function Uint8ArrayToArrayBuffer(array) {
 }
 
 /**
+ * Concatenates n-many ArrayBuffers
+ * Based on the https://gist.github.com/72lions/4528834
+ * @param {Array.Uint8Array} ArrayBuffer(s) to concatenate
+ * @return {ArrayBuffer} The new ArrayBuffer created out of n buffers.
+ */
+concatUint8Arrays = function (buffers) {
+    let totalBufferlength = buffers.reduce((acc, cur) => { 
+        return acc + cur.byteLength; 
+    }, 0);
+    let unit8Arr = new Uint8Array(totalBufferlength);
+    let offset = 0;
+    for (let i = 0; i < buffers.length; i++) {
+        unit8Arr.set(new Uint8Array(buffers[i]), offset);
+        offset += buffers[i].length;
+    }
+    return unit8Arr;
+};
+
+/**
  * Sleep for ms milliseconds
  * @param {Number} ms time in ms
  * @returns {Promise} Promise that resolves after timeout

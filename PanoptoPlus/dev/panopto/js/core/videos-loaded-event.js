@@ -5,6 +5,12 @@ let VideosLoadedEvent = (() => {
     //private static variables
     let isWaiting = false;
     let isDone = false;
+    let videoElements = {
+        all: [],
+        primaryVideoIndex: undefined,
+        primaryVideo: undefined,
+        secondaryVideo: undefined
+    };
     let callbacks = $.Callbacks();
 
     /**
@@ -17,35 +23,72 @@ let VideosLoadedEvent = (() => {
     async function waitForVideoLoad() {
         //MutationObserver suddenly stopped working so I'm going to use a more primitive method lmao
         let sleepMs = 20;
-        while (verifyVideoLoad() != null) {
+        let countDone = 0;
+        while ((countDone = Math.max(countDone, verifyVideoLoad(countDone))) < 2) {
+            //If one video is already loaded, wait 4 times. 
+            //If it doesn't load by then, then consider it loaded.
+            //countDone will result in a non-integer if it is only 1 video.
+            if (countDone >= 1)
+                countDone += 0.30;
             await sleep(sleepMs++);
         }
-        videosLoaded();
+        videosLoaded(countDone);
     };
 
     /**
-     * Verify all videos have been loaded, else return video to await for
+     * Verify all videos have been loaded, else return video to await for.
      * @private
      * @static
-     * @returns {Video|null} Video element if found
+     * @returns {Number} Number of video elements loaded
      */
     function verifyVideoLoad() {
-        var videoDOMs = document.querySelectorAll("video");
-        for (var i = 0; i < videoDOMs.length; i++) {
-            if (videoDOMs[i].src == "") {
-                return videoDOMs[i];
+        let videoDOMs = document.querySelectorAll("video");
+        let count = 0;
+        for (let i = 0; i < videoDOMs.length; i++) {
+            if (videoDOMs[i].src !== "") {
+                count++;
             }
         }
-        return null;
+        return count;
     }
 
     /**
      * private static function to call when videos are loaded
      * @private
      * @static
+     * @param {Number} countDone used to ID if 1 or 2 video stream
      * @returns {undefined}
      */
-    function videosLoaded() {
+    function videosLoaded(countDone) {
+        let videoDOMs = document.querySelectorAll("video");
+        if (Math.floor(countDone) === countDone) {
+            //2 video stream
+            //We want to ensure that both subtitles are synced. The transcript timestamps that we got are based on the one that starts earlier.
+            //Thus, get the videoDOM with the lowest currentTime.
+            let mainVideoIndex = 0;
+            let min = videoDOMs[0].currentTime;
+            for (let i = 1; i < videoDOMs.length; i++) {
+                if (videoDOMs[i].currentTime < min) {
+                    mainVideoIndex = i;
+                    min = videoDOMs[i].currentTime;
+                }
+            }
+            videoElements = {
+                all: videoDOMs,
+                primaryVideoIndex: mainVideoIndex,
+                primaryVideo: videoDOMs[mainVideoIndex],
+                secondaryVideo: videoDOMs[mainVideoIndex^1]
+            };
+        } else {
+            //1 video stream
+            let video = $(".fp-engine.hlsjs-engine")[0];
+            videoElements = {
+                all: [video],
+                primaryVideoIndex: 0,
+                primaryVideo: video,
+                secondaryVideo: undefined
+            };
+        }
         isDone = true;
         callbacks.fire();
         callbacks.empty();
@@ -74,26 +117,10 @@ let VideosLoadedEvent = (() => {
          * Return all videoDOMs, primary video and secondary video.
          * Primary video refers to the video that the subtitles (and silence cues) are synced to in terms of timestamp.
          * If there is only 1 video stream, then the secondary video is undefined.
-         * @return {{all: Array.<Video>, primaryVideoIndex: Number, primaryVideo: Video, secondaryVideo: Video}}
+         * @return {{all: Array.<Video>, primaryVideoIndex: Number, primaryVideo: Video, secondaryVideo: Video|undefined}}
          */
         static getVideosElements() {
-            let videoDOMs = document.querySelectorAll("video");
-            //We want to ensure that both subtitles are synced. The transcript timestamps that we got are based on the one that starts earlier.
-            //Thus, get the videoDOM with the lowest currentTime.
-            let mainVideoIndex = 0;
-            let min = videoDOMs[0].currentTime;
-            for (let i = 1; i < videoDOMs.length; i++) {
-                if (videoDOMs[i].currentTime < min) {
-                    mainVideoIndex = i;
-                    min = videoDOMs[i].currentTime;
-                }
-            }
-            return {
-                all: videoDOMs,
-                primaryVideoIndex: mainVideoIndex,
-                primaryVideo: videoDOMs[mainVideoIndex],
-                secondaryVideo: videoDOMs[mainVideoIndex^1]
-            };
+            return videoElements;
         }
     }
 

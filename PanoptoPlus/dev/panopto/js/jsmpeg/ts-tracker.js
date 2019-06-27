@@ -20,6 +20,13 @@ TSTracker = (() => {
             var self = this;
             this.timeArr = [];
             this.distanceArr = [];
+            this.maxBufferedTSFilesLimit = 20;
+            this.minBufferedTSFilesLimit = 14;
+            this.bufferArrayBufferTimeout = 500;
+            this.bufferArrayBufferSecondTimeout = 30000;
+            this.bufferedTSFiles = [];
+            this.bufferedTSFilesMetadata = [];
+            this.bufferLastPushTime = Date.now();
             this.processedTSFilesMap = {}; //Prevent duplicate processing
             //this.OSTree = new OrderStatisticTree();
             //this.samplesBeforeCalculatingThreshold = 
@@ -27,14 +34,17 @@ TSTracker = (() => {
             this.noiseReferenceCallbacks = $.Callbacks();
             VideosLoadedEvent.subscribe(() => {
                 //This function is called in the user environment
+                //#region injected function
                 var injectedFunc = () => {
                     //Optimize the loading of TS files and buffering
                     let players = [];
                     players.push(flowplayer(0));
-                    let tmp = flowplayer(1);
-                    if (tmp != undefined) {
-                        players.push(tmp);
+                    //If has second player
+                    if (Panopto.Viewer.Viewer.activeSecondary()) {
+                        players.push(flowplayer(1));
                     }
+                    
+                    //Set configs for optimization
                     players.forEach(player => {
                         player.engine.hlsjs.config.startFragPrefetch = true;
                         player.engine.hlsjs.currentLevel = 0;
@@ -75,10 +85,12 @@ TSTracker = (() => {
                             //Notice that panopto sometimes "Fades out" the last second of the webcast
                             let startProcessingFrom = 1.3;
                             let lastTSUrl = "";
+                            let lastTSId = "";
                             let foundDataNeeded = 0;
                             for (let i = indexFileData.length - 1; i > 0; i--) {
                                 if (indexFileData[i].indexOf(".ts") > -1) {
-                                    lastTSUrl = `${tmp}${indexFileData[i]}`;
+                                    lastTSId = indexFileData[i];
+                                    lastTSUrl = `${tmp}${lastTSId}`;
                                     foundDataNeeded++;
                                 }
                                 else if (indexFileData[i].indexOf("#EXTINF:") > -1) {
@@ -96,7 +108,7 @@ TSTracker = (() => {
                                 if (foundDataNeeded >= 2) 
                                     break;
                             }
-                            return {url: lastTSUrl, options: {isNoiseSample: true, startProcessingFrom: startProcessingFrom}};
+                            return {url: lastTSUrl, options: {isNoiseSample: true, startProcessingFrom: startProcessingFrom, id: lastTSId}};
                         } else return null;
                         //return `${tmp}${new Array(url.length - tmp.length - 3).fill(0).join('')}.ts`;
                     }
@@ -115,14 +127,24 @@ TSTracker = (() => {
                         }
                         request(details.frag.url, details.frag);
                     });
+                    console.info("TS-Tracker initialized");
                 };
+                //#endregion
 
                 var ctxBridge = new ContextBridge(injectedFunc, "TsTrackingEvent", (event) => {
                     if (event != undefined && event.detail != undefined && event.detail.data != undefined) {
                         if (!self.processedTSFilesMap[event.detail.frag.relurl] || event.detail.options.isNoiseSample) {
-                            self.processedTSFilesMap[event.detail.frag.relurl] = 1;
-                            self.process(event.detail.frag.relurl, event.detail.frag.start, event.detail.data, event.detail.options);
-
+                            if (!event.detail.options.isNoiseSample) {
+                                self.processedTSFilesMap[event.detail.frag.relurl] = 1;
+                            }
+                            //console.info(event.detail.data, event.detail.options);
+                            self.process(event.detail.data, {
+                                isNoiseSample: event.detail.options.isNoiseSample,
+                                startProcessingFrom: event.detail.options.startProcessingFrom,
+                                id: event.detail.options.id || event.detail.frag.relurl,
+                                startTime: event.detail.frag.start,
+                                duration: event.detail.frag.duration,
+                            });
                         }
                     }
                 });
@@ -132,29 +154,38 @@ TSTracker = (() => {
 
         /**
          * Process the arraybuffer and pass it into an audio context to be decoded
-         * @param {String} id relurl of the ts file being retrieved
-         * @param {Number} startTime start time of the TS file
          * @param {ArrayBuffer} arraybuffer array buffer, data
-         * @param {Object} options {isNoiseSample: boolean, startProcessingFrom: relative time};
+         * @param {Object} options {isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number};
          * @returns {undefined}
          */
-        process(id, startTime, arraybuffer, options) {
-            //https://stackoverflow.com/questions/8074152/is-there-a-way-to-use-the-web-audio-api-to-sample-audio-faster-than-real-time
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        process(arraybuffer, options) {
             //This will be a AAC LC file
             //This processing can maybe be done in a web worklet
             var audioByteStream = WebModule["MPEG2TS"].toByteStream(WebModule["MPEG2TS"].demux(new Uint8Array(arraybuffer), 0).AUDIO_TS_PACKET);
             //Some browsers may not support AAC but chrome does
+            if (options.isNoiseSample) {
+                this.decodeAudioData(audioByteStream, [options]);
+            } else {
+                this.waitForNoiseSample().then(() => {
+                    this.bufferArrayBuffer(audioByteStream, options);
+                });
+            }
+        }
+
+        /**
+         * Decode the audio data and pass it into an audio context to be decoded
+         * @param {Uint8Array} audioByteStream data
+         * @param {Array.Object} optionsArray Array of {isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number};
+         * @returns {undefined}
+         */
+        decodeAudioData(audioByteStream, optionsArray) {
+            console.info(audioByteStream);
+            //https://stackoverflow.com/questions/8074152/is-there-a-way-to-use-the-web-audio-api-to-sample-audio-faster-than-real-time
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             audioCtx.decodeAudioData(Uint8ArrayToArrayBuffer(audioByteStream), 
-                (buffer) => { 
-                    if (options.isNoiseSample || this.noiseReferenceLineFeatures != null) {
-                        //WARNING: The ID for noise sample will be 00000.ts, but because the ID will not be used, fixing it is extremely low priority
-                        this.postDecodeAudioData(id, startTime, buffer, options); 
-                    } else {
-                        this.waitForNoiseSample().then(() => {
-                            this.postDecodeAudioData(id, startTime, buffer, options);
-                        });
-                    }
+                (buffer) => {
+                    this.postDecodeAudioData(buffer, optionsArray); 
+                    audioCtx.close();
                 },
                 (err) => { console.error("Error with decoding audio data" + err.err); });
         }
@@ -165,29 +196,73 @@ TSTracker = (() => {
          */
         waitForNoiseSample() {
             return new Promise((resolve) => {
-                this.noiseReferenceCallbacks.add(function() { resolve(); });
+                if (this.noiseReferenceLineFeatures == null)
+                    this.noiseReferenceCallbacks.add(() => { resolve(); });
+                else resolve();
             });
         }
 
         /**
-         * Process the decoded buffer in a webworklet
-         * @param {String} id relurl of the ts file being retrieved
-         * @param {Number} startTime start time of the TS file
-         * @param {ArrayBuffer} buffer array buffer, data
-         * @param {Object} options {isNoiseSample: boolean, startProcessingFrom: relative time};
+         * Put ArrayBuffers into an array. When there are enough files, send for processing.
+         * @param {ArrayBuffer} arraybuffer array buffer, data
+         * @param {Object} options {isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number};
          * @returns {undefined}
          */
-        async postDecodeAudioData(id, startTime, buffer, options) {
-            if (buffer.length <= 0) console.error("Buffer length 0");
-            const offlineCtx = new OfflineAudioContext(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
+        async bufferArrayBuffer(buffer, options) {
+            this.bufferedTSFiles.push(buffer);
+            this.bufferedTSFilesMetadata.push(options);
+            const currentTime = Date.now();
+            this.bufferLastPushTime = currentTime;
+            await sleep(this.bufferArrayBufferTimeout);
+            if ((currentTime === this.bufferLastPushTime && this.bufferedTSFiles.length >= this.minBufferedTSFilesLimit) ||
+                this.bufferedTSFiles.length >= this.maxBufferedTSFilesLimit) {
+                    console.info('bufferArr', currentTime, this.bufferedTSFiles.length);
+                    this.concatAndProcessBuffer();
+            } else if (currentTime === this.bufferLastPushTime) {
+                //If not max limit but last push time didn't change, assume at end / near end.
+                await sleep(this.bufferArrayBufferSecondTimeout);
+                //If really near the end
+                if (currentTime === this.bufferLastPushTime) {
+                    console.info('timeout bufferArr', currentTime, this.bufferedTSFiles.length);
+                    this.concatAndProcessBuffer();
+                }
+            }
+        }
+
+        /**
+         * Concat and process buffer
+         */
+        concatAndProcessBuffer() {
+            //TODO: PADDING OF Uint8Arrays to be 128 aligned, and update time. 
+            this.decodeAudioData(concatUint8Arrays(this.bufferedTSFiles), this.bufferedTSFilesMetadata);
+            this.bufferedTSFiles = [];
+            this.bufferedTSFilesMetadata = [];
+        }
+
+        /**
+         * Process the decoded buffer in a webworklet
+         * @param {ArrayBuffer} compiledBuffer array buffer, data
+         * @param {Array.Object} optionsArray Array of {isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number};
+         * @returns {undefined}
+         */
+        async postDecodeAudioData(compiledBuffer, optionsArray) {
+            if (compiledBuffer.length <= 0) console.error("compiledBuffer length 0");
+            const offlineCtx = new OfflineAudioContext(compiledBuffer.numberOfChannels, compiledBuffer.length, compiledBuffer.sampleRate);
             // Loads module script via AudioWorklet.
             await offlineCtx.audioWorklet.addModule(chrome.extension.getURL("/panopto/js/jsmpeg/vad-audio-worklet-processor.js"));
             const source = offlineCtx.createBufferSource();
             const processor = new AudioWorkletNode(offlineCtx, 'vad-audio-worklet-processor');
             //Join everything like lego
-            source.buffer = buffer;
+            source.buffer = compiledBuffer;
             source.connect(processor);
             processor.connect(offlineCtx.destination);
+
+            let cleanUp = function() {
+                source.disconnect();
+                source.buffer = undefined;
+                processor.disconnect();
+                prossor.port.onmessage = undefined;
+            };
             //Start processing the offline context
             //await offlineCtx.startRendering();
             //On receiving results from processor, process results
@@ -195,8 +270,11 @@ TSTracker = (() => {
                 if (event.data) {
                     switch (event.data.msgEnum) {
                         case TSTracker.MessageEnums.NORMAL_RESULTS:
-                            event.data.data.results.forEach(x => x.time += startTime);
-                            this.insertSilentSections(id, event.data.data.results);
+                            //After merging, the start times are at their approprate locations
+                            event.data.data.results.forEach(result => {
+                                this.insertSilentSections(result.metadata.id, result.data);
+                            });
+                            cleanUp();
                             break;
                         case TSTracker.MessageEnums.RAW_DATA_RESULTS: 
                             //for debugging purposes generally
@@ -213,10 +291,11 @@ TSTracker = (() => {
                             this.noiseReferenceLineFeatures = event.data.data.results;
                             this.noiseReferenceCallbacks.fire();
                             this.noiseReferenceCallbacks.empty();
+                            cleanUp();
                             break;
-                        case TSTracker.MessageEnums.INITIALIZATION_SUCCESS:        
-                            //console.log("TSTracker INIT SUCCESS: ");
-                            //console.log(event.data.data);
+                        case TSTracker.MessageEnums.INITIALIZATION_SUCCESS:       
+                            console.log("TSTracker INIT SUCCESS: ");
+                            console.log(event.data.data);
                             //Start source
                             source.start(0);
                             offlineCtx.startRendering().then((buffer) => {
@@ -242,40 +321,7 @@ TSTracker = (() => {
                 }
             }).bind(this);
             //Begin initialization process
-            processor.port.postMessage({msgEnum: 0, data: {noiseReferenceLineFeatures: this.noiseReferenceLineFeatures, sampleRate: buffer.sampleRate, options: options} });
-        }
-
-        /**
-         * @deprecated
-         * Used to calculate threshold to define what noise and voice is
-         * @param {Array.<{results: Array.<Number>, interval: Number}>} data {results: Array of distances, interval: Interval between each calculated distance}
-         */
-        calculateThreshold(data) {
-            return 300;
-        }
-
-        /**
-         * @deprecated
-         * Used to process silent sections using raw data
-         * @param {Array.<{results: Array.<Number>, interval: Number}>} data {results: Array of distances, interval: Interval between each calculated distance}
-         */
-        processSilentSections(startTime, data, threshold) {
-            let silentSections = [];
-            let isSpeaking = false;
-            for (let i = 0; i < data.results.length; i++) {
-                if (isSpeaking) {
-                    if (data.results[i] < threshold) {
-                        isSpeaking = !isSpeaking;
-                        silentSections.push({isSpeaking: false, time: startTime + data.interval * i});
-                    }
-                } else {
-                    if (data.results[i] >= threshold) {
-                        isSpeaking = !isSpeaking;
-                        silentSections.push({isSpeaking: true, time: startTime + data.interval * i});
-                    }
-                }
-            }
-            return silentSections;
+            processor.port.postMessage({msgEnum: 0, data: {noiseReferenceLineFeatures: this.noiseReferenceLineFeatures, sampleRate: compiledBuffer.sampleRate, optionsArray: optionsArray} });
         }
         
         /**

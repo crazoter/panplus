@@ -35,6 +35,7 @@
                 "panopto/js/ui/subtitles.js",
                 "panopto/js/ui/logger-disabler.js",
                 "panopto/js/ui/delay-disabler.js",
+                "panopto/js/jsmpeg/vad-audio-worklet-node.js",
                 "panopto/js/jsmpeg/ts-tracker.js",
                 "panopto/js/init.js"
             ],
@@ -60,6 +61,7 @@
         "panopto/templates/sidebar.html",
         "panopto/templates/speed-slider.html",
         "libs/indutny-fft-js/fft.min.js",
-        "panopto/js/jsmpeg/vad-audio-worklet-processor.js"
+        "panopto/js/jsmpeg/vad-audio-worklet-processor.js",
+        "panopto/js/jsmpeg/processor.js"
     ]
 }

@@ -33,14 +33,15 @@ DelayDisabler = (() => {
                     tmpDisable();
                 });
                 
-                let videoDOMs = Array.from(document.getElementsByTagName("video"));
+                let videoDOMs = undefined;
                 let repeatableFunction = () => {
+                    //console.info('rF', firedToggle, Panopto.Viewer.Viewer.playState(), videoDOMs, videoDOMs[0].paused, videoDOMs[1].paused);
                     if (!firedToggle && Panopto.Viewer.Viewer.playState() === 1 && videoDOMs.some((video) => video.paused)) {
                         //Supposed to be playing but video is paused?!
                         //lol...
                         firedToggle = true;
                         videoDOMs.forEach((video) => {
-                            video.play();
+                            if (video) { video.play(); }
                         });
                         Panopto.Viewer.Viewer.setPlayState(1);
                         console.info("Delay quickfix triggered");
@@ -52,9 +53,13 @@ DelayDisabler = (() => {
                 };
                 Panopto.Core.Logger.log = ((msg) => {
                     console.info(msg);
+                    //Secondary player started playing stream null: Stream stopped
                     if (msg.indexOf("player changed play state to {1}") > -1 || msg.indexOf("player changed play state to 2") > -1) {
                         //playstate: 1: playing (or at least supposed to be), 2: paused
                         window.setTimeout(() => {
+                            //Must convert to array first
+                            videoDOMs = Array.from(document.getElementsByTagName("video"));
+                            if (!Panopto.Viewer.Viewer.activeSecondary()) videoDOMs.pop();
                             repeatableFunction();
                         }, 1);
                     }
