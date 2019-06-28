@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: VADAudioWorkletProcessor</title>
+    <title>JSDoc: Class: VADProcessor</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: VADAudioWorkletProcessor</h1>
+    <h1 class="page-title">Class: VADProcessor</h1>
 
     
 
@@ -28,9 +28,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>VADAudioWorkletProcessor<span class="signature">()</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>VADProcessor<span class="signature">(inputs, options)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">Audio Worklet to process TS files</div>
+            <div class="class-description">Processor to process TS files, Based off vad-audio-worklet-processor.js</div>
         
     
 </header>
@@ -45,19 +45,95 @@
     
 
     
-    <h4 class="name" id="VADAudioWorkletProcessor"><span class="type-signature"></span>new VADAudioWorkletProcessor<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="VADProcessor"><span class="type-signature"></span>new VADProcessor<span class="signature">(inputs, options)</span><span class="type-signature"></span></h4>
     
 
     
 
 
 
+<div class="description">
+    Processor to process TS files, Based off vad-audio-worklet-processor.js
+</div>
 
 
 
 
 
 
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>inputs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;ArrayBuffer></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">array of arraybuffers containing PCM data of the TS file. Each row is 1 channel</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">{isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number, float32Length: Number, sampleRate: Number}</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -93,7 +169,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line12">line 12</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line33">line 33</a>
     </li></ul></dd>
     
 
@@ -296,7 +372,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line302">line 302</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line229">line 229</a>
     </li></ul></dd>
     
 
@@ -337,414 +413,6 @@
     <dd>
         
 <span class="param-type">undefined</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="bufferThenProcess"><span class="type-signature"></span>bufferThenProcess<span class="signature">(inputs, outputs, parameters, calledFunction)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Buffer samples for rectangle windowingNote: buffering means the last few pieces of info in a TS file may be dropped if it doesn't mod 512
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>inputs</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Float32Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The input audio buffer from the incoming connections provided by the user agent.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>outputs</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Float32Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The output audio buffer that is to be consumed by the user agent</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>parameters</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">A map of string keys and associated Float32Arrays. parameters["name"] corresponds to the automation values of the AudioParam named "name".</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>calledFunction</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">function that is called with the buffer as an argument</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line164">line 164</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">undefined</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="calculateDistanceMeasurement"><span class="type-signature"></span>calculateDistanceMeasurement<span class="signature">(lineFeatures1, lineFeatures2)</span><span class="type-signature"> &rarr; {Number}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Calculate the distance between sets of two line features. Idea is that the line features of a noise signal will be similar to that of the reference signal.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>lineFeatures1</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;Number></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Line features 1 of length 5</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>lineFeatures2</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;Number></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Line features 2 of length 5</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <dt class="important tag-deprecated">Deprecated:</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line393">line 393</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    distance
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
 
 
     </dd>
@@ -886,7 +554,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line427">line 427</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line336">line 336</a>
     </li></ul></dd>
     
 
@@ -992,7 +660,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line437">line 437</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line346">line 346</a>
     </li></ul></dd>
     
 
@@ -1170,7 +838,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line317">line 317</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line244">line 244</a>
     </li></ul></dd>
     
 
@@ -1329,7 +997,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line447">line 447</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line356">line 356</a>
     </li></ul></dd>
     
 
@@ -1372,6 +1040,94 @@
 </dl>
 
     
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="cleanUp"><span class="type-signature"></span>cleanUp<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Precautionary clean up function to clean up references to Float32Arrays
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line413">line 413</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1507,7 +1263,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line410">line 410</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line319">line 319</a>
     </li></ul></dd>
     
 
@@ -1617,7 +1373,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line495">line 495</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line406">line 406</a>
     </li></ul></dd>
     
 
@@ -1795,7 +1551,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line460">line 460</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line369">line 369</a>
     </li></ul></dd>
     
 
@@ -1897,7 +1653,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line487">line 487</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line398">line 398</a>
     </li></ul></dd>
     
 
@@ -2056,7 +1812,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line474">line 474</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line383">line 383</a>
     </li></ul></dd>
     
 
@@ -2110,7 +1866,7 @@
     
 
     
-    <h4 class="name" id="process"><span class="type-signature"></span>process<span class="signature">(inputs, outputs, parameters)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <h4 class="name" id="process"><span class="type-signature"></span>process<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="global.html#NoiseResult">NoiseResult</a>|<a href="global.html#NormalResult">NormalResult</a>}</span></h4>
     
 
     
@@ -2118,7 +1874,7 @@
 
 
 <div class="description">
-    Inputs of length 128, buffer size of 512https://en.wikipedia.org/wiki/Voice_frequency "In telephony, the usable voice frequency band ranges from approximately 300 Hz to 3400 Hz."https://en.wikipedia.org/wiki/Sampling_(signal_processing)#Speech_samplingRefer to https://webaudio.github.io/web-audio-api/#dom-audioworkletprocessor-process for the actual API
+    Process inputs and return results
 </div>
 
 
@@ -2127,101 +1883,6 @@
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>inputs</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Float32Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">inputs[n][m] is a Float32Array of audio samples for the mth channel of the nth input.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>outputs</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Float32Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The output audio buffer that is to be consumed by the user agent</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>parameters</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">A map of string keys and associated Float32Arrays. parameters["name"] corresponds to the automation values of the AudioParam named "name".</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -2257,7 +1918,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line127">line 127</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line87">line 87</a>
     </li></ul></dd>
     
 
@@ -2285,6 +1946,10 @@
 <h5>Returns:</h5>
 
         
+<div class="param-desc">
+    If is noise sample: (2x5 matrix; 2 arrays 5 var). If is not, it will return Array.<{isSpeaking: Boolean, time: Number}>
+</div>
+
 
 
 <dl>
@@ -2293,7 +1958,10 @@
     </dt>
     <dd>
         
-<span class="param-type">undefined</span>
+<span class="param-type"><a href="global.html#NoiseResult">NoiseResult</a></span>
+|
+
+<span class="param-type"><a href="global.html#NormalResult">NormalResult</a></span>
 
 
     </dd>
@@ -2345,8 +2013,6 @@
         
 
         
-        <th>Default</th>
-        
 
         <th class="last">Description</th>
     </tr>
@@ -2371,12 +2037,6 @@
 
             
 
-            
-                <td class="default">
-                
-                    true
-                
-                </td>
             
 
             <td class="description last">Check if speaking against reference.</td>
@@ -2420,7 +2080,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line242">line 242</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line178">line 178</a>
     </li></ul></dd>
     
 
@@ -2478,7 +2138,7 @@
     
 
     
-    <h4 class="name" id="processReference"><span class="type-signature"></span>processReference<span class="signature">(parameters)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <h4 class="name" id="processReference"><span class="type-signature"></span>processReference<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
     
 
     
@@ -2486,7 +2146,7 @@
 
 
 <div class="description">
-    Process & average some samples of noise (assume that the start of the webcast is noise) as reference.
+    Process & average some samples of noise (assume that the start of the webcast is noise) as reference.Store results in this.results.
 </div>
 
 
@@ -2495,55 +2155,6 @@
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>parameters</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">A map of string keys and associated Float32Arrays. parameters["name"] corresponds to the automation values of the AudioParam named "name".</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -2579,7 +2190,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsmpeg_vad-audio-worklet-processor.js.html">jsmpeg/vad-audio-worklet-processor.js</a>, <a href="jsmpeg_vad-audio-worklet-processor.js.html#line185">line 185</a>
+        <a href="jsmpeg_vad-processor.js.html">jsmpeg/vad-processor.js</a>, <a href="jsmpeg_vad-processor.js.html#line121">line 121</a>
     </li></ul></dd>
     
 
@@ -2643,13 +2254,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADAudioWorkletProcessor.html">VADAudioWorkletProcessor</a></li><li><a href="global.html#VADProcessor">VADProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jun 28 2019 16:55:46 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jun 28 2019 17:09:16 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -33,6 +33,12 @@ let VideosLoadedEvent = (() => {
     //private static variables
     let isWaiting = false;
     let isDone = false;
+    let videoElements = {
+        all: [],
+        primaryVideoIndex: undefined,
+        primaryVideo: undefined,
+        secondaryVideo: undefined
+    };
     let callbacks = $.Callbacks();
 
     /**
@@ -45,35 +51,72 @@ let VideosLoadedEvent = (() => {
     async function waitForVideoLoad() {
         //MutationObserver suddenly stopped working so I'm going to use a more primitive method lmao
         let sleepMs = 20;
-        while (verifyVideoLoad() != null) {
+        let countDone = 0;
+        while ((countDone = Math.max(countDone, verifyVideoLoad(countDone))) &lt; 2) {
+            //If one video is already loaded, wait 4 times. 
+            //If it doesn't load by then, then consider it loaded.
+            //countDone will result in a non-integer if it is only 1 video.
+            if (countDone >= 1)
+                countDone += 0.30;
             await sleep(sleepMs++);
         }
-        videosLoaded();
+        videosLoaded(countDone);
     };
 
     /**
-     * Verify all videos have been loaded, else return video to await for
+     * Verify all videos have been loaded, else return video to await for.
      * @private
      * @static
-     * @returns {Video|null} Video element if found
+     * @returns {Number} Number of video elements loaded
      */
     function verifyVideoLoad() {
-        var videoDOMs = document.querySelectorAll("video");
-        for (var i = 0; i &lt; videoDOMs.length; i++) {
-            if (videoDOMs[i].src == "") {
-                return videoDOMs[i];
+        let videoDOMs = document.querySelectorAll("video");
+        let count = 0;
+        for (let i = 0; i &lt; videoDOMs.length; i++) {
+            if (videoDOMs[i].src !== "") {
+                count++;
             }
         }
-        return null;
+        return count;
     }
 
     /**
      * private static function to call when videos are loaded
      * @private
      * @static
+     * @param {Number} countDone used to ID if 1 or 2 video stream
      * @returns {undefined}
      */
-    function videosLoaded() {
+    function videosLoaded(countDone) {
+        let videoDOMs = document.querySelectorAll("video");
+        if (Math.floor(countDone) === countDone) {
+            //2 video stream
+            //We want to ensure that both subtitles are synced. The transcript timestamps that we got are based on the one that starts earlier.
+            //Thus, get the videoDOM with the lowest currentTime.
+            let mainVideoIndex = 0;
+            let min = videoDOMs[0].currentTime;
+            for (let i = 1; i &lt; videoDOMs.length; i++) {
+                if (videoDOMs[i].currentTime &lt; min) {
+                    mainVideoIndex = i;
+                    min = videoDOMs[i].currentTime;
+                }
+            }
+            videoElements = {
+                all: videoDOMs,
+                primaryVideoIndex: mainVideoIndex,
+                primaryVideo: videoDOMs[mainVideoIndex],
+                secondaryVideo: videoDOMs[mainVideoIndex^1]
+            };
+        } else {
+            //1 video stream
+            let video = $(".fp-engine.hlsjs-engine")[0];
+            videoElements = {
+                all: [video],
+                primaryVideoIndex: 0,
+                primaryVideo: video,
+                secondaryVideo: undefined
+            };
+        }
         isDone = true;
         callbacks.fire();
         callbacks.empty();
@@ -102,26 +145,10 @@ let VideosLoadedEvent = (() => {
          * Return all videoDOMs, primary video and secondary video.
          * Primary video refers to the video that the subtitles (and silence cues) are synced to in terms of timestamp.
          * If there is only 1 video stream, then the secondary video is undefined.
-         * @return {{all: Array.&lt;Video>, primaryVideoIndex: Number, primaryVideo: Video, secondaryVideo: Video}}
+         * @return {{all: Array.&lt;Video>, primaryVideoIndex: Number, primaryVideo: Video, secondaryVideo: Video|undefined}}
          */
         static getVideosElements() {
-            let videoDOMs = document.querySelectorAll("video");
-            //We want to ensure that both subtitles are synced. The transcript timestamps that we got are based on the one that starts earlier.
-            //Thus, get the videoDOM with the lowest currentTime.
-            let mainVideoIndex = 0;
-            let min = videoDOMs[0].currentTime;
-            for (let i = 1; i &lt; videoDOMs.length; i++) {
-                if (videoDOMs[i].currentTime &lt; min) {
-                    mainVideoIndex = i;
-                    min = videoDOMs[i].currentTime;
-                }
-            }
-            return {
-                all: videoDOMs,
-                primaryVideoIndex: mainVideoIndex,
-                primaryVideo: videoDOMs[mainVideoIndex],
-                secondaryVideo: videoDOMs[mainVideoIndex^1]
-            };
+            return videoElements;
         }
     }
 
@@ -136,13 +163,13 @@ let VideosLoadedEvent = (() => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADAudioWorkletProcessor.html">VADAudioWorkletProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Tue Jun 25 2019 23:26:17 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jun 28 2019 17:09:16 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

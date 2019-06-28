@@ -1,6 +1,7 @@
 /**
- * An enumeration of various message types that can be sent between the main thread and the audio worklet.
- * @enum {Object}
+ * An enumeration of various message types that can be sent between the main thread and the worker.
+ * Previously all of these enums were used, but now only NOISE_RESULTS, NORMAL_RESULTS and ERROR are used (DEBUG is used only for dev purposes)
+ * @enum {Number}
  */
 MessageEnums = {
     INITIALIZATION_PARAMS: 0,

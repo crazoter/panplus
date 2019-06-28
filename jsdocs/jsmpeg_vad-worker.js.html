@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: core/template.js</title>
+    <title>JSDoc: Source: jsmpeg/vad-worker.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: core/template.js</h1>
+    <h1 class="page-title">Source: jsmpeg/vad-worker.js</h1>
 
     
 
@@ -26,35 +26,32 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * @file Template class
+            <pre class="prettyprint source linenums"><code>
+/**
+ * @file Web Worklet to demux, decode and process TS files for silent sections.
  */
-let Template = (() => {
-    /**
-     * Template class
-     */
-    class Template {
-        /**
-         * Get the template in HTML format and convert it into DOM for manipulation and insertion into the page.
-         * @static
-         * @param {string} fileName The filename of the template in panopto/templates. Use the full name with extension e.g. "sidebar.html".
-         * @returns {DOM} DOM of the HTML file
-         */
-        static get(fileName) {
-            return new Promise(function(resolve) {
-                $.ajax({
-                    url: chrome.runtime.getURL(`/panopto/templates/${fileName}`),
-                    success: function(data) {
-                        //data is the HTML file in string format. $.parseHTML refers to https://api.jquery.com/jQuery.parseHTML/
-                        //$ is shorthand for jQuery
-                        return resolve($.parseHTML(data));
-                    }
-                });
-            });
-        }
-    }
-    return Template; 
-})();</code></pre>
+//Import scripts
+//current directory: root/panopto/js/jsmpeg
+importScripts(
+	"../../../libs/indutny-fft-js/fft.min.js",
+	"./vad-processor.js",
+	"./message-enums.js",
+);
+
+//Messaging system with TS-Tracker.js
+onmessage = (event) => {
+	//this.VADWorker.postMessage({data: [channel0, channel1], options: options}, [channel0, channel1]);
+	//event.data.data: [ArrayBuffer] arraybuffer array buffer, data
+	//event.data.options: {Object} options {isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number, float32Length: Number, sampleRate: Number};
+	const data = event.data.data;
+	const options = event.data.options;
+	const vadProcessor = new VADProcessor(data, options);
+	const results = vadProcessor.process();
+	const msgEnum = options.isNoiseSample ? MessageEnums.NOISE_RESULTS : MessageEnums.NORMAL_RESULTS;
+	vadProcessor.cleanUp();
+	//Send results back
+	postMessage({data: {results: results, interval: vadProcessor.calculateLagTime()}, options: options, msgEnum: msgEnum});
+};</code></pre>
         </article>
     </section>
 

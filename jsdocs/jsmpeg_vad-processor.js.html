@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: jsmpeg/vad-processor.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: jsmpeg/vad-processor.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @file Processor to process TS files. Code is included here as they are needed (this code is called from a worker).
  */
 VADProcessor = (() => {
@@ -27,7 +55,7 @@ VADProcessor = (() => {
     class VADProcessor {
         /**
          * Processor to process TS files, Based off vad-audio-worklet-processor.js
-         * @param {Array.<ArrayBuffer>} inputs array of arraybuffers containing PCM data of the TS file. Each row is 1 channel
+         * @param {Array.&lt;ArrayBuffer>} inputs array of arraybuffers containing PCM data of the TS file. Each row is 1 channel
          * @param {Object} options {isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number, float32Length: Number, sampleRate: Number}
          */
         constructor(inputs, options) {
@@ -74,15 +102,15 @@ VADProcessor = (() => {
         }
         
         /**
-         * @typedef {Array.<Array.<{lowerBound: Number, upperBound: Number}>>} NoiseResult 2x5 matrix of objects containing lower and upper bound.
+         * @typedef {Array.&lt;Array.&lt;{lowerBound: Number, upperBound: Number}>>} NoiseResult 2x5 matrix of objects containing lower and upper bound.
          */
         /**
-         * @typedef {Array.<{isSpeaking: Boolean, time: Number}>} NormalResult Results containing if isSpeaking (true means a transition from no-speech to speech) and the timestamp
+         * @typedef {Array.&lt;{isSpeaking: Boolean, time: Number}>} NormalResult Results containing if isSpeaking (true means a transition from no-speech to speech) and the timestamp
          */
 
         /**
          * Process inputs and return results
-         * @returns {NoiseResult|NormalResult} If is noise sample: (2x5 matrix; 2 arrays 5 var). If is not, it will return Array.<{isSpeaking: Boolean, time: Number}>
+         * @returns {NoiseResult|NormalResult} If is noise sample: (2x5 matrix; 2 arrays 5 var). If is not, it will return Array.&lt;{isSpeaking: Boolean, time: Number}>
          */
         process() {
             if (this.processedResults) return this.results;
@@ -92,11 +120,11 @@ VADProcessor = (() => {
             const size = this.float32Length - initialOffset;
             const length = initialOffset + size - (size % FFT1_BIN_COUNT);
             this.currentTime = initialOffset / this.sampleRate;
-            for (let ofs = initialOffset; ofs < length; ofs += FFT1_BIN_COUNT) {
+            for (let ofs = initialOffset; ofs &lt; length; ofs += FFT1_BIN_COUNT) {
                 if (this.continueBuffering) {
                     //Make shallow copies of the next set of samples
                     //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-                    for (var ch = 0; ch < this.inputs.length; ch++) {
+                    for (var ch = 0; ch &lt; this.inputs.length; ch++) {
                         this.buffers[ch] = this.inputs[ch].slice(ofs, ofs + FFT1_BIN_COUNT);
                         //this.log("buffer", [this.buffers[ch], this.inputs[ch]]);
                     }
@@ -114,7 +142,7 @@ VADProcessor = (() => {
         }
 
         /**
-         * Process & average some samples of noise (assume that the start of the webcast is noise) as reference.
+         * Process &amp; average some samples of noise (assume that the start of the webcast is noise) as reference.
          * Store results in this.results.
          * @returns {undefined}
          */
@@ -123,20 +151,20 @@ VADProcessor = (() => {
                 this.referenceSamples = 0;
                 this.referenceData = [];
                 this.results = [];
-                for (let i = 0; i < 2; i++) {
+                for (let i = 0; i &lt; 2; i++) {
                     this.results.push([]);
                     this.referenceData.push([]);
-                    for (let j = 0; j < 5; j++) {
+                    for (let j = 0; j &lt; 5; j++) {
                         this.referenceData[i].push([]);
                         this.results[i].push({mean: 0, stddev: 0});
                     }
                 }
             }
-            if (this.referenceSamples < NOISE_SAMPLE_COUNT) {
+            if (this.referenceSamples &lt; NOISE_SAMPLE_COUNT) {
                 let newData = this.processData(false);
                 this.referenceSamples++;
-                for (let i = 0; i < this.referenceData.length; i++) {
-                    for (let j = 0; j < this.referenceData[i].length; j++) {
+                for (let i = 0; i &lt; this.referenceData.length; i++) {
+                    for (let j = 0; j &lt; this.referenceData[i].length; j++) {
                         ////Push to array of data
                         this.referenceData[i][j].push(newData[i][j]);
                         //Sum for mean later
@@ -146,12 +174,12 @@ VADProcessor = (() => {
                 //Gathered enough samples
                 if (this.referenceSamples >= NOISE_SAMPLE_COUNT) {
                     //Calculate mean and std dev of each variable
-                    for (let i = 0; i < this.referenceData.length; i++) {
-                        for (let j = 0; j < this.referenceData[i].length; j++) {
+                    for (let i = 0; i &lt; this.referenceData.length; i++) {
+                        for (let j = 0; j &lt; this.referenceData[i].length; j++) {
                             //Calculate mean
                             this.results[i][j].mean /= this.referenceData[i][j].length;
-                            //Calculate variance & subsequently std dev
-                            for (let k = 0; k < this.referenceData[i][j].length; k++) {
+                            //Calculate variance &amp; subsequently std dev
+                            for (let k = 0; k &lt; this.referenceData[i][j].length; k++) {
                                 this.results[i][j].stddev += Math.pow(this.referenceData[i][j][k] - this.results[i][j].mean, 2);
                             }
                             this.results[i][j].stddev /= this.referenceData[i][j].length - 1;
@@ -173,15 +201,15 @@ VADProcessor = (() => {
          * VAD section
          * https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4142156/
          * @param {Boolean} checkForSpeech Check if speaking against reference.
-         * @returns {Array.<Array.<Number>>} array of line features, usually 2 line features of 5 variables
+         * @returns {Array.&lt;Array.&lt;Number>>} array of line features, usually 2 line features of 5 variables
          */
         processData(checkForSpeech) {
             //process for both channels
             let lineFeatures = [];
             let isSpeaking = false;
-            for (let i = 0; i < this.buffers.length; i++) {
+            for (let i = 0; i &lt; this.buffers.length; i++) {
                 //DCFT, but with 48k sample instead of downsampled 8k.
-                //Don't want to downsample to reduce noise created from downsampling & reduce processing.
+                //Don't want to downsample to reduce noise created from downsampling &amp; reduce processing.
                 //Instead, first FFT will FFT the entire 48k sample, then 2nd FFT will use the range from 0 - 12k Hz.
                 //First FFT
                 //this.log("buffer", this.buffers[i]);
@@ -198,7 +226,7 @@ VADProcessor = (() => {
                 //this.log("fft2In2", this.fft128In);
                 lineFeatures.push(this.calculateLineFeatures(this.fft128In, LAST_BIN));
 
-                if (checkForSpeech && this.distanceOutsideBounds(lineFeatures[i], referenceLineFeatures[i])) {
+                if (checkForSpeech &amp;&amp; this.distanceOutsideBounds(lineFeatures[i], referenceLineFeatures[i])) {
                     isSpeaking = true;
                     break;
                 }
@@ -228,7 +256,7 @@ VADProcessor = (() => {
          */
         binsToMagnitudeArray(complexArray, binCount, magArr) {
             //this.log("binsToMagnitudeArray", [complexArray, binCount, magArr]);
-            for (let i = 0; i < binCount; i++) {
+            for (let i = 0; i &lt; binCount; i++) {
                 magArr[i] = this.calculateFftBinMagnitude(complexArray, i);
                 //this.log("midBins", [magArr, i, magArr[i]]);
             }
@@ -239,7 +267,7 @@ VADProcessor = (() => {
          * Use to calculate line features (see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4142156/)
          * @param {Array} magArr Array of magnitudes
          * @param {Number} magArrLength 
-         * @returns {Array.<Number>} line feature, contains 5 variables/coefficients 
+         * @returns {Array.&lt;Number>} line feature, contains 5 variables/coefficients 
          */
         calculateLineFeatures(magArr, magArrLength) {
             let lineFeatures = [];
@@ -247,7 +275,7 @@ VADProcessor = (() => {
             let sumMagDivj = 0;
             let sumMagLog2JDivj = 0;
             let sumMag = 0;
-            for (let j = 1; j <= magArrLength; j++) {
+            for (let j = 1; j &lt;= magArrLength; j++) {
                 //ERROR: CALCULATION ERROR HERE, LINE_COEFFS are SUM
                 sumMagDivj += magArr[j] * LINE_COEFFS.jReciprocal[j];
                 sumMagLog2JDivj += magArr[j] * LINE_COEFFS.log2jOverj[j];
@@ -274,7 +302,7 @@ VADProcessor = (() => {
             }
             let x = 0;
             let y = 0;
-            for (let j = 1; j <= l; j++) {
+            for (let j = 1; j &lt;= l; j++) {
                 x += magArr[j] * LINE_COEFFS.jReciprocal[j];
                 y += magArr[j] * LINE_COEFFS.log2jOverj[j];
             }
@@ -282,7 +310,7 @@ VADProcessor = (() => {
             lineFeatures.push(determinant * (a * x + bOrC * y));
             //lineFeatures.al1 
             lineFeatures.push(determinant * (bOrC * x + d * y));
-            for (let i = 0; i < lineFeatures.length; i++) {
+            for (let i = 0; i &lt; lineFeatures.length; i++) {
                 if (!isFinite(lineFeatures[i])) {
                     this.log("NaN LF Before", {magArr: magArr, lineFeatures: lineFeatures, sumMag: sumMag, sumMagDivj: sumMagDivj, sumMagLog2JDivj: sumMagLog2JDivj, determinant: determinant, a: a, bOrC: bOrC, d: d, x: x, y: y,l: l, magArrLength: magArrLength});
                     this.logSend(MessageEnums.ERROR);
@@ -300,7 +328,7 @@ VADProcessor = (() => {
             //lineFeatures.ah1 
             lineFeatures.push(determinant * (bOrC * x + d * y));
 
-            for (let i = 0; i < lineFeatures.length; i++) {
+            for (let i = 0; i &lt; lineFeatures.length; i++) {
                 if (!isFinite(lineFeatures[i])) {
                     this.log("NaN LF After", {magArr: magArr, lineFeatures: lineFeatures, sumMag: sumMag, sumMagDivj: sumMagDivj, sumMagLog2JDivj: sumMagLog2JDivj, determinant: determinant, a: a, bOrC: bOrC, d: d, x: x, y: y,l: l, magArrLength: magArrLength});
                     this.logSend(MessageEnums.ERROR);
@@ -312,14 +340,14 @@ VADProcessor = (() => {
 
         /**
          * Check if the line features are within the "boundaries" of the noise reference signal
-         * @param {Array.<Number>} lineFeatures Line features of length 5 (variables that define the signal)
-         * @param {Array.<{Number, Number}>} boundsArr Array containing the lower and upper bounds of each line feature variable
+         * @param {Array.&lt;Number>} lineFeatures Line features of length 5 (variables that define the signal)
+         * @param {Array.&lt;{Number, Number}>} boundsArr Array containing the lower and upper bounds of each line feature variable
          * @returns {Boolean} exceeded bounds
          */
         distanceOutsideBounds(lineFeatures, boundsArr) {
             let varExceeded = 0;
-            for (let i = 0; i < lineFeatures.length; i++) {
-                if (lineFeatures[i] < boundsArr[i].lowerBound || lineFeatures[i] > boundsArr[i].upperBound) {
+            for (let i = 0; i &lt; lineFeatures.length; i++) {
+                if (lineFeatures[i] &lt; boundsArr[i].lowerBound || lineFeatures[i] > boundsArr[i].upperBound) {
                     varExceeded++;
                     if (varExceeded >= VARIABLES_FAIL_BEFORE_SIGNIFICANT) break;
                 }
@@ -419,4 +447,26 @@ VADProcessor = (() => {
         }
     }
     return VADProcessor;
-})();
+})();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jun 28 2019 17:09:16 GMT+0800 (Singapore Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -64,7 +64,7 @@ let SilenceCueManager = (() => {
             var injectedFunc = () => {
                 //There's no way to create a texttrack with id and insert it into the video. Thus, we'll have to do this the old fashioned way
                 //let cueTrack = document.getElementsByTagName("video")[0].textTracks.getTrackById("SilenceCueTrack");
-                let textTrackList =  document.getElementsByTagName("video")[0].textTracks;
+                let textTrackList = document.getElementsByTagName("video")[0].textTracks;
                 let cueTrack = null;
                 for (let i = 0; i &lt; textTrackList.length; i++) {
                     if (textTrackList[i].label === "silenceCues") {
@@ -74,13 +74,16 @@ let SilenceCueManager = (() => {
                 }
                 //Units are in seconds
                 const videoDOMs = document.getElementsByTagName("video");
-                const hasMultipleVideos = videoDOMs.length > 1;
                 const FAST_JUMP_THRESHOLD = 0.04;
                 const DESYNC_LIMIT = 10;
                 let lastSynced = 0;
+                let timeSaved = 0;
+                let startTime = Date.now();
+                let timeWatched = 0;
+                let elapsedTime = 0;
                 //Todo: add setting configs to influence playback rate
                 cueTrack.oncuechange = function () {
-                    let cues = cueTrack.activeCues;
+                    const cues = cueTrack.activeCues;
                     //Add an additional prevTime variable to prevent getting stuck
                     let prevTime = 0;
                     //If on enter
@@ -88,10 +91,16 @@ let SilenceCueManager = (() => {
                         //Calculate offset and skip if necessary
                         //Prefer fast jump by currentTime. However, can cause desyncing if multiple streams involved.
                         let offset = cues[0].endTime - cues[0].startTime;
+                        timeSaved += offset;
                         lastSynced += offset;
-                        if (!hasMultipleVideos || lastSynced &lt; DESYNC_LIMIT || offset &lt; FAST_JUMP_THRESHOLD) {
-                            for (let i = 0; i &lt; videoDOMs.length; i++)
-                                videoDOMs[i].currentTime += offset;
+                        //If don't have secondary or still within desync limit
+                        if (!Panopto.Viewer.Viewer.activeSecondary() || lastSynced &lt; DESYNC_LIMIT || offset &lt; FAST_JUMP_THRESHOLD) {
+                            for (let i = 0; i &lt; videoDOMs.length; i++) {
+                                if (videoDOMs[i]) {
+                                    //console.info(`${videoDOMs[i].currentTime}`);
+                                    videoDOMs[i].currentTime += offset;
+                                }
+                            }
                         } else if (lastSynced > DESYNC_LIMIT &amp;&amp; prevTime &lt; cues[0].endTime) {
                             //Call Panopto's API to reposition and avoid desync issue
                             //Panopto's implementation can be a bit laggy though, so only call if it runs the risk of desync
@@ -101,7 +110,11 @@ let SilenceCueManager = (() => {
                             lastSynced = 0;
                             console.info("Synced using Panopto API");
                         }
-                        console.info(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}, reduced by: ${cues[0].endTime - cues[0].startTime}`, `sync time: ${lastSynced}`);
+                        elapsedTime = (Date.now() - startTime) / 1000;
+                        timeWatched = elapsedTime - timeSaved;
+                        //console.info(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}, reduced by: ${cues[0].endTime - cues[0].startTime}`, `sync time: ${lastSynced}`);
+                        console.info(`Time saved: ${timeSaved.toFixed(4)}`, `elapsed: ${elapsedTime}`, `multipler: ${(elapsedTime / timeWatched).toFixed(2)}x`);//,`${videoDOMs[0].currentTime}`);
+                        
                     }
                 };
             }
@@ -212,13 +225,13 @@ let SilenceCueManager = (() => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADAudioWorkletProcessor.html">VADAudioWorkletProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Tue Jun 25 2019 23:26:17 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jun 28 2019 17:09:16 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -20,6 +20,7 @@ onmessage = (event) => {
 	const vadProcessor = new VADProcessor(data, options);
 	const results = vadProcessor.process();
 	const msgEnum = options.isNoiseSample ? MessageEnums.NOISE_RESULTS : MessageEnums.NORMAL_RESULTS;
+	vadProcessor.cleanUp();
 	//Send results back
 	postMessage({data: {results: results, interval: vadProcessor.calculateLagTime()}, options: options, msgEnum: msgEnum});
 };

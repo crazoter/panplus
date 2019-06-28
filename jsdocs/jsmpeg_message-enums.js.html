@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: core/template.js</title>
+    <title>JSDoc: Source: jsmpeg/message-enums.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: core/template.js</h1>
+    <h1 class="page-title">Source: jsmpeg/message-enums.js</h1>
 
     
 
@@ -27,34 +27,21 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @file Template class
+ * An enumeration of various message types that can be sent between the main thread and the worker.
+ * Previously all of these enums were used, but now only NOISE_RESULTS, NORMAL_RESULTS and ERROR are used (DEBUG is used only for dev purposes)
+ * @enum {Number}
  */
-let Template = (() => {
-    /**
-     * Template class
-     */
-    class Template {
-        /**
-         * Get the template in HTML format and convert it into DOM for manipulation and insertion into the page.
-         * @static
-         * @param {string} fileName The filename of the template in panopto/templates. Use the full name with extension e.g. "sidebar.html".
-         * @returns {DOM} DOM of the HTML file
-         */
-        static get(fileName) {
-            return new Promise(function(resolve) {
-                $.ajax({
-                    url: chrome.runtime.getURL(`/panopto/templates/${fileName}`),
-                    success: function(data) {
-                        //data is the HTML file in string format. $.parseHTML refers to https://api.jquery.com/jQuery.parseHTML/
-                        //$ is shorthand for jQuery
-                        return resolve($.parseHTML(data));
-                    }
-                });
-            });
-        }
-    }
-    return Template; 
-})();</code></pre>
+MessageEnums = {
+    INITIALIZATION_PARAMS: 0,
+    INITIALIZATION_SUCCESS: 1,
+    NOISE_RESULTS: 2,
+    NORMAL_RESULTS: 3,
+    REQUEST_RESULTS: 4,
+    DEBUG: 5,
+    DEBUG_HISTOGRAM: 6,
+    RAW_DATA_RESULTS: 7,
+    ERROR: 8
+};</code></pre>
         </article>
     </section>
 

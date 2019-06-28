@@ -39,7 +39,7 @@ TSTracker = (() => {
                     switch (event.data.msgEnum) {
                         case MessageEnums.NORMAL_RESULTS:
                             //debugger;
-                            //console.info(event.data.data);
+                            //console.info(event.data);
                             //After merging, the start times are at their approprate locations
                             this.insertSilentSections(event.data.options.id, event.data.data.results);
                             break;
@@ -48,7 +48,7 @@ TSTracker = (() => {
                             this.logDataForR(startTime, event.data.data);
                             break;
                         case MessageEnums.NOISE_RESULTS: 
-                            console.info("TSTracker NOISE RES: ", event.data.data);
+                            //console.info("TSTracker NOISE RES: ", event.data.data);
                             if (!event.data.data || !event.data.data.results) throw new Error("Invalid noise reference line features");
                             this.noiseReferenceLineFeatures = event.data.data.results;
                             this.noiseReferenceCallbacks.fire();
@@ -88,9 +88,9 @@ TSTracker = (() => {
                         player.engine.hlsjs.currentLevel = 0;
                         player.engine.hlsjs.config.maxFragLookUpTolerance = 0.20;
                         player.engine.hlsjs.config.maxStarvationDelay = 0.5;
-                        player.engine.hlsjs.config.maxBufferLength = 900;
-                        player.engine.hlsjs.config.maxMaxBufferLength = 1500;
-                        player.engine.hlsjs.config.maxBufferSize = 150000000;
+                        player.engine.hlsjs.config.maxBufferLength = 360;
+                        player.engine.hlsjs.config.maxMaxBufferLength = 600;
+                        player.engine.hlsjs.config.maxBufferSize = 60000000;
                         player.engine.hlsjs.config.stretchShortVideoTrack = true;
                     });
 
