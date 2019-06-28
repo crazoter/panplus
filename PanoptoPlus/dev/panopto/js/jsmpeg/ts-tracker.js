@@ -32,6 +32,44 @@ TSTracker = (() => {
             //this.samplesBeforeCalculatingThreshold = 
             this.noiseReferenceLineFeatures = null;
             this.noiseReferenceCallbacks = $.Callbacks();
+
+            this.VADWorker = new Worker(chrome.runtime.getURL('/panopto/js/jsmpeg/vad-worker.js'));
+            this.VADWorker.onmessage = (event) => {
+                if (event.data) {
+                    switch (event.data.msgEnum) {
+                        case MessageEnums.NORMAL_RESULTS:
+                            //debugger;
+                            //console.info(event.data.data);
+                            //After merging, the start times are at their approprate locations
+                            this.insertSilentSections(event.data.options.id, event.data.data.results);
+                            break;
+                        case MessageEnums.RAW_DATA_RESULTS: 
+                            //console.info(event.data.data);
+                            this.logDataForR(startTime, event.data.data);
+                            break;
+                        case MessageEnums.NOISE_RESULTS: 
+                            console.info("TSTracker NOISE RES: ", event.data.data);
+                            if (!event.data.data || !event.data.data.results) throw new Error("Invalid noise reference line features");
+                            this.noiseReferenceLineFeatures = event.data.data.results;
+                            this.noiseReferenceCallbacks.fire();
+                            this.noiseReferenceCallbacks.empty();
+                            break;
+                        case MessageEnums.DEBUG: 
+                            console.log("TSTracker DEBUG: ");
+                            console.log(event.data.data);
+                            //debugger;
+                            break;
+                        case MessageEnums.DEBUG_HISTOGRAM:
+                            break;
+                        case MessageEnums.ERROR:
+                            debugger;
+                            break;
+                    }
+                } else {
+                    console.warn("TSTracker processor returns undefined results");
+                }
+            };
+
             VideosLoadedEvent.subscribe(() => {
                 //This function is called in the user environment
                 //#region injected function
@@ -131,12 +169,22 @@ TSTracker = (() => {
                 };
                 //#endregion
 
+                //Context bridge to handle data from page
                 var ctxBridge = new ContextBridge(injectedFunc, "TsTrackingEvent", (event) => {
                     if (event != undefined && event.detail != undefined && event.detail.data != undefined) {
                         if (!self.processedTSFilesMap[event.detail.frag.relurl] || event.detail.options.isNoiseSample) {
                             if (!event.detail.options.isNoiseSample) {
                                 self.processedTSFilesMap[event.detail.frag.relurl] = 1;
                             }
+                            let options = {
+                                isNoiseSample: event.detail.options.isNoiseSample,
+                                startProcessingFrom: event.detail.options.startProcessingFrom,
+                                id: event.detail.options.id || event.detail.frag.relurl,
+                                startTime: event.detail.frag.start,
+                                duration: event.detail.frag.duration,
+                            };
+
+                            //return;
                             //console.info(event.detail.data, event.detail.options);
                             self.process(event.detail.data, {
                                 isNoiseSample: event.detail.options.isNoiseSample,
@@ -154,6 +202,11 @@ TSTracker = (() => {
 
         /**
          * Process the arraybuffer and pass it into an audio context to be decoded
+         * Also, audiocontext cannot be created in worker.
+         * https://github.com/WebAudio/web-audio-api/issues/1098
+         * We'll continue to demux & decode in the UI thread before passing it to our worker to process the silent sections.
+         * Passing it back and forth (for demux) accrues some overhead even with zero-copy. No time to benchmark, so we'll keep it as it is for now.
+         * 
          * @param {ArrayBuffer} arraybuffer array buffer, data
          * @param {Object} options {isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number};
          * @returns {undefined}
@@ -164,10 +217,11 @@ TSTracker = (() => {
             var audioByteStream = WebModule["MPEG2TS"].toByteStream(WebModule["MPEG2TS"].demux(new Uint8Array(arraybuffer), 0).AUDIO_TS_PACKET);
             //Some browsers may not support AAC but chrome does
             if (options.isNoiseSample) {
-                this.decodeAudioData(audioByteStream, [options]);
+                this.decodeAudioData(audioByteStream, options);
             } else {
                 this.waitForNoiseSample().then(() => {
-                    this.bufferArrayBuffer(audioByteStream, options);
+                    this.decodeAudioData(audioByteStream, options);
+                    //this.bufferArrayBuffer(audioByteStream, options);
                 });
             }
         }
@@ -175,16 +229,23 @@ TSTracker = (() => {
         /**
          * Decode the audio data and pass it into an audio context to be decoded
          * @param {Uint8Array} audioByteStream data
-         * @param {Array.Object} optionsArray Array of {isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number};
+         * @param {Object} options {isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number};
          * @returns {undefined}
          */
-        decodeAudioData(audioByteStream, optionsArray) {
-            console.info(audioByteStream);
+        decodeAudioData(audioByteStream, options) {
+            //console.info(audioByteStream);
             //https://stackoverflow.com/questions/8074152/is-there-a-way-to-use-the-web-audio-api-to-sample-audio-faster-than-real-time
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             audioCtx.decodeAudioData(Uint8ArrayToArrayBuffer(audioByteStream), 
-                (buffer) => {
-                    this.postDecodeAudioData(buffer, optionsArray); 
+                (audioBuffer) => {
+                    options.sampleRate = audioBuffer.sampleRate;
+                    options.duration = audioBuffer.duration;
+                    options.float32Length = audioBuffer.length;
+                    //Convert to ArrayBuffers for transfer
+                    const channel0 = audioBuffer.getChannelData(0).buffer;
+                    const channel1 = audioBuffer.getChannelData(1).buffer;
+                    //Send to VADWorker for processing
+                    this.VADWorker.postMessage({data: [channel0, channel1], options: options}, [channel0, channel1]);
                     audioCtx.close();
                 },
                 (err) => { console.error("Error with decoding audio data" + err.err); });
@@ -200,128 +261,6 @@ TSTracker = (() => {
                     this.noiseReferenceCallbacks.add(() => { resolve(); });
                 else resolve();
             });
-        }
-
-        /**
-         * Put ArrayBuffers into an array. When there are enough files, send for processing.
-         * @param {ArrayBuffer} arraybuffer array buffer, data
-         * @param {Object} options {isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number};
-         * @returns {undefined}
-         */
-        async bufferArrayBuffer(buffer, options) {
-            this.bufferedTSFiles.push(buffer);
-            this.bufferedTSFilesMetadata.push(options);
-            const currentTime = Date.now();
-            this.bufferLastPushTime = currentTime;
-            await sleep(this.bufferArrayBufferTimeout);
-            if ((currentTime === this.bufferLastPushTime && this.bufferedTSFiles.length >= this.minBufferedTSFilesLimit) ||
-                this.bufferedTSFiles.length >= this.maxBufferedTSFilesLimit) {
-                    console.info('bufferArr', currentTime, this.bufferedTSFiles.length);
-                    this.concatAndProcessBuffer();
-            } else if (currentTime === this.bufferLastPushTime) {
-                //If not max limit but last push time didn't change, assume at end / near end.
-                await sleep(this.bufferArrayBufferSecondTimeout);
-                //If really near the end
-                if (currentTime === this.bufferLastPushTime) {
-                    console.info('timeout bufferArr', currentTime, this.bufferedTSFiles.length);
-                    this.concatAndProcessBuffer();
-                }
-            }
-        }
-
-        /**
-         * Concat and process buffer
-         */
-        concatAndProcessBuffer() {
-            //TODO: PADDING OF Uint8Arrays to be 128 aligned, and update time. 
-            this.decodeAudioData(concatUint8Arrays(this.bufferedTSFiles), this.bufferedTSFilesMetadata);
-            this.bufferedTSFiles = [];
-            this.bufferedTSFilesMetadata = [];
-        }
-
-        /**
-         * Process the decoded buffer in a webworklet
-         * @param {ArrayBuffer} compiledBuffer array buffer, data
-         * @param {Array.Object} optionsArray Array of {isNoiseSample: boolean, startProcessingFrom: relative time, id: "00123.ts", startTime: Number, duration: Number};
-         * @returns {undefined}
-         */
-        async postDecodeAudioData(compiledBuffer, optionsArray) {
-            if (compiledBuffer.length <= 0) console.error("compiledBuffer length 0");
-            const offlineCtx = new OfflineAudioContext(compiledBuffer.numberOfChannels, compiledBuffer.length, compiledBuffer.sampleRate);
-            // Loads module script via AudioWorklet.
-            await offlineCtx.audioWorklet.addModule(chrome.extension.getURL("/panopto/js/jsmpeg/vad-audio-worklet-processor.js"));
-            const source = offlineCtx.createBufferSource();
-            const processor = new AudioWorkletNode(offlineCtx, 'vad-audio-worklet-processor');
-            //Join everything like lego
-            source.buffer = compiledBuffer;
-            source.connect(processor);
-            processor.connect(offlineCtx.destination);
-
-            let cleanUp = function() {
-                source.disconnect();
-                source.buffer = undefined;
-                processor.disconnect();
-                prossor.port.onmessage = undefined;
-            };
-            //Start processing the offline context
-            //await offlineCtx.startRendering();
-            //On receiving results from processor, process results
-            processor.port.onmessage = ((event) => {
-                if (event.data) {
-                    switch (event.data.msgEnum) {
-                        case TSTracker.MessageEnums.NORMAL_RESULTS:
-                            //After merging, the start times are at their approprate locations
-                            event.data.data.results.forEach(result => {
-                                this.insertSilentSections(result.metadata.id, result.data);
-                            });
-                            cleanUp();
-                            break;
-                        case TSTracker.MessageEnums.RAW_DATA_RESULTS: 
-                            //for debugging purposes generally
-                            //console.log(event.data.data);
-                            //let threshold = this.calculateThreshold(event.data.data);
-                            //let silentSections = this.processSilentSections(startTime, event.data.data, threshold);
-                            this.logDataForR(startTime, event.data.data);
-                            //console.log(silentSections);
-                            //this.insertSilentSections(id, silentSections);
-                            break;
-                        case TSTracker.MessageEnums.NOISE_RESULTS: 
-                            console.info("TSTracker NOISE RES: ", event.data.data);
-                            if (!event.data.data || !event.data.data.results) throw new Error("Invalid noise reference line features");
-                            this.noiseReferenceLineFeatures = event.data.data.results;
-                            this.noiseReferenceCallbacks.fire();
-                            this.noiseReferenceCallbacks.empty();
-                            cleanUp();
-                            break;
-                        case TSTracker.MessageEnums.INITIALIZATION_SUCCESS:       
-                            console.log("TSTracker INIT SUCCESS: ");
-                            console.log(event.data.data);
-                            //Start source
-                            source.start(0);
-                            offlineCtx.startRendering().then((buffer) => {
-                                //Once finished, request results from processor
-                                processor.port.postMessage({msgEnum: TSTracker.MessageEnums.REQUEST_RESULTS});
-                            }).catch((err) => {
-                                console.error("TSTracker offlineCtx.startRendering", err);
-                            });
-                            break;
-                        case TSTracker.MessageEnums.DEBUG: 
-                            console.log("TSTracker DEBUG: ");
-                            console.log(event.data.data);
-                            //debugger;
-                            break;
-                        case TSTracker.MessageEnums.DEBUG_HISTOGRAM:
-                            break;
-                        case TSTracker.MessageEnums.ERROR:
-                            debugger;
-                            break;
-                    }
-                } else {
-                    console.warn("TSTracker processor returns undefined results");
-                }
-            }).bind(this);
-            //Begin initialization process
-            processor.port.postMessage({msgEnum: 0, data: {noiseReferenceLineFeatures: this.noiseReferenceLineFeatures, sampleRate: compiledBuffer.sampleRate, optionsArray: optionsArray} });
         }
         
         /**
@@ -363,22 +302,6 @@ TSTracker = (() => {
             SilenceCueManager.addSilenceCues(id, data);
         }
     }
-
-    /**
-     * An enumeration of various message types that can be sent between the main thread and the audio worklet.
-     * @enum {Object}
-     */
-    TSTracker.MessageEnums = {
-        INITIALIZATION_PARAMS: 0,
-        INITIALIZATION_SUCCESS: 1,
-        NOISE_RESULTS: 2,
-        NORMAL_RESULTS: 3,
-        REQUEST_RESULTS: 4,
-        DEBUG: 5,
-        DEBUG_HISTOGRAM: 6,
-        RAW_DATA_RESULTS: 7,
-        ERROR: 8
-    };
 
     return TSTracker;
 })();

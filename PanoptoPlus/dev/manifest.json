@@ -1,15 +1,20 @@
 {
     "name": "Panopto Plus",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Improve your webcasting experience!",
     "manifest_version": 2,
     "permissions": ["tabs", "storage"],
+    "background": {
+        "persistent": false,
+        "scripts": ["libs/rob--w-chrome-api/worker_proxy.js"]
+    },
     "content_scripts": [
         {
             "matches": ["*://nuscast.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=*",
                 "*://*.weblecture.nus.edu.sg/Panopto/Pages/Viewer.aspx?id=*",
                 "*://luminus.nus.edu.sg/iframe/lti-launch/panopto*"],
             "js": [
+                "libs/indutny-fft-js/fft.min.js",
                 "libs/jquery-3.4.1.min.js",
                 "libs/jquery-ui/jquery-ui-1.12.1.min.js",
                 "libs/jquery-ui-slider-pips/jquery-ui-slider-pips.min.js",
@@ -20,6 +25,7 @@
                 "libs/uupaa/mpeg2ts/MPEG2TSDemuxer.js",
                 "libs/uupaa/mpeg2ts/MPEG2TSNALUnit.js",
                 "libs/uupaa/mpeg2ts/MPEG2TS.js",
+                "libs/rob--w-chrome-api/worker_proxy.js",
                 "panopto/js/core/settings.js",
                 "panopto/js/core/helper.js",
                 "panopto/js/core/context-bridge.js",
@@ -35,7 +41,7 @@
                 "panopto/js/ui/subtitles.js",
                 "panopto/js/ui/logger-disabler.js",
                 "panopto/js/ui/delay-disabler.js",
-                "panopto/js/jsmpeg/vad-audio-worklet-node.js",
+                "panopto/js/jsmpeg/message-enums.js",
                 "panopto/js/jsmpeg/ts-tracker.js",
                 "panopto/js/init.js"
             ],
@@ -58,10 +64,12 @@
         }
     ],
     "web_accessible_resources": [
-        "panopto/templates/sidebar.html",
-        "panopto/templates/speed-slider.html",
+        "libs/rob--w-chrome-api/worker_proxy.html",
         "libs/indutny-fft-js/fft.min.js",
-        "panopto/js/jsmpeg/vad-audio-worklet-processor.js",
-        "panopto/js/jsmpeg/processor.js"
+        "panopto/js/jsmpeg/message-enums.js",
+        "panopto/js/jsmpeg/vad-worker.js",
+        "panopto/js/jsmpeg/vad-processor.js",
+        "panopto/templates/sidebar.html",
+        "panopto/templates/speed-slider.html"
     ]
 }
