@@ -56,13 +56,17 @@ let Subtitles = (() => {
             }
             //If 2 videos, sync by adding cue to currentTime when the cue is played.
             if (elements.all.length === 2) {
+                let currentCue = null;
                 let otherVideoIndex = elements.primaryVideoIndex ^ 1;
                 tracks[elements.primaryVideoIndex].oncuechange = function () {
                     //function is embedded in the code here because of the need to access previous variables for performance reasons
                     let cues = tracks[elements.primaryVideoIndex].activeCues;
                     //console.log(cues);
+                    //TODO: REMOVE IF LENGTH 0
                     if (cues.length > 0) {
                         //Entered into a new cue
+                        //Implementation 1: Insert with fixed death time
+                        /*
                         if (tracks[otherVideoIndex].cues.getCueById(cues[0].startTime) === null) {
                             //Add cue with offset only if it hasn't already been added
                             let offset = elements.secondaryVideo.currentTime - elements.primaryVideo.currentTime;
@@ -71,7 +75,15 @@ let Subtitles = (() => {
                                 cues[0].text);
                             cue.id = cues[0].startTime;
                             tracks[otherVideoIndex].addCue(cue);
-                        }
+                        }*/
+                        //Implementation 2: Insert and exit depending on other cue
+                        let offset = elements.secondaryVideo.currentTime - elements.primaryVideo.currentTime;
+                        currentCue = new VTTCue(cues[0].startTime + offset, 
+                            cues[0].endTime + offset, 
+                            cues[0].text);
+                        tracks[otherVideoIndex].addCue(currentCue);
+                    } else if (currentCue) {
+                        tracks[otherVideoIndex].removeCue(currentCue);
                     }
                 };
             } else if (videoDOMs.length > 2) {
