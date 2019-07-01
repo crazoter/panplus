@@ -84,8 +84,8 @@ let SilenceCueManager = (() => {
                         }
                         elapsedTime = (Date.now() - startTime) / 1000;
                         timeWatched = elapsedTime - timeSaved;
-                        //console.info(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}, reduced by: ${cues[0].endTime - cues[0].startTime}`, `sync time: ${lastSynced}`);
-                        console.info(`Time saved: ${timeSaved.toFixed(4)}`, `elapsed: ${elapsedTime}`, `multipler: ${(elapsedTime / timeWatched).toFixed(2)}x`);//,`${videoDOMs[0].currentTime}`);
+                        console.info(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}, reduced by: ${cues[0].endTime - cues[0].startTime}`, `sync time: ${lastSynced}`);
+                        //console.info(`Time saved: ${timeSaved.toFixed(4)}`, `elapsed: ${elapsedTime}`, `multipler: ${(elapsedTime / timeWatched).toFixed(2)}x`);//,`${videoDOMs[0].currentTime}`);
                         
                     }
                 };
