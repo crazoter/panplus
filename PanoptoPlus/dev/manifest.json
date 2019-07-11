@@ -14,6 +14,7 @@
                 "*://*.weblecture.nus.edu.sg/Panopto/Pages/Viewer.aspx?id=*",
                 "*://luminus.nus.edu.sg/iframe/lti-launch/panopto*"],
             "js": [
+                "libs/preact/preact.min.js",
                 "libs/indutny-fft-js/fft.min.js",
                 "libs/jquery-3.4.1.min.js",
                 "libs/jquery-ui/jquery-ui-1.12.1.min.js",
@@ -26,6 +27,9 @@
                 "libs/uupaa/mpeg2ts/MPEG2TSNALUnit.js",
                 "libs/uupaa/mpeg2ts/MPEG2TS.js",
                 "libs/rob--w-chrome-api/worker_proxy.js",
+                "libs/notify/notify.min.js",
+                "panopto/js/core/min-heap.js",
+                "panopto/js/core/cache.js",
                 "panopto/js/core/settings.js",
                 "panopto/js/core/helper.js",
                 "panopto/js/core/context-bridge.js",
@@ -37,10 +41,13 @@
                 "panopto/js/transcript/transcript-requester.js",
                 "panopto/js/ui/silence-cue-manager.js",
                 "panopto/js/ui/speed-slider.js",
+                "panopto/js/ui/volume-booster.js",
                 "panopto/js/ui/sidebar.js",
+                "panopto/js/ui/settings-page.js",
                 "panopto/js/ui/subtitles.js",
                 "panopto/js/ui/logger-disabler.js",
                 "panopto/js/ui/delay-disabler.js",
+                "panopto/js/ui/carousel-manager.js",
                 "panopto/js/jsmpeg/message-enums.js",
                 "panopto/js/jsmpeg/ts-tracker.js",
                 "panopto/js/init.js"
@@ -50,9 +57,12 @@
                 "libs/jquery-ui/css/jquery-ui.theme.min.css",
                 "libs/jquery-ui/css/jquery-ui.min.css",
                 "libs/jquery-ui-slider-pips/jquery-ui-slider-pips.min.css",
+                "libs/fontawesome/all.min.css",
+                "panopto/css/player.css",
                 "panopto/css/speed-slider.css",
                 "panopto/css/thumbnails.css",
-                "panopto/css/subtitles.css"
+                "panopto/css/subtitles.css",
+                "panopto/css/sidebar.css"
             ],
             "all_frames": true
         },
@@ -70,6 +80,7 @@
         "panopto/js/jsmpeg/vad-worker.js",
         "panopto/js/jsmpeg/vad-processor.js",
         "panopto/templates/sidebar.html",
-        "panopto/templates/speed-slider.html"
+        "panopto/templates/speed-slider.html",
+        "panopto/templates/volume-booster.html"
     ]
 }

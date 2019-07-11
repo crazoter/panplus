@@ -9,10 +9,6 @@ span.speed-slider-padding {
   display: table-cell;
 }
 
-.viewer #playControls #playSpeedExpander div.play-speed.accented-tab, .viewer #viewerContent #rightPane #playControls #playSpeedExpander div.play-speed {
-  display:none;
-}
-
 /*https://simeydotme.github.io/jQuery-ui-Slider-Pips/*/
 span.ui-slider-handle.ui-corner-all.ui-state-default {
   background: #E8800C;
@@ -91,3 +87,24 @@ span.ui-slider-handle.ui-corner-all.ui-state-default {
     .scale-slider .ui-slider-pip.ui-slider-pip-selected-second .ui-slider-label {
       background: #b75f00;
       color: #fffaf7; }
+
+span.ui-slider-handle.ui-corner-all.ui-state-default {
+  height: 20px;
+  width: 12px;
+  top: -26px;
+  border-radius: 2px;
+  border-width: initial;
+  border-style: none;
+  border-color: initial;
+  border-image: initial;
+}
+
+.hidden {
+  display: none;
+}
+
+/*
+.viewer #playControls #playSpeedExpander div.play-speed.accented-tab, 
+.viewer #viewerContent #rightPane #playControls #playSpeedExpander div.play-speed {
+  display:none;
+}*/

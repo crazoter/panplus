@@ -2,7 +2,7 @@
  * @file TranscriptRequester class manages the retrieval and caching of transcripts.
  */
 let TranscriptRequester = (() => {
-    const DEBUG_TRANSCRIPT_REQUEST = 1;
+    const DEBUG_TRANSCRIPT_REQUEST = 0;
     //Private static variables
     /**Problem: Multiple parts of our code needs the transcript. 
      * We don't want to call the AJAX function multiple times, so everytime it is required and it's not ready, we add it to callbacks
@@ -12,10 +12,8 @@ let TranscriptRequester = (() => {
     let callbacks = $.Callbacks();
     let cachedTranscript = null; //Transcript object
     let isGettingTranscript = false;
-    let key = "";
     //All panopto webcast websites have a form (the search bar)
-    if (document.forms[0]) { key = `transcript-${$.urlParam(document.forms[0].action, "id")}`; } 
-    else throw new Error("Transcript.js: Unable to get webcast ID");
+    //let key = `transcript-${getWebcastId()}`;
 
     /**
      * private static function to process transcript get if cache doesn't hit
@@ -27,9 +25,10 @@ let TranscriptRequester = (() => {
      */
     function getTranscript(transcriptSrc, resolve) {
         transcriptSrc.retrieve().then((data) => {
-            let kvp = {};
-            kvp[key] = data;
-            chrome.storage.local.set(kvp, () => console.log("Saved " + key));
+            Cache.saveTranscript(data);
+            //let kvp = {};
+            //kvp[key] = data;
+            //chrome.storage.local.set(kvp, () => console.log("Saved " + key));
             return finishGettingTranscript(resolve, data);
         });
     }
@@ -76,11 +75,17 @@ let TranscriptRequester = (() => {
                 } else {
                     //Else, attempt to get transcript from cache
                     isGettingTranscript = true;
+                    Cache.loadTranscript().then((result) => {
+                        return result && !DEBUG_TRANSCRIPT_REQUEST 
+                            ? finishGettingTranscript(resolve, result)
+                            : getTranscript(transcriptSrc, resolve);
+                    });
+                    /*
                     chrome.storage.local.get([key], (result) => {
                         return result[key] && !DEBUG_TRANSCRIPT_REQUEST 
                             ? finishGettingTranscript(resolve, result[key])
                             : getTranscript(transcriptSrc, resolve);
-                    });
+                    });*/
                 }
             });
         }

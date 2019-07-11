@@ -63,3 +63,21 @@ concatUint8Arrays = function (buffers) {
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+/**
+ * Get webcast ID
+ * @returns {String} webcast ID
+ */
+function getWebcastId() {
+    if (document.forms[0]) { 
+        return $.urlParam(document.forms[0].action, "id"); 
+    } else throw new Error("Unable to get webcast ID");
+}
+
+/**
+ * Get module ID
+ * @returns {String} module ID
+ */
+function getModuleId() {
+    return $("#parentName").text();
+}

@@ -3,6 +3,7 @@
  * @global
  */
 (() => {
+    App = {};
     //Wait for page load
     MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
     var observer = new MutationObserver(function(mutations, observer) {
@@ -11,15 +12,32 @@
             observer.disconnect();
             //Put initialization code here
             console.log("DOM loaded!");
-            Settings.initialize().then((instance) => {
-                new Sidebar().init();
-                new SpeedSlider().init();
-                new Subtitles().init();
-                new SilenceCueManager().init();
-                new TSTracker().init();
-                new LoggerDisabler().init();
-                new DelayDisabler().init();
-                console.log("FIN");
+            //Initialize cache & settings
+            Cache.init().then(() => {
+                Settings.init().then(() => {
+                    let settings = Settings.getDataAsObject();
+                    //debugger;
+                    //Initialize app
+                    App = {
+                        sidebar: new Sidebar(settings),
+                        speedSlider: new SpeedSlider(settings),
+                        volumeBooster: new VolumeBooster(settings),
+                        subtitles: new Subtitles(settings),
+                        silenceCueManager: new SilenceCueManager(settings),
+                        tsTracker: new TSTracker(settings),
+                        carouselManager: new CarouselManager(settings),
+                        loggerDisabler: new LoggerDisabler(settings),
+                        delayDisabler: new DelayDisabler(settings)
+                    };
+                    /*
+                    let keys = Object.keys(App);
+                    keys.forEach((key) => { 
+                        App[key].init();
+                    });*/
+
+                    //Initialize initial settings
+                    console.log("FIN");
+                });
             });
         }
     });

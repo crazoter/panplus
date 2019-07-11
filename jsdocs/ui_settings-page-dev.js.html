@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ui/settings-page-dev.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ui/settings-page-dev.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/** @jsx preact.h */
+
+/**
+ * Throw this into a Babel compiler https://babeljs.io/repl
+ */
+let SettingsPage = (() => {
+    const SAVE_WEBCAST_ONLY = 0;
+    const SAVE_FOR_MODULE = 1;
+    const SAVE_FOR_ALL = 2;
+    const CLEAR_CACHE = 3;
+    const CONFIRM_MESSAGES = [
+        "Save these settings for this webcast only?",
+        "Save these settings for all webcasts under this module? (Overrides ALL existing settings under this module)",
+        "Save these settings for all webcasts? (Overrides ALL existing settings)",
+        "Clear the cache? (Only select this if there are issues with the cache)",
+    ];
+    const PREFIXES = [Cache.GLOBAL_SETTINGS_ID, Cache.MODULE_SETTINGS_PREFIX, Cache.WEBCAST_SETTINGS_PREFIX];
+
+    class SettingsPage extends preact.Component {
+        /**
+         * A setting is changed
+         * @param {Event} event event triggered (onChange event)
+         */
+        settingsChange(event) {
+            debugger;
+            if (event.target.name == "settings_playbackoptions") {
+                this.saveSettingsWithoutCaching();
+                App.speedSlider.updateOptions();
+            } else if (event.target.name == "settings_carouseldesign") {
+                this.saveSettingsWithoutCaching();
+                App.carouselManager.updateDesign();
+                let ctxBridge = new ContextBridge(() => $(window).trigger('resize'));
+                ctxBridge.exec();
+            } else if (event.target.name == "settings_subtitles") {
+                this.saveSettingsWithoutCaching();
+                App.subtitles.updateVisibility();
+            } 
+            console.info(event);
+        }
+
+        saveSettingsWithoutCaching() {
+            let form = document.getElementById("settings-form");
+            let settingsData = $(form).serializeArray();
+            settingsData.push({name: "time", value: new Date().getTime()});
+            Settings.setData(settingsData);
+        }
+
+        /**
+         * Save settings button pressed, save settings
+         * @param {Number} index Index of what kind of saving it is (refer to constants)
+         */
+        saveSettings(index) {
+            let form = document.getElementById("settings-form");
+            if (form.checkValidity()) {
+                if (confirm(CONFIRM_MESSAGES[index])) {
+                    if (index == CLEAR_CACHE) {
+                        Cache.invalidateCache().then(() => {
+                            $.notify("Cache Cleared!","success");
+                        });
+                    } else {
+                        //Example data
+                        //"[{"name":"settings_sidebar","value":"1"},{"name":"settings_opentab","value":"0"},{"name":"settings_carouselshown","value":"1"},{"name":"settings_initialspeed","value":"1"},{"name":"settings_playbackoptions","value":"0"},{"name":"settings_carouseldesign","value":"0"},{"name":"settings_subtitles","value":"1"},{"name":"settings_machinetranscript","value":"1"},{"name":"settings_silencetrimming","value":"1"},{"name":"settings_silencethreshold","value":"2"}]"
+                        //Save current data
+                        let settingsData = $(form).serializeArray();
+                        settingsData.push({name: "time", value: new Date().getTime()});
+                        Settings.setData(settingsData);
+                        //Get cleaned up data
+                        settingsData = Settings.getData();
+                        let promise = null;
+                        switch (index) {
+                            case SAVE_WEBCAST_ONLY:
+                                promise = Cache.save(`${PREFIXES[2]}${getWebcastId()}`, settingsData, Cache.WEBCAST_SETTINGS_EXPIRY_OFFSET_DAYS);
+                                break;
+                            case SAVE_FOR_MODULE:
+                                promise = Cache.save(`${PREFIXES[1]}${getModuleId()}`, settingsData, Cache.MODULE_SETTINGS_EXPIRY_OFFSET_DAYS);
+                                break;
+                            case SAVE_FOR_ALL:
+                                promise = Cache.save(`${PREFIXES[0]}`, settingsData, Cache.GLOBAL_SETTINGS_EXPIRY_OFFSET_DAYS);
+                                break;
+                        }
+                        promise.then(() => {
+                            $.notify("Settings Saved!","success");
+                        });
+                    }
+                }
+            } else {
+                $.notify("Some fields are invalid (all fields must be filled).", "warn");
+            }
+        }
+
+        /**
+         * After component mounted, set form values
+         * https://preactjs.com/guide/api-reference
+         */
+        componentDidMount() {
+            //Populate data from Settings data
+            let form = document.getElementById("settings-form");
+            let settingsData = Settings.getData();
+            for (let i = 0; i &lt; settingsData.length; i++) {
+                if (form.elements[settingsData[i].name])
+                    form.elements[settingsData[i].name].value = settingsData[i].value;
+            }
+        }
+
+        //Note: only numbers used as values and they will be parsed as Int later on
+        render({}, {}) {
+            return &lt;form id="settings-form">
+                    &lt;h4>On Startup&lt;/h4>
+                    &lt;div>Sidebar&lt;/div>
+                    &lt;div onChange={this.settingsChange.bind(this)}>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_sidebar" value="1"/>&lt;i>Expanded&lt;/i>&lt;/label>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_sidebar" value="0"/>&lt;i>Collapsed&lt;/i>&lt;/label>
+                    &lt;/div>
+                    &lt;div>Open Tab&lt;/div>
+                    &lt;div onChange={this.settingsChange.bind(this)}>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_opentab" value="0"/>&lt;i>2nd Screen&lt;/i>&lt;/label>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_opentab" value="1"/>&lt;i>Transcript&lt;/i>&lt;/label>
+                    &lt;/div>
+                    &lt;div>Carousel&lt;/div>
+                    &lt;div onChange={this.settingsChange.bind(this)}>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_carouselshown" value="1"/>&lt;i>Shown&lt;/i>&lt;/label>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_carouselshown" value="0"/>&lt;i>Hidden&lt;/i>&lt;/label>
+                    &lt;/div>
+                    &lt;div>Initial Playback Speed&lt;/div>
+                    &lt;div onChange={this.settingsChange.bind(this)}>
+                        &lt;input type="number" name="settings_initialspeed" step="0.1" min="0.5" max="5" value="1" required/>
+                    &lt;/div>
+                    &lt;hr/>
+                    &lt;h4>Theme&lt;/h4>
+                    &lt;div>Playback Options&lt;/div>
+                    &lt;div onChange={this.settingsChange.bind(this)}>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_playbackoptions" value="0"/>&lt;i>Default&lt;/i>&lt;/label>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_playbackoptions" value="1"/>&lt;i>More Buttons&lt;/i>&lt;/label>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_playbackoptions" value="2"/>&lt;i>Slider&lt;/i>&lt;/label>
+                    &lt;/div>
+                    &lt;div>Carousel&lt;/div>
+                    &lt;div onChange={this.settingsChange.bind(this)}>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_carouseldesign" value="0"/>&lt;i>Default&lt;/i>&lt;/label>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_carouseldesign" value="1"/>&lt;i>Smaller&lt;/i>&lt;/label>
+                    &lt;/div>
+                    &lt;div>Subtitles&lt;/div>
+                    &lt;div onChange={this.settingsChange.bind(this)}>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_subtitles" value="1"/>&lt;i>Shown&lt;/i>&lt;/label>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_subtitles" value="0"/>&lt;i>Hidden&lt;/i>&lt;/label>
+                    &lt;/div>
+                    &lt;hr/>
+                    &lt;h4>Features&lt;/h4>
+                    &lt;div>(Changes after restarting)&lt;/div>
+                    &lt;div>Machine Transcription&lt;/div>
+                    &lt;div onChange={this.settingsChange.bind(this)}>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_machinetranscript" value="1"/>&lt;i>Enabled&lt;/i>&lt;/label>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_machinetranscript" value="0"/>&lt;i>Disabled&lt;/i>&lt;/label>
+                    &lt;/div>
+                    &lt;div>Silence Trimming&lt;/div>
+                    &lt;div onChange={this.settingsChange.bind(this)}>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_silencetrimming" value="1"/>&lt;i>Enabled&lt;/i>&lt;/label>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_silencetrimming" value="0"/>&lt;i>Disabled&lt;/i>&lt;/label>
+                    &lt;/div>
+                    &lt;div>Noise Threshold (Default is 2.37, Increasing will increase true and false positives for noise)&lt;/div>
+                    &lt;div onChange={this.settingsChange.bind(this)}>
+                    &lt;input type="number" name="settings_silencethreshold" step="0.01" value="" required/>&lt;i>&lt;/i>
+                    &lt;/div>
+                    &lt;br/>
+                    &lt;hr/>
+                    &lt;div onClick={this.saveSettings.bind(this, SAVE_WEBCAST_ONLY)} class="ui-state-default ui-button save-btns">&lt;a href="#" class="ui-tabs-text-lookalike">&lt;span>Save for this webcast only&lt;/span>&lt;/a>&lt;/div>
+                    &lt;div onClick={this.saveSettings.bind(this, SAVE_FOR_MODULE)} class="ui-state-default ui-button save-btns">&lt;a href="#" class="ui-tabs-text-lookalike">&lt;span>Save for all webcasts under this module&lt;/span>&lt;/a>&lt;/div>
+                    &lt;div onClick={this.saveSettings.bind(this, SAVE_FOR_ALL)} class="ui-state-default ui-button save-btns">&lt;a href="#" class="ui-tabs-text-lookalike">&lt;span>Save for all webcasts&lt;/span>&lt;/a>&lt;/div>
+                    &lt;div onClick={this.saveSettings.bind(this, CLEAR_CACHE)} class="ui-state-default ui-button save-btns">&lt;a href="#" class="ui-tabs-text-lookalike">&lt;span>Clear Cache&lt;/span>&lt;/a>&lt;/div>
+                &lt;/form>;
+        }
+    }
+    return SettingsPage;
+})();
+
+/**
+Settings
+On Startup
+Sidebar: Collapsed / Hidden
+Opened Tab: 2nd Screen / Transcript
+Carousel: Shown / Hidden
+Initial Playback Speed: 1.5x
+Volume Boosted: Disabled / Enabled
+Volume Boost Multiplier: 3.0
+
+Theme
+Playback Options: Slider / More Buttons / Default
+Carousel: Smaller / Default
+Subtitles: Shown / Hidden
+
+Features (Changing will require restarting)
+Machine Transcription: Enabled / Disabled
+Silence Removal: Enabled / Disabled
+Silence Removal Threshold (default 2.3, higher for looser definition of what is noise): 2.3
+
+Save for this webcast only
+Save for all webcasts under this module
+Save for all webcasts
+ */</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 12 2019 01:45:09 GMT+0800 (Singapore Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

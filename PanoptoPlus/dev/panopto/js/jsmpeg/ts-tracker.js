@@ -7,9 +7,14 @@ TSTracker = (() => {
      */
     class TSTracker {
         /**
-         * Constructor is empty
+         * Initialize with regards to settings
+         * @param {Object} settings Settings object
          */
-        constructor() {}
+        constructor(settings) {
+            if (settings[Settings.keys.silencetrimming]) {
+                this.init();
+            }
+        }
 
         /**
          * Initialization, setup a bridge to detect which TS files are loaded
@@ -241,6 +246,7 @@ TSTracker = (() => {
                     options.sampleRate = audioBuffer.sampleRate;
                     options.duration = audioBuffer.duration;
                     options.float32Length = audioBuffer.length;
+                    options.silenceThreshold = Settings.getDataAsObject()[Settings.keys.silencethreshold];
                     //Convert to ArrayBuffers for transfer
                     const channel0 = audioBuffer.getChannelData(0).buffer;
                     const channel1 = audioBuffer.getChannelData(1).buffer;

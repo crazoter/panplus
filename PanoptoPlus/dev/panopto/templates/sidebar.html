@@ -1,14 +1,16 @@
 <div id="sidebar-tabs">
-  <ul>
-    <li id="sidebar-tab-1"><a href="#sidebar-tab-pg-1">Second Screen</a></li>
-    <li id="sidebar-tab-2"><a href="#sidebar-tab-pg-2">Transcript</a></li>
-    <li id="sidebar-tab-3"><a href="#sidebar-tab-pg-3">Settings</a></li>
-  </ul>
+  <div class="tabs-container">
+    <ul>
+      <li class="sidebar-tab" id="sidebar-tab-1"><a href="#sidebar-tab-pg-1"><i class="far fa-clone"></i>2nd Screen</a></li>
+      <li class="sidebar-tab" id="sidebar-tab-2"><a href="#sidebar-tab-pg-2"><i class="far fa-file-alt"></i>Transcript</a></li>
+      <li class="sidebar-tab" id="sidebar-tab-3"><a href="#sidebar-tab-pg-3"><i class="fas fa-cog"></i>Settings</a></li>
+    </ul>
+    <span class="hide-btn ui-state-default ui-button"><a href="#" class="ui-tabs-text-lookalike"><i class="fas fa-eye-slash"></i><span> Minimize</span></a></span>
+    <span class="show-btn hidden ui-state-default ui-button"><a href="#" class="ui-tabs-text-lookalike"><i class="fas fa-eye"></i><span> Expand</span></a></span>
+  </div>
   <div id="sidebar-tab-pg-1" style="height:0px; padding: 0"><!--Handle this tab with JS--></div>
   <div id="sidebar-tab-pg-2">
-    <p>Transcript goes here.</p>
+    <p>Transcript</p>
   </div>
-  <div id="sidebar-tab-pg-3">
-    <p>Settings (of app and webcast) goes here.</p>
-  </div>
+  <div id="sidebar-tab-pg-3"></div>
 </div>

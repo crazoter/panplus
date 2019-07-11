@@ -11,9 +11,15 @@ let Subtitles = (() => {
      */
     class Subtitles {
         /**
-         * Constructor is empty
+         * Initialize with regards to settings
+         * @param {Object} settings Settings object
          */
-        constructor() {}
+        constructor(settings) {
+            if (settings[Settings.keys.machinetranscript]) {
+                this.tracks = [];
+                this.init();
+            }
+        }
 
         /**
          * Init: initialize subtitles
@@ -35,9 +41,9 @@ let Subtitles = (() => {
          * @returns {undefined}
          */
         async loadSubtitles() {
-            let transcript = await TranscriptRequester.get(new TranscriptSourcePanopto());
-            let cueArray = transcript.toVTTCueArray();
-            console.log(cueArray.length + " Subtitle cues detected");
+            const transcript = await TranscriptRequester.get(new TranscriptSourcePanopto());
+            const cueArray = transcript.toVTTCueArray();
+            console.info(cueArray.length + " Subtitle cues detected");
             //Stop if there are no cues in the first place
             if (cueArray.length == 0 && Settings.getSubtitlesEnabled) {
                 $("#sidebar-tab-pg-2").html("No transcript & subtitles available for this webcast.");
@@ -46,44 +52,48 @@ let Subtitles = (() => {
             }
             let elements = VideosLoadedEvent.getVideosElements();
             //Add track(s) for video(s)
-            let tracks = [];
+            //let tracks = [];
+            this.tracks = [];
             for (var i = 0; i < elements.all.length; i++) {
-                tracks.push(elements.all[i].addTextTrack("captions", "English", "en"));
+                this.tracks.push(elements.all[i].addTextTrack("captions", "English", "en"));
             }
+            //Add a sleep here to avoid issues with adding cues
+            await sleep(100);
             //Add cues only for main video
             for (let j = 0; j < cueArray.length; j++) {
-                tracks[elements.primaryVideoIndex].addCue(cueArray[j]);
+                this.tracks[elements.primaryVideoIndex].addCue(cueArray[j]);
             }
             //If 2 videos, sync by adding cue to currentTime when the cue is played.
             if (elements.all.length === 2) {
                 let otherVideoIndex = elements.primaryVideoIndex ^ 1;
-                tracks[elements.primaryVideoIndex].oncuechange = function () {
+                let self = this;
+                this.tracks[elements.primaryVideoIndex].oncuechange = function () {
                     //function is embedded in the code here because of the need to access previous variables for performance reasons
-                    let cues = tracks[elements.primaryVideoIndex].activeCues;
+                    let cues = self.tracks[elements.primaryVideoIndex].activeCues;
                     //remove all cues before adding any new ones
-                    while (tracks[otherVideoIndex].cues.length > 0) {
-                        tracks[otherVideoIndex].removeCue(tracks[otherVideoIndex].cues[0]);
+                    while (self.tracks[otherVideoIndex].cues.length > 0) {
+                        self.tracks[otherVideoIndex].removeCue(self.tracks[otherVideoIndex].cues[0]);
                     }
 
                     if (cues.length > 0) {
                         //Entered into a new cue
                         //Implementation 1: Insert with fixed death time
                         /*
-                        if (tracks[otherVideoIndex].cues.getCueById(cues[0].startTime) === null) {
+                        if (this.tracks[otherVideoIndex].cues.getCueById(cues[0].startTime) === null) {
                             //Add cue with offset only if it hasn't already been added
                             let offset = elements.secondaryVideo.currentTime - elements.primaryVideo.currentTime;
                             let cue = new VTTCue(cues[0].startTime + offset, 
                                 cues[0].endTime + offset, 
                                 cues[0].text);
                             cue.id = cues[0].startTime;
-                            tracks[otherVideoIndex].addCue(cue);
+                            this.tracks[otherVideoIndex].addCue(cue);
                         }*/
                         //Implementation 2: Clear cues, then insert cue
                         let offset = elements.secondaryVideo.currentTime - elements.primaryVideo.currentTime;
                         let currentCue = new VTTCue(cues[0].startTime + offset, 
                             cues[0].endTime + offset, 
                             cues[0].text);
-                        tracks[otherVideoIndex].addCue(currentCue);
+                            self.tracks[otherVideoIndex].addCue(currentCue);
                     }
                 };
             } else if (videoDOMs.length > 2) {
@@ -91,20 +101,39 @@ let Subtitles = (() => {
             }
 
             //Set to show subtitles after a brief delay (Doesn't work without delay, this is a hotfix)
+            await this.updateVisibility();
+            console.log("Subtitles loaded");
+        }
+
+        async updateVisibility() {
+            if (Settings.getDataAsObject()[Settings.keys.subtitles])
+                await this.show();
+            else 
+                await this.hide();
+        }
+
+        async hide() {
+            return await this.setState("hidden");
+        }
+
+        async show() {
+            return await this.setState("showing");
+        }
+    
+        async setState(state) {
+            //Set to show subtitles after a brief delay (Doesn't work without delay, this is a hotfix)
             let showing = true;
             do {
                 showing = true;
                 await sleep(500);
                 //Show track(s)
-                for (let i = 0; i < tracks.length; i++)
-                    tracks[i].mode = "showing";
+                for (let i = 0; i < this.tracks.length; i++)
+                    this.tracks[i].mode = state;
                 await sleep(200);
-                //verify tracks are indeed showing
-                for (let i = 0; i < tracks.length; i++)
-                    showing &= tracks[i].mode === "showing";
+                //verify this.tracks are indeed showing
+                for (let i = 0; i < this.tracks.length; i++)
+                    showing &= this.tracks[i].mode === state;
             } while(!showing);
-
-            console.log("Subtitles loaded");
         }
     }
     return Subtitles;

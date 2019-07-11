@@ -7,9 +7,14 @@ let SilenceCueManager = (() => {
      */
     class SilenceCueManager {
         /**
-         * Constructor is empty
+         * Initialize with regards to settings
+         * @param {Object} settings Settings object
          */
-        constructor() {}
+        constructor(settings) {
+            if (settings[Settings.keys.silencetrimming]) {
+                this.init();
+            }
+        }
 
         /**
          * Initialize Silence Cue Manager.

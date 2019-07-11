@@ -22,7 +22,8 @@ let VideosLoadedEvent = (() => {
      */
     async function waitForVideoLoad() {
         //MutationObserver suddenly stopped working so I'm going to use a more primitive method lmao
-        let sleepMs = 20;
+        let sleepMs = 50;
+        /*
         let countDone = 0;
         while ((countDone = Math.max(countDone, verifyVideoLoad(countDone))) < 2) {
             //If one video is already loaded, wait 4 times. 
@@ -33,6 +34,11 @@ let VideosLoadedEvent = (() => {
             await sleep(sleepMs++);
         }
         videosLoaded(countDone);
+        */
+        while (!verifyVideoLoad()) {
+            await sleep(sleepMs++);
+        }
+        videosLoaded();
     };
 
     /**
@@ -42,6 +48,8 @@ let VideosLoadedEvent = (() => {
      * @returns {Number} Number of video elements loaded
      */
     function verifyVideoLoad() {
+        //Implementation 1 appears faulty
+        /*
         let videoDOMs = document.querySelectorAll("video");
         let count = 0;
         for (let i = 0; i < videoDOMs.length; i++) {
@@ -50,18 +58,20 @@ let VideosLoadedEvent = (() => {
             }
         }
         return count;
+        */
+        //Implementation 2: Use time
+        return $("#timeElapsed").text() != "";
     }
 
     /**
      * private static function to call when videos are loaded
      * @private
      * @static
-     * @param {Number} countDone used to ID if 1 or 2 video stream
      * @returns {undefined}
      */
-    function videosLoaded(countDone) {
+    function videosLoaded() {
         let videoDOMs = document.querySelectorAll("video");
-        if (Math.floor(countDone) === countDone) {
+        if (!VideosLoadedEvent.isSingleVideoStream()) {
             //2 video stream
             //We want to ensure that both subtitles are synced. The transcript timestamps that we got are based on the one that starts earlier.
             //Thus, get the videoDOM with the lowest currentTime.
@@ -121,6 +131,14 @@ let VideosLoadedEvent = (() => {
          */
         static getVideosElements() {
             return videoElements;
+        }
+
+        /**
+         * Return true if is single video stream at that point in time.
+         * @return {Boolean} true if only 1 video stream at that point in time
+         */
+        static isSingleVideoStream() {
+            return $(".player.primary-only").length > 0;
         }
     }
 

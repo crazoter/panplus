@@ -53,6 +53,7 @@ VADProcessor = (() => {
             //array of 5 to allow for customization of distance across the different variables
             //Customizable variables
             this.stddevDistance = [2.37, 2.37, 2.37, 2.37, 2.37];
+            this.stddevDistance.fill(options.silenceThreshold);
             //Variables required in the processor
             this.buffers = [];
             this.fft512Out = FFT512.createComplexArray();

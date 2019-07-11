@@ -8,9 +8,12 @@ LoggerDisabler = (() => {
      */
     class LoggerDisabler {
         /**
-         * Constructor is empty
+         * Initialize with regards to settings
+         * @param {Object} settings Settings object
          */
-        constructor() {}
+        constructor(settings) {
+            this.init();
+        }
         /**
          * Initialize and inject function onto page context
          * @return {undefined}

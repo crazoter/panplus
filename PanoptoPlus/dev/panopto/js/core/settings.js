@@ -1,95 +1,76 @@
 /**
- * @file Singleton class
+ * @file Settings Class
  */
 
  /**
-  * @class Singleton Settings class to manage user settings. Constructor is private.
+  * @class Settings Class
   */
-function Settings() { throw new Error("Please use Settings.requestInstance to initialize Settings."); }
-(function() {
-    var initiated = false;
-    var instance = null;
 
-    /**
-     * Private constructor
-     * @private
-     * @constructor
-     * @param {Boolean} subtitlesEnabled 
-     * @param {Number} normalPlaybackRate 
-     * @param {Boolean} silenceSkipEnabled 
-     * @param {Number} silencePlaybackRate 
-     */
-    function _Settings(subtitlesEnabled = true, 
-        normalPlaybackRate = 1.0, 
-        silenceSkipEnabled = true) {
-        if (!initiated) {
-            initiated = true;
-            this.subtitlesEnabled = subtitlesEnabled;
-            this.normalPlaybackRate = normalPlaybackRate;
-            this.silenceSkipEnabled = silenceSkipEnabled;
+let Settings = (() => {
+    let data = [];
+    let dataObject = undefined;
+    class Settings {
+        /**
+         * Constructor is empty
+         */
+        constructor() {}
+
+        /**
+         * Get default data if not found in cache
+         * @returns default data
+         */
+        static initializeDefaults() {
+            let data = [{"name":"settings_sidebar","value":1},{"name":"settings_opentab","value":0},{"name":"settings_carouselshown","value":1},{"name":"settings_initialspeed","value":1},{"name":"settings_playbackoptions","value":2},{"name":"settings_carouseldesign","value":1},{"name":"settings_subtitles","value":1},{"name":"settings_machinetranscript","value":1},{"name":"settings_silencetrimming","value":1},{"name":"settings_silencethreshold","value":2.37}];
+            data.push({name: "time", value: new Date().getTime()});
+            return data;
         }
+
+        /**
+         * Initialize
+         */
+        static async init() {
+            //Assuming that cache is already prepared
+            data = await Cache.loadSettings();
+            if (data == null) {
+                data = Settings.initializeDefaults();
+            }
+            this.updateDataObject();
+        }
+
+        /**
+         * Convert settings data (which is in formdata format) to object format
+         */
+        static updateDataObject() {
+            dataObject = {};
+            data.forEach((nameValuePair) => {
+                dataObject[nameValuePair.name] = nameValuePair.value;
+            });
+        }
+        static getData() { return data; }
+        static setData(d) {
+            data = d;
+            for (let i = 0; i < data.length; i++) {
+                let floatVal = parseFloat(data[i].value);
+                if (!isNaN(floatVal)) {
+                    data[i].value = floatVal;
+                }
+            }
+            this.updateDataObject();
+        }
+        static getDataAsObject() { return dataObject; }
     }
 
-    /**
-     * Request instance using Promises
-     */
-    Settings.initialize = function() {
-        return new Promise((resolve) => {
-            if (!initiated) {
-                Settings.load().then((result) => {
-                    instance = new _Settings();
-                    //instance = result;
-                    initiated = true;
-                    resolve(instance);
-                }).catch(() => {
-                    instance = new _Settings();
-                    resolve(instance);
-                });
-            } else {
-                resolve(instance);
-            }
-        });
+    Settings.keys = {sidebar: "settings_sidebar", opentab: "settings_opentab", carouselshown: "settings_carouselshown", initialspeed: "settings_initialspeed", playbackoptions: "settings_playbackoptions", carouseldesign: "settings_carouseldesign", subtitles: "settings_subtitles", machinetranscript: "settings_machinetranscript", silencetrimming: "settings_silencetrimming", silencethreshold: "settings_silencethreshold" };
+    Settings.PLAYBACK_OPTIONS = {
+        DEFAULT: 0,
+        MORE_BUTTONS: 1,
+        SLIDER: 2,
+    };
+    Settings.CAROUSEL_DESIGNS = {
+        DEFAULT: 0,
+        SMALLER: 1,
     }
-    /** * */ Settings.getSubtitlesEnabled = function() { return instance.subtitlesEnabled; }
-    /** * */ Settings.getNormalPlaybackRate = function() { return instance.normalPlaybackRate; }
-    /** * */ Settings.getSilenceSkipEnabled = function() { return instance.silenceSkipEnabled; }
-    /** *@param {Boolean} val */ 
-    Settings.setSubtitlesEnabled = function(val) { 
-        instance.subtitlesEnabled = val;
-        Settings.save();
-    }
-    /** *@param {Number} val */ 
-    Settings.setNormalPlaybackRate = function(val) { 
-        instance.normalPlaybackRate = val;
-        Settings.save();
-    }
-    /** *@param {Boolean} val */ 
-    Settings.setSilenceSkipEnabled = function(val) { 
-        instance.silenceSkipEnabled = val;
-        Settings.save();
-    }
-    
-    /**
-     * Load from chrome storage using Promises
-     * KIV: segregated settings for each module
-     * @returns {Promise}
-     */
-    Settings.load = function() {
-        return new Promise((resolve, reject) => {
-            chrome.storage.local.get(['settings'],(res) => {
-                if (res['settings']) resolve(res['settings']);
-                else reject();
-            });
-        });
-    }
-    
-    /**
-     * Saving of settings into chrome storage
-     * * @returns {undefined}
-     */
-    Settings.save = function() {
-        var kvp = {};
-        kvp['settings'] = instance;
-        chrome.storage.local.set(kvp,() => {});
-    }
+
+
+    return Settings;
 })();

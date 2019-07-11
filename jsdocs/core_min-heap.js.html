@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/min-heap.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/min-heap.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file MinHeap, JS implementation of min heap
+ */
+let MinHeap = (() => {
+    /**
+     * MinHeap, JS implementation of min heap
+     */
+    class MinHeap {
+        constructor(arr) {
+            if (arr == null) {
+                this.harr = [];
+            } else {
+                this.harr = arr;
+                this.buildHeap();
+            }
+        }
+
+        buildHeap() { 
+            // Index of last non-leaf node 
+            let startIdx = ((this.harr.length / 2) | 0) - 1; 
+            // Perform reverse level order traversal 
+            // from last non-leaf node and heapify 
+            // each node 
+            for (let i = startIdx; i >= 0; i--) {
+                this.heapify(i); 
+            } 
+        } 
+
+        // Inserts a new key 'k' 
+        insertKey(k) { 
+            // First insert the new key at the end 
+            this.harr.length++; 
+            let i = this.harr.length - 1; 
+            this.harr[i] = k; 
+            // Fix the min heap property if it is violated 
+            while (i != 0 &amp;&amp; this.harr[this.parent(i)] > this.harr[i]) { 
+                this.swapByIndex(i, this.parent(i)); 
+                i = this.parent(i); 
+            } 
+        } 
+        
+        getMin() { return this.harr[0]; }
+        size() { return this.harr.length; }
+        toArray() { return this.harr; }
+        parent(i) { return (i - 1) / 2 | 0; }
+        // to get index of left child of node at index i 
+        left(i) { return (2 * i + 1); } 
+        // to get index of right child of node at index i 
+        right(i) { return (2 * i + 2); } 
+
+        // Method to remove minimum element (or root) from min heap 
+        extractMin() { 
+            if (this.harr.length &lt;= 0) 
+                return Infinity; 
+            if (this.harr.length == 1) { 
+                let root = this.harr[0]; 
+                this.harr.length--;
+                return root; 
+            } 
+        
+            // Store the minimum value, and remove it from heap 
+            let root = this.harr[0]; 
+            this.harr[0] = this.harr[this.harr.length - 1]; 
+            this.harr.length--;
+            this.heapify(0); 
+        
+            return root; 
+        } 
+        
+        // A recursive method to heapify a subtree with the root at given index 
+        // This method assumes that the subtrees are already heapified 
+        heapify(i) { 
+            let l = this.left(i); 
+            let r = this.right(i); 
+            let smallest = i; 
+            if (l &lt; this.harr.length &amp;&amp; this.harr[l] &lt; this.harr[i]) 
+                smallest = l; 
+            if (r &lt; this.harr.length &amp;&amp; this.harr[r] &lt; this.harr[smallest]) 
+                smallest = r; 
+            if (smallest != i) { 
+                this.swapByIndex(i, smallest); 
+                this.heapify(smallest); 
+            } 
+        } 
+        
+        // A utility function to swapByIndex two elements 
+        swapByIndex(i1, i2) { 
+            this.harr[i1] ^= this.harr[i2];
+            this.harr[i2] ^= this.harr[i1];
+            this.harr[i1] ^= this.harr[i2];
+        } 
+    }
+    return MinHeap;
+})();
+
+/**
+ * Test Code
+ */
+/*
+x = new MinHeap();
+x.insertKey(1);
+x.insertKey(10);
+x.insertKey(2);
+x.insertKey(42184);
+x.insertKey(28);
+x.insertKey(421);
+x.insertKey(421);
+x.insertKey(3);
+x.getMin();
+x.extractMin();
+x.extractMin();
+x.extractMin();
+x.extractMin();
+y = new MinHeap([10,9,6,8,5,2,6,1,2]);
+*/</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 12 2019 01:45:09 GMT+0800 (Singapore Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

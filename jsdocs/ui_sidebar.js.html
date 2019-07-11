@@ -31,16 +31,20 @@
  */
 let Sidebar = (() => {
     //Private static variables
-    const videoContainers = ["#leftPlayerContainer","#rightPlayersContainer"];
+    let swappedVideos = false;
 
     /**
      * Sidebar, includes code that will inject DOM into the sidebar (as well as other DOM manipulation code involving the sidebar). It is presumed only 1 instance will be launched.
      */
     class Sidebar {
         /**
-         * Initializes mainVideoIndex
+         * Initializes mainVideoIndex and initialize based on settings
+         * @param {Object} settings settings object
          */
-        constructor() { this.mainVideoIndex = 0; }
+        constructor(settings) { 
+            this.mainVideoIndex = 0;
+            this.init();
+        }
 
         /**
          * Init will initialize the sidebar. First grabs sidebar, prepends, then initializes tabs.
@@ -57,25 +61,106 @@ let Sidebar = (() => {
                 $("#sidebar-tabs").tabs({
                     //When the second screen is clicked, show the second screen and the extra stuff below it
                     activate: function( event, ui ) {
-                        if (ui.newTab[0].id === "sidebar-tab-1") {
-                            $(videoContainers[self.mainVideoIndex]).show();
-                            $('aside[role="complementary"]').show();
-                        } else if (ui.oldTab[0].id === "sidebar-tab-1") {
-                            $(videoContainers[self.mainVideoIndex]).hide();
-                            $('aside[role="complementary"]').hide();
+                        if (!VideosLoadedEvent.isSingleVideoStream()) {
+                            //Only trigger show / hide functionality because single video stream displays differently
+                            if (!swappedVideos) {
+                                if (ui.newTab[0].id === "sidebar-tab-1") {//show
+                                    $("#leftPlayerContainer").show();
+                                    $('aside[role="complementary"]').show();
+                                    let ctxBridge = new ContextBridge(() => $(window).trigger('resize'));
+                                    ctxBridge.exec();
+                                } else if (ui.oldTab[0].id === "sidebar-tab-1") {//hide
+                                    $("#leftPlayerContainer").hide();
+                                    $('aside[role="complementary"]').hide();
+                                }
+                            } else {
+                                if (ui.newTab[0].id === "sidebar-tab-1") {//show
+                                    $(".secondaryPlayer.player.roaming").show();
+                                    $("#rightPlayersContainer").css("visibility", "visible");
+                                    $('aside[role="complementary"]').show();
+                                    let ctxBridge = new ContextBridge(() => $(window).trigger('resize'));
+                                    ctxBridge.exec();
+                                } else if (ui.oldTab[0].id === "sidebar-tab-1") {//hide
+                                    $(".secondaryPlayer.player.roaming").hide();
+                                    $("#rightPlayersContainer").css("visibility", "hidden");
+                                    $('aside[role="complementary"]').hide();
+                                }
+                            }
                         }
-                    }
+                    } 
                 });
+
+                //Add icons
+                $("#commentsTabHeader").prepend('&lt;i class="far fa-comments">&lt;/i>');
+                $("#notesTabHeader").prepend('&lt;i class="far fa-sticky-note">&lt;/i>');
+                $("#bookmarksTabHeader").prepend('&lt;i class="far fa-bookmark">&lt;/i>');
+                $("#hideEventsButton div").text("Hide Sidebar");
+                $("#hideEventsButton div").prepend('&lt;i class="fas fa-chevron-left" style="padding-right:4px">&lt;/i>');
+                $("#hideEventsButton").css({display: "initial", visibility: "visible"});
+
+                //Hide button
+                $("#sidebar-tabs .tabs-container .hide-btn").click(() => {
+                    $("#hideEventsButton").children()[0].click();
+                });
+                $("#hideEventsButton div").click(() => {
+                    $("#sidebar-tabs").addClass("compact");
+                    $("#sidebar-tabs .tabs-container .hide-btn").hide();
+                    $("#sidebar-tabs .tabs-container .show-btn").css('display','block');
+                });
+
+                //Show button
+                //BUG: SOMETIMES THE EVENT DOESN'T FIRE IF CLICKING THE TABS BELOW SCREEN. LOW PRIORITY.
+                $("#sidebar-tabs .tabs-container .show-btn").click(() => {
+                    $("#commentsTabHeader").click();
+                });
+                $("#commentsTabHeader").click(this.expand);
+                $("#commentsTabHeader span").click(this.expand);
+                $("#notesTabHeader").click(this.expand);
+                $("#notesTabHeader span").click(this.expand);
+                $("#bookmarksTabHeader").click(this.expand);
+                $("#bookmarksTabHeader span").click(this.expand);
+                $(".event-tab-header").click(this.expand);
+                $("#searchInput").click(this.expand);
 
                 //Panopto literally switches the positions of the screens, so if the user toggles screens make sure it's on the right tab
                 //Making it such that it stays on the same tab is a KIV
                 $(document).on('mouseup', '.player-layout-controls i', function(event) {
+                    //$("#sidebar-tabs").tabs("option", "active", 0);
                     $("#sidebar-tabs").tabs("option", "active", 0);
-                    self.mainVideoIndex ^= 1;//bit toggling
+                    swappedVideos = !swappedVideos;
+                    //self.mainVideoIndex ^= 1;//bit toggling
                 });
                 //Because we added the tabs, the max-height of the results part of the search feature needs to be modified on our side
                 $("div.event-tab-scroll-pane").css("max-height",'-=40');
+
+                //Initialize as compact if it is so
+                if (VideosLoadedEvent.isSingleVideoStream()) {
+                    $("#sidebar-tabs .tabs-container .hide-btn").click();
+                }
+
+                //Preact Components
+                preact.render(preact.h(SettingsPage, null), document.getElementById("sidebar-tab-pg-3"));
+
+                //Settings
+                this.openTab(Settings.getDataAsObject()[Settings.keys.opentab]);
+                sleep(1000).then(() => {
+                    Settings.getDataAsObject()[Settings.keys.sidebar] ? this.expand() : this.collapse();
+                });
             });
+        }
+
+        collapse() {
+            $("#sidebar-tabs .tabs-container .hide-btn").click();
+        }
+
+        expand() {
+            $("#sidebar-tabs").removeClass("compact");
+            $("#sidebar-tabs .tabs-container .show-btn").hide();
+            $("#sidebar-tabs .tabs-container .hide-btn").show();
+        }
+
+        openTab(index) {
+            $("#sidebar-tabs").tabs("option", "active", index);
         }
     }
     return Sidebar;
@@ -89,13 +174,13 @@ let Sidebar = (() => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jun 28 2019 17:09:16 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 12 2019 01:45:09 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

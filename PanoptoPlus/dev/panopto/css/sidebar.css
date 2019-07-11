@@ -1,0 +1,132 @@
+.viewer #viewerContent #leftPane #eventTabs #eventTabControl .event-tab-header.selected i.far {
+    color: white;
+}
+
+.viewer #viewerContent #leftPane #eventTabs #eventTabControl #hideEventsButton div, .viewer #viewerContent #leftPane #eventTabs #eventTabControl #advancedEditorLink div {
+    padding-top: 4px;
+}
+
+
+#sidebar-tabs, .tabs-container ul[role="tablist"] {
+    border: 0;
+    padding: 0;
+}
+
+#sidebar-tabs #sidebar-tab-pg-3 {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+#sidebar-tabs #sidebar-tab-pg-3[aria-hidden="false"] {
+    height: calc(100vh - 130px);
+}
+
+@media only screen and (max-width: 930px) {
+    #sidebar-tabs #sidebar-tab-pg-3[aria-hidden="false"] {
+        height: calc(100vh - 160px);
+    }
+}
+
+@media only screen and (max-width: 792px) {
+    #sidebar-tabs #sidebar-tab-pg-3[aria-hidden="false"] {
+        height: calc(100vh - 190px);
+    }
+}
+
+@media only screen and (max-width: 590px) {
+    #viewer.viewer {
+        left: calc(75vw - 480px);
+    }
+}
+
+#sidebar-tabs.compact #sidebar-tab-pg-3[aria-hidden="false"] {
+    height: calc(100vh - 220px);
+    font-size: 10px;
+}
+
+#sidebar-tabs .tabs-container {
+    display: flex;
+    align-items: stretch;
+}
+
+#sidebar-tabs.compact .tabs-container {
+    display: block;
+}
+
+#sidebar-tabs .tabs-container ul li a i{
+    padding-right: 4px;
+}
+
+#sidebar-tabs .tabs-container ul {
+    background: white;
+}
+
+#sidebar-tabs .tabs-container ul {
+    display: inline-block;
+}
+
+#sidebar-tabs .tabs-container .hide-btn, #sidebar-tabs .tabs-container .show-btn {
+    padding: 4px;
+    display: flex;
+}
+#sidebar-tabs .tabs-container .hide-btn {
+    width: 80px;
+}
+
+#sidebar-tabs.compact .tabs-container ul li.sidebar-tab {
+    width: 100%;
+}
+
+#sidebar-tabs .tabs-container .show-btn {
+    width: 100%;
+    margin: 1px .2em 0 0;
+}
+
+#sidebar-tabs .tabs-container ul li {
+    border-bottom-width: 1px;
+}
+
+#sidebar-tabs .tabs-container ul li.sidebar-tab {
+    width: 108px;
+    border-radius: 0px;
+}
+
+#sidebar-tabs .tabs-container .hidden {
+    display: none;
+}
+
+.viewer #viewerContent #leftPane div#searchRegion, #searchWrapper, .viewer #viewerContent #leftPane #searchRegion input#searchInput {
+    height: 32px;
+}
+
+#sidebar-tabs, #searchWrapper {
+    font-size: 0.83em;
+    font-family: Segoe UI,Helvetica,sans-serif;
+}
+
+.ui-state-default.ui-button .ui-tabs-text-lookalike {
+    margin: auto;
+    display: block;
+    text-decoration: none;
+    text-align: center;
+}
+#sidebar-tabs.compact .tabs-container .ui-state-default.ui-button .ui-tabs-text-lookalike {
+    padding-left: 8px;
+    text-align: left;
+}
+.margin-bottom {
+    margin-bottom: 8px;
+}
+.margin-4 {
+    margin: 4px;
+}
+
+.ui-state-default.ui-button.save-btns {
+    padding: 4px;
+    margin: 4px;
+}
+
+.settings-checkbox {
+    padding: 4px;
+    display: inline-block;
+}

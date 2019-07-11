@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ui/volume-booster.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ui/volume-booster.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file VolumeBooster, includes code that will modify the volume node to include a volume booster (gain modifier)
+ */
+let VolumeBooster = (() => {
+    let audioContexts = [];
+    /**
+     * VolumeBooster, includes code that will modify the volume node to include a volume booster (gain modifier)
+     */
+    class VolumeBooster {
+        /**
+         * Initializes mainVideoIndex and initialize based on settings
+         * @param {Object} settings settings object
+         */
+        constructor() {
+            this.init();
+        }
+
+         /**
+         * Init: initialize volume booster. First grabs slider template, then initializes.
+         * @returns {undefined}
+         */
+        init() {
+            VideosLoadedEvent.subscribe(() => {
+                this.setup();
+                //Get template
+                Template.get('volume-booster.html').then((template) => {
+                    //Add volume booster
+                    $("#volumeFlyout").append(template);
+                    //Initialize enable button to reveal on enable
+                    $("#vol-boost-btn-enable").click(() => {
+                        //Hide and show stuff
+                        $("#vol-boost-btn-enable").hide();
+                        $("#vol-boost-disclaimer").hide();
+                        $("#vol-boost-gain").prop('disabled', false);
+                        //$("#vol-boost-ui-container").show();
+                        //Change gain on value change
+                        $('#vol-boost-gain').on('input', () => {
+                            let gain = parseFloat($('#vol-boost-gain').val());
+                            if (!isNaN(gain)) {
+                                audioContexts.forEach((x) => {
+                                    x.amplify(gain);
+                                });
+                            }
+                        });
+                    });
+                });
+            });
+        }
+
+        /**
+         * Setup the audiocontexts, called by init. 
+         */
+        setup() {
+            let doms = document.getElementsByTagName("video");
+            for (let i = 0; i &lt; doms.length; i++)
+                audioContexts.push(this.prepareAudioContext(doms[i]));
+        }
+
+        /**
+         * Modify gain to push volume beyond max https://stackoverflow.com/questions/46264417/videojs-html5-video-js-how-to-boost-volume-above-maximum
+         * @param {DOM} mediaElem MediaElement (video) which will have its gain modified
+         * @returns AudioContext to call .amplify(Number) to modify its gain
+         */
+        prepareAudioContext(mediaElem) {
+            var context = new(window.AudioContext || window.webkitAudioContext),
+              result = {
+                context: context,
+                source: context.createMediaElementSource(mediaElem),
+                gain: context.createGain(),
+                media: mediaElem,
+                amplify: function(multiplier) {
+                  result.gain.gain.value = multiplier;
+                },
+                getAmpLevel: function() {
+                  return result.gain.gain.value;
+                }
+              };
+            result.source.connect(result.gain);
+            result.gain.connect(context.destination);
+            result.amplify(1);
+            return result;
+          }
+    }
+    return VolumeBooster;
+})();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 12 2019 01:45:09 GMT+0800 (Singapore Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
