@@ -17,7 +17,6 @@ let SettingsPage = (() => {
      * @param {Event} event event triggered (onChange event)
      */
     settingsChange(event) {
-      debugger;
       if (event.target.name == "settings_playbackoptions") {
         this.saveSettingsWithoutCaching();
         App.speedSlider.updateOptions();
@@ -28,7 +27,7 @@ let SettingsPage = (() => {
         ctxBridge.exec();
       } else if (event.target.name == "settings_subtitles") {
         this.saveSettingsWithoutCaching();
-        App.subtitles.updateVisibility();
+        App.transcriptDisplay.updateVisibility();
       }
 
       console.info(event);

@@ -19,6 +19,7 @@ DelayDisabler = (() => {
          */
         init() {
             let injectedFunc = () => {
+                
                 let firedToggle = false;
                 //I hate this method, but it's our hack in the bag
                 //Temporarily disable delay on click or on spacebar
@@ -54,7 +55,9 @@ DelayDisabler = (() => {
                         }, 10);
                     }
                 };
+                
                 Panopto.Core.Logger.log = ((msg) => {
+                    
                     console.info(msg);
                     //Secondary player started playing stream null: Stream stopped
                     if (msg.indexOf("player changed play state to {1}") > -1 || msg.indexOf("player changed play state to 2") > -1) {

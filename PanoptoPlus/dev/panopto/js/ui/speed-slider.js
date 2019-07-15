@@ -47,6 +47,12 @@ let SpeedSlider = (() => {
                         });
                     }
 
+                    //Update slider on click
+                    $("#playSpeedExpander .accented-tab").click((e) => {
+                        let spd = parseFloat(e.currentTarget.innerText);
+                        $("#speed-slider").slider('value', spd);
+                    });
+
                     resolve();
                 });
             });
@@ -110,7 +116,9 @@ let SpeedSlider = (() => {
             return new Promise((resolve) => {
                 //Settings
                 VideosLoadedEvent.subscribe(() => {
-                    this.changePlaybackSpeed(Settings.getDataAsObject()[Settings.keys.initialspeed]);
+                    let spd = Settings.getDataAsObject()[Settings.keys.initialspeed];
+                    this.changePlaybackSpeed(spd);
+                    $("#speed-slider").slider('value', spd);
                     resolve();
                 });
             });

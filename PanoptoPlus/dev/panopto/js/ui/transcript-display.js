@@ -1,15 +1,15 @@
 /**
- * @file Subtitles, includes code that will load the transcript, then inject the subtitles as cues into the first video's texttrack.
+ * @file TranscriptDisplay, includes code that will load the transcript, then inject the subtitles as cues into the first video's texttrack.
  * If there is a second video, then when the cue is reached, the subtitle will be injected into the second video.
  * This is to circumvent the issue of the variable offset between the 1st and 2nd video currentTime.
  */
-let Subtitles = (() => {
+let TranscriptDisplay = (() => {
     /**
-     * Subtitles, includes code that will load the transcript, then inject the subtitles as cues into the first video's texttrack.
+     * TranscriptDisplay, includes code that will load the transcript, then inject the subtitles as cues into the first video's texttrack.
      * If there is a second video, then when the cue is reached, the subtitle will be injected into the second video.
      * This is to circumvent the issue of the variable offset between the 1st and 2nd video currentTime.
      */
-    class Subtitles {
+    class TranscriptDisplay {
         /**
          * Initialize with regards to settings
          * @param {Object} settings Settings object
@@ -33,19 +33,57 @@ let Subtitles = (() => {
              * 2. The video DOM(s) do not have their src ready i.e. anything you do to the video may be undone
              * 3. The video may actually be playing (super unlikely though)
              */
-            VideosLoadedEvent.subscribe(() => { this.loadSubtitles(); });
+            VideosLoadedEvent.subscribe(() => { 
+                this.loadTranscriptDisplay();
+            });
+        }
+
+        /**
+         * Load videos with subtitle tracks and show subtitles. Also prepares transcript
+         * @returns {undefined}
+         */
+        async loadTranscriptDisplay() {
+            const transcript = await TranscriptRequester.get(new TranscriptSourcePanopto());
+            this.initTranscriptTab(transcript);
+            this.loadSubtitles(transcript);
+        }
+
+        /**
+         * Initialize transcript tab
+         * @param {Transcript} transcript
+         */
+        async initTranscriptTab(transcript) {
+            if (transcript.data.length > 0) {
+                $('#megalist-transcript').megalist();
+                $('#megalist-transcript').megalist('setDataProvider', () => {
+                    let result = [];
+                    for (let i = 0; i < transcript.data.length; i++) {
+                        result.push({
+                            time: (transcript.data[i].time / 60).toFixed(2).replace('.',':'), 
+                            text: transcript.data[i].text
+                        });
+                    }
+                    return result;
+                });
+                $('#megalist-transcript').megalist('setLabelFunction', (item) => {
+                    return `${item.time}: ${item.text}`;
+                });
+                $('#megalist-transcript').on('change', (event) => {
+                    //TODO: Jump on click
+                });
+            }
         }
 
         /**
          * Load videos with subtitle tracks and show subtitles.
+         * @param {Transcript} transcript
          * @returns {undefined}
          */
-        async loadSubtitles() {
-            const transcript = await TranscriptRequester.get(new TranscriptSourcePanopto());
+        async loadSubtitles(transcript) {
             const cueArray = transcript.toVTTCueArray();
             console.info(cueArray.length + " Subtitle cues detected");
             //Stop if there are no cues in the first place
-            if (cueArray.length == 0 && Settings.getSubtitlesEnabled) {
+            if (cueArray.length == 0) {
                 $("#sidebar-tab-pg-2").html("No transcript & subtitles available for this webcast.");
                 //alert("No subtitles available for this webcast.");
                 return;
@@ -102,7 +140,7 @@ let Subtitles = (() => {
 
             //Set to show subtitles after a brief delay (Doesn't work without delay, this is a hotfix)
             await this.updateVisibility();
-            console.log("Subtitles loaded");
+            console.log("TranscriptDisplay loaded");
         }
 
         async updateVisibility() {
@@ -136,5 +174,5 @@ let Subtitles = (() => {
             } while(!showing);
         }
     }
-    return Subtitles;
+    return TranscriptDisplay;
 })();

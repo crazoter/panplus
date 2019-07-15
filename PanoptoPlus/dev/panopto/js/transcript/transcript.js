@@ -39,7 +39,7 @@ let Transcript = (() => {
          * @param {Number} lastIndexDuration time to show last subtitle. Default is 10s.
          * @returns {Array.<VTTCue>} Returns an array of VTTCues based on the data in this transcript
          */
-        toVTTCueArray(flashDelay, lastIndexDuration) {
+        toVTTCueArray(flashDelay = 0.2, lastIndexDuration = 10) {
             var result = [];
             for (var i = 0; i < this.data.length; i++)
                 result.push(this.getVttCue(i, flashDelay, lastIndexDuration));

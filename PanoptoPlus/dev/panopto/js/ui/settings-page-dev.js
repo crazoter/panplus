@@ -22,7 +22,6 @@ let SettingsPage = (() => {
          * @param {Event} event event triggered (onChange event)
          */
         settingsChange(event) {
-            debugger;
             if (event.target.name == "settings_playbackoptions") {
                 this.saveSettingsWithoutCaching();
                 App.speedSlider.updateOptions();
@@ -33,7 +32,7 @@ let SettingsPage = (() => {
                 ctxBridge.exec();
             } else if (event.target.name == "settings_subtitles") {
                 this.saveSettingsWithoutCaching();
-                App.subtitles.updateVisibility();
+                App.transcriptDisplay.updateVisibility();
             } 
             console.info(event);
         }
@@ -156,7 +155,7 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_silencetrimming" value="1"/><i>Enabled</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_silencetrimming" value="0"/><i>Disabled</i></label>
                     </div>
-                    <div>Noise Threshold (Default is 2.37, Increasing will increase true and false positives for noise)</div>
+                    <div>Noise z-value (Default is 2.37, determines interval of what will be classified as noise)</div>
                     <div onChange={this.settingsChange.bind(this)}>
                     <input type="number" name="settings_silencethreshold" step="0.01" value="" required/><i></i>
                     </div>

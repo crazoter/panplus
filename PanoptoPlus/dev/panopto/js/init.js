@@ -22,7 +22,7 @@
                         sidebar: new Sidebar(settings),
                         speedSlider: new SpeedSlider(settings),
                         volumeBooster: new VolumeBooster(settings),
-                        subtitles: new Subtitles(settings),
+                        transcriptDisplay: new TranscriptDisplay(settings),
                         silenceCueManager: new SilenceCueManager(settings),
                         tsTracker: new TSTracker(settings),
                         carouselManager: new CarouselManager(settings),
