@@ -12,6 +12,9 @@ let SilenceCueManager = (() => {
          */
         constructor(settings) {
             if (settings[Settings.keys.silencetrimming]) {
+                this.updateVisibilitySleepTime = 500;
+                this.updateVisibilitySleepTimeIncrement = 100;
+                this.updateVisibilitySleepTimeMax = 1000;
                 this.init();
             }
         }
@@ -99,19 +102,46 @@ let SilenceCueManager = (() => {
             ctxBridge.exec();
 
             //Set to show tracks after a brief delay (Doesn't work without delay, this is a hotfix)
+            this.updateVisibility();
+
+            console.log("Silence Cues loaded");
+        };
+
+        async updateVisibility() {
+            while (true) {
+                if (Settings.getDataAsObject()[Settings.keys.silencetrimming])
+                    await this.show();
+                else 
+                    await this.hide();
+
+                //Getting really tired of my subtitles not appearing so i'm going to long poll this
+                await sleep(this.updateVisibilitySleepTime);
+                if (this.updateVisibilitySleepTimeMax > this.updateVisibilitySleepTime)
+                    this.updateVisibilitySleepTime += this.updateVisibilitySleepTimeIncrement;
+            }
+        }
+
+        async hide() {
+            return await this.setState("disabled");
+        }
+
+        async show() {
+            return await this.setState("hidden");
+        }
+    
+        async setState(state) {
+            //Set to show subtitles after a brief delay (Doesn't work without delay, this is a hotfix)
             let showing = true;
             do {
                 showing = true;
                 await sleep(500);
                 //Show track(s)
-                SilenceCueManager.cueTrack.mode = "hidden";
+                SilenceCueManager.cueTrack.mode = state;
                 await sleep(200);
-                //Verify tracks are indeed not hidden
-                showing &= SilenceCueManager.cueTrack.mode === "hidden";
+                //verify this.tracks are indeed showing
+                showing &= SilenceCueManager.cueTrack.mode === state;
             } while(!showing);
-
-            console.log("Silence Cues loaded");
-        };
+        }
 
         /**
          * Convert id to index (e.g. "00012.ts" to 12)

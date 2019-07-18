@@ -130,3 +130,7 @@
     padding: 4px;
     display: inline-block;
 }
+
+.viewer #viewerHeader div.header-right {
+    float: none;
+}

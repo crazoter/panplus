@@ -17,6 +17,9 @@ let TranscriptDisplay = (() => {
         constructor(settings) {
             if (settings[Settings.keys.machinetranscript]) {
                 this.tracks = [];
+                this.updateVisibilitySleepTime = 500;
+                this.updateVisibilitySleepTimeIncrement = 100;
+                this.updateVisibilitySleepTimeMax = 1000;
                 this.init();
             }
         }
@@ -44,7 +47,7 @@ let TranscriptDisplay = (() => {
          */
         async loadTranscriptDisplay() {
             const transcript = await TranscriptRequester.get(new TranscriptSourcePanopto());
-            this.initTranscriptTab(transcript);
+            //this.initTranscriptTab(transcript);//This has been moved into load subtitles
             this.loadSubtitles(transcript);
         }
 
@@ -55,21 +58,42 @@ let TranscriptDisplay = (() => {
         async initTranscriptTab(transcript) {
             if (transcript.data.length > 0) {
                 $('#megalist-transcript').megalist();
-                $('#megalist-transcript').megalist('setDataProvider', () => {
+                $('#megalist-transcript').megalist('setDataProvider', (() => {
                     let result = [];
                     for (let i = 0; i < transcript.data.length; i++) {
                         result.push({
-                            time: (transcript.data[i].time / 60).toFixed(2).replace('.',':'), 
+                            time: (((transcript.data[i].time / 60) | 0) + ((transcript.data[i].time | 0) % 60 / 100)).toFixed(2).replace('.',':'),
                             text: transcript.data[i].text
                         });
                     }
                     return result;
-                });
+                })());
                 $('#megalist-transcript').megalist('setLabelFunction', (item) => {
-                    return `${item.time}: ${item.text}`;
+                    return `<div><b>${item.time}:</b> ${item.text}</div>`;
                 });
+
+                let injectedFunc = () => {
+                    let videoDOM = document.getElementsByTagName("video")[0];
+                    let track = null;
+                    for(let i = 0; i < videoDOM.textTracks.length; i++) {
+                        if (videoDOM.textTracks[i].label == "Machine Transcribed") {
+                            track = videoDOM.textTracks[i];
+                            break;
+                        }
+                    }
+
+                    if (track == null) console.error("Track cannot be null");
+
+                    bridgeReceiveDataCallback((event) => {
+                        Panopto.Viewer.Viewer.position(track.cues[parseInt(event.detail)].startTime);
+                    });
+                };
+
+                let ctxBridge = new ContextBridge(injectedFunc, "megalist_trigger");
+                ctxBridge.connect();
+                
                 $('#megalist-transcript').on('change', (event) => {
-                    //TODO: Jump on click
+                    ctxBridge.send(event.selectedIndex);
                 });
             }
         }
@@ -93,12 +117,13 @@ let TranscriptDisplay = (() => {
             //let tracks = [];
             this.tracks = [];
             for (var i = 0; i < elements.all.length; i++) {
-                this.tracks.push(elements.all[i].addTextTrack("captions", "English", "en"));
+                this.tracks.push(elements.all[i].addTextTrack("captions", "Machine Transcribed", "en"));
             }
             //Add a sleep here to avoid issues with adding cues
             await sleep(100);
             //Add cues only for main video
             for (let j = 0; j < cueArray.length; j++) {
+                cueArray[j].id = j;
                 this.tracks[elements.primaryVideoIndex].addCue(cueArray[j]);
             }
             //If 2 videos, sync by adding cue to currentTime when the cue is played.
@@ -109,11 +134,11 @@ let TranscriptDisplay = (() => {
                     //function is embedded in the code here because of the need to access previous variables for performance reasons
                     let cues = self.tracks[elements.primaryVideoIndex].activeCues;
                     //remove all cues before adding any new ones
-                    while (self.tracks[otherVideoIndex].cues.length > 0) {
+                    while (self.tracks[otherVideoIndex].cues && self.tracks[otherVideoIndex].cues.length > 0) {
                         self.tracks[otherVideoIndex].removeCue(self.tracks[otherVideoIndex].cues[0]);
                     }
 
-                    if (cues.length > 0) {
+                    if (cues && cues.length > 0) {
                         //Entered into a new cue
                         //Implementation 1: Insert with fixed death time
                         /*
@@ -132,11 +157,16 @@ let TranscriptDisplay = (() => {
                             cues[0].endTime + offset, 
                             cues[0].text);
                             self.tracks[otherVideoIndex].addCue(currentCue);
+
+                        //Set selected index
+                        $('#megalist-transcript').megalist('setSelectedIndex', parseInt(cues[0].id));
                     }
                 };
             } else if (videoDOMs.length > 2) {
                 alert("Extension currently doesn't support subtitling of more than 2 video streams.");
             }
+
+            this.initTranscriptTab(transcript);
 
             //Set to show subtitles after a brief delay (Doesn't work without delay, this is a hotfix)
             await this.updateVisibility();
@@ -144,10 +174,17 @@ let TranscriptDisplay = (() => {
         }
 
         async updateVisibility() {
-            if (Settings.getDataAsObject()[Settings.keys.subtitles])
-                await this.show();
-            else 
-                await this.hide();
+            while (true) {
+                if (Settings.getDataAsObject()[Settings.keys.subtitles])
+                    await this.show();
+                else 
+                    await this.hide();
+
+                //Getting really tired of my subtitles not appearing so i'm going to long poll this
+                await sleep(this.updateVisibilitySleepTime);
+                if (this.updateVisibilitySleepTimeMax > this.updateVisibilitySleepTime)
+                    this.updateVisibilitySleepTime += this.updateVisibilitySleepTimeIncrement;
+            }
         }
 
         async hide() {

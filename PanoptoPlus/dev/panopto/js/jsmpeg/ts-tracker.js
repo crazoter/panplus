@@ -44,7 +44,7 @@ TSTracker = (() => {
                     switch (event.data.msgEnum) {
                         case MessageEnums.NORMAL_RESULTS:
                             //debugger;
-                            //console.info(event.data);
+                            //console.info("TSTracker NORMAL RES:", event.data);
                             //After merging, the start times are at their approprate locations
                             this.insertSilentSections(event.data.options.id, event.data.data.results);
                             break;
@@ -53,7 +53,7 @@ TSTracker = (() => {
                             this.logDataForR(startTime, event.data.data);
                             break;
                         case MessageEnums.NOISE_RESULTS: 
-                            //console.info("TSTracker NOISE RES: ", event.data.data);
+                            console.info("TSTracker NOISE RES: ", event.data.data);
                             if (!event.data.data || !event.data.data.results) throw new Error("Invalid noise reference line features");
                             this.noiseReferenceLineFeatures = event.data.data.results;
                             this.noiseReferenceCallbacks.fire();
@@ -88,6 +88,8 @@ TSTracker = (() => {
                     }
                     
                     //Set configs for optimization
+                    //Disabled because causing some problems for some webcasts
+                    /*
                     players.forEach(player => {
                         player.engine.hlsjs.config.startFragPrefetch = true;
                         player.engine.hlsjs.currentLevel = 0;
@@ -97,21 +99,51 @@ TSTracker = (() => {
                         player.engine.hlsjs.config.maxMaxBufferLength = 600;
                         player.engine.hlsjs.config.maxBufferSize = 60000000;
                         player.engine.hlsjs.config.stretchShortVideoTrack = true;
-                    });
+                    });*/
+
+                    let promiseChain = null;
+                    let waitForPromiseChainResolve = null;
+                    let waitForPromiseChain = new Promise(resolve => { waitForPromiseChainResolve = resolve; });
 
                     var request = function(url, frag, options) {
-                        if (!options)
-                            options = {isNoiseSample: false, startProcessingFrom: 0};
-                        //console.log("hlsFragLoading: " + url);
-                        //https://stackoverflow.com/questions/33902299/using-jquery-ajax-to-download-a-binary-file
-                        //Make the request in the webpage environment in case there are any CORS issues
-                        var req = new XMLHttpRequest();
-                        req.open("GET", url, true);
-                        req.responseType = "arraybuffer";
-                        req.onload = function(e) {
-                            bridgeCallback({frag: frag, data: req.response, options: options});
-                        };
-                        req.send();
+                        if (!promiseChain) {
+                            //Initialize the promise chain with the noise request as the first promise
+                            if (options && options.isNoiseSample) {
+                                promiseChain = requestFx(url, frag, options);
+                                waitForPromiseChainResolve();
+                            } else {
+                                //If there were others that came before, get them to wait, then add them to the chain later
+                                waitForPromiseChain.then(() => {
+                                    promiseChain.then(requestFx(url, frag, options));
+                                });
+                            }
+                        } else {
+                            //Initialized, chain more promises
+                            promiseChain.then(requestFx(url, frag, options));
+                        }
+                    }
+                    
+                    var requestFx = function(url, frag, options) {
+                        return new Promise((resolve) => {
+                            if (!options)
+                                options = {isNoiseSample: false, startProcessingFrom: 0};
+                            //https://stackoverflow.com/questions/33902299/using-jquery-ajax-to-download-a-binary-file
+                            //Make the request in the webpage environment in case there are any CORS issues
+                            var req = new XMLHttpRequest();
+                            req.open("GET", url, true);
+                            req.responseType = "arraybuffer";
+                            //console.log("TS Request", url);
+                            req.onload = function(e) {
+                                bridgeSendData({frag: {
+                                        relurl: frag.relurl,
+                                        start: frag.start,
+                                        duration: frag.duration,
+                                        url: frag.url
+                                    }, data: req.response, options: options});
+                                resolve();
+                            };
+                            req.send();
+                        });
                     }
 
                     var noiseTSParameters = async function(url) {
@@ -159,17 +191,38 @@ TSTracker = (() => {
                     let noiseSampleRequested = false;
                     //Make use of the flowplayer on the website to keep us updated on TS files are in use
                     //This automatically picks the 1st video which should carry the audio
-                    players[0].engine.hlsjs.observer.addListener("hlsFragLoading",(callbackId, details) => {
-                        if (!noiseSampleRequested) {
-                            noiseTSParameters(details.frag.url).then((params) => {
-                                if (params) {
-                                    request(params.url, details.frag, params.options);
-                                    noiseSampleRequested = true;
+                    let listenerFired = false;
+                    let fragsListened = {};
+                    let addListener = function() {
+                        players[0].engine.hlsjs.observer.addListener("hlsFragLoading",(callbackId, details) => {
+                            listenerFired = true;
+                            if(fragsListened[details.frag.relurl] == null) {
+                                fragsListened[details.frag.relurl] = 1;
+                                if (!noiseSampleRequested) {
+                                    noiseTSParameters(details.frag.url).then((params) => {
+                                        if (params) {
+                                            request(params.url, details.frag, params.options);
+                                            noiseSampleRequested = true;
+                                        }
+                                    });
                                 }
-                            });
-                        }
-                        request(details.frag.url, details.frag);
-                    });
+                                request(details.frag.url, details.frag);
+                            }
+                        });
+                    };
+                    addListener();
+                    
+                    let loop = function() {
+                        window.setTimeout(function() {
+                            console.log("ListenerTracker", fragsListened, listenerFired);
+                            if (!listenerFired) {
+                                addListener();
+                                loop();
+                            }
+                        }, 500);
+                    }
+                    loop();
+
                     console.info("TS-Tracker initialized");
                 };
                 //#endregion
@@ -181,16 +234,17 @@ TSTracker = (() => {
                             if (!event.detail.options.isNoiseSample) {
                                 self.processedTSFilesMap[event.detail.frag.relurl] = 1;
                             }
+                            /*
                             let options = {
                                 isNoiseSample: event.detail.options.isNoiseSample,
                                 startProcessingFrom: event.detail.options.startProcessingFrom,
                                 id: event.detail.options.id || event.detail.frag.relurl,
                                 startTime: event.detail.frag.start,
                                 duration: event.detail.frag.duration,
-                            };
+                            };*/
 
                             //return;
-                            //console.info(event.detail.data, event.detail.options);
+                            //console.info('TsTrackingEvent', event.detail.data, event.detail.options);
                             self.process(event.detail.data, {
                                 isNoiseSample: event.detail.options.isNoiseSample,
                                 startProcessingFrom: event.detail.options.startProcessingFrom,
@@ -199,6 +253,8 @@ TSTracker = (() => {
                                 duration: event.detail.frag.duration,
                             });
                         }
+                    } else {
+                        debugger;
                     }
                 });
                 ctxBridge.connect();
@@ -247,6 +303,7 @@ TSTracker = (() => {
                     options.duration = audioBuffer.duration;
                     options.float32Length = audioBuffer.length;
                     options.silenceThreshold = Settings.getDataAsObject()[Settings.keys.silencethreshold];
+                    //console.info(options.silenceThreshold);
                     //Convert to ArrayBuffers for transfer
                     const channel0 = audioBuffer.getChannelData(0).buffer;
                     const channel1 = audioBuffer.getChannelData(1).buffer;
@@ -289,7 +346,6 @@ TSTracker = (() => {
                 hist(myData$dist, breaks=1000)
                 par(pch=22, col="red");heading = paste("type=","h");plot(myData$time, myData$dist, type="n", main=heading);lines(myData$time, myData$dist, type="h") 
                 */
-                debugger;
                 return dataCSV;//Only return something so they don't garbage collect my dataCSV
             }
         }

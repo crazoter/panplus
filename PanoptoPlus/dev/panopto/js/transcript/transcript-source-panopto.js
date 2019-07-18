@@ -28,7 +28,7 @@ let TranscriptSourcePanopto = (() => {
                 responseType: "json"
             },
             success: function(data) {
-                bridgeCallback(data);
+                bridgeSendData(data);
             }
         });
     };

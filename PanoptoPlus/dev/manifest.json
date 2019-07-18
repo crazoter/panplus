@@ -59,7 +59,7 @@
                 "libs/jquery-ui/css/jquery-ui.min.css",
                 "libs/jquery-ui-slider-pips/jquery-ui-slider-pips.min.css",
                 "libs/fontawesome/all.min.css",
-                "libs/triceam-megalist/megalist.css",
+                "panopto/css/megalist.css",
                 "panopto/css/player.css",
                 "panopto/css/speed-slider.css",
                 "panopto/css/thumbnails.css",

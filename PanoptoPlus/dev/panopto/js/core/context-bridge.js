@@ -17,15 +17,18 @@ let ContextBridge = (() => {
         document.body.appendChild(this.script);
     }
     /**
-     * private function to wrap function with additional code to be injected
+     * private function to wrap function with additional code to be injected.
+     * In your injected script, you can call bridgeSendData(object) to send something back to the isolated extension environment.
+     * You can call bridgeReceiveDataCallback(function) to set a callback for when the script receives data from the isolated extension environment.
+     * You can also call 
      * @private
      * @static
      * @returns {undefined}
      */
     function buildConnectScript() {
         return `(() => { var bridgeCall = ${this.func}
-        ; var bridgeCallback = function (detail) {
-        document.dispatchEvent(new CustomEvent("${this.eventHandle}", {detail: detail})); };
+        ; var bridgeSendData = (detail) => { document.dispatchEvent(new CustomEvent("${this.eventHandle}", {detail: detail})); };
+        var bridgeReceiveDataCallback = (func) => { document.addEventListener("${this.eventHandle}_FROM_EXT", func); };
         bridgeCall(); })();`;
     }
     /**
@@ -36,8 +39,8 @@ let ContextBridge = (() => {
     class ContextBridge {
         /**
          * ContextBridge class for setting up linkages between the isolated code environment and the actual code environment of the user
-         * @param {function} func the function to be injected into the page. To trigger the eventHandle (and eventHandler) from within this function, call bridgeCallback().
-         * @param {String|undefined} eventHandle the string used for triggering & detecting events for this particular bridge. Only required if using request or connect.
+         * @param {function} func the function to be injected into the page. To trigger the eventHandle (and eventHandler) from within this function, call bridgeSendData().
+         * @param {String|undefined} eventHandle the string used for triggering & detecting events for this particular bridge. Only required if using request or connect. If using the send() function, the event handler will have a "_FROM_EXT" appended to the back.
          * @param {function|undefined} eventHandler the function called whenever the eventHandle is triggered (think of it as a callback). This function takes in 1 parameter. Only required if using connect.
          */
         constructor(func, eventHandle, eventHandler) {
@@ -86,6 +89,14 @@ let ContextBridge = (() => {
             document.addEventListener(this.eventHandle, this.eventHandler);
             this.script.remove();
             this.script = null;
+        }
+        
+        /**
+         * Send an object back to a connected script
+         * @param {Object} data object to send back
+         */
+        send(data) {
+            document.dispatchEvent(new CustomEvent(this.eventHandle + "_FROM_EXT", {detail: data}));
         }
 
         /**
