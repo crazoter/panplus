@@ -639,6 +639,29 @@ window.requestAnimFrame = (function(){
     
     scrollbarTouchMove: function( event ) {
         var newCoordinates = this.getInputCoordinates( event );
+        this.scrollTo(newCoordinates);
+        event.preventDefault();
+        return false;
+    },
+
+    scrollToIndex: function(index) {
+        var ratio = (index / (this.dataProvider.length));
+        var newYPosition = ratio*(this.itemHeight*this.dataProvider.length-1);
+
+        newYPosition = Math.max( 0, newYPosition );
+        newYPosition = Math.min( newYPosition, (this.itemHeight*(this.dataProvider.length))-(this.$el.height()-(2*this.SCROLLBAR_BORDER)-this.$scrollbar.height()) );
+
+        var newScrollbarPos = this.SCROLLBAR_BORDER + ratio*(this.$el.height()-this.SCROLLBAR_BORDER-this.$scrollbar.height());
+        newScrollbarPos = Math.max( newScrollbarPos, this.SCROLLBAR_BORDER );
+        newScrollbarPos = Math.min( newScrollbarPos, this.$el.height()-this.SCROLLBAR_BORDER-this.$scrollbar.height() );
+        this.$scrollbar.css( "top", newScrollbarPos );
+        this.scrollbarInputCoordinates = {x: 0, y: newScrollbarPos};
+
+        this.yPosition = newYPosition;
+        this.updateLayout(true);
+    },
+
+    scrollTo: function(newCoordinates) {
         var yDelta = this.scrollbarInputCoordinates.y - newCoordinates.y;
         
         var yPosition = parseInt( this.$scrollbar.css( "top" ), 10 );

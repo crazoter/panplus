@@ -159,7 +159,10 @@ let TranscriptDisplay = (() => {
                             self.tracks[otherVideoIndex].addCue(currentCue);
 
                         //Set selected index
-                        $('#megalist-transcript').megalist('setSelectedIndex', parseInt(cues[0].id));
+                        let index = parseInt(cues[0].id);
+                        //debugger;
+                        $('#megalist-transcript').megalist('setSelectedIndex', index);
+                        $('#megalist-transcript').megalist('scrollToIndex', index - 4);
                     }
                 };
             } else if (videoDOMs.length > 2) {
