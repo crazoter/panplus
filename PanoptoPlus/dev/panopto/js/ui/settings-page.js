@@ -30,7 +30,7 @@ let SettingsPage = (() => {
         App.transcriptDisplay.updateVisibility();
       }
 
-      console.info(event);
+      console.log(event);
     }
 
     saveSettingsWithoutCaching() {

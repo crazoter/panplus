@@ -40,6 +40,9 @@ let SilenceCueManager = (() => {
          */
         constructor(settings) {
             if (settings[Settings.keys.silencetrimming]) {
+                this.updateVisibilitySleepTime = 500;
+                this.updateVisibilitySleepTimeIncrement = 100;
+                this.updateVisibilitySleepTimeMax = 1000;
                 this.init();
             }
         }
@@ -102,7 +105,7 @@ let SilenceCueManager = (() => {
                         if (!Panopto.Viewer.Viewer.activeSecondary() || lastSynced &lt; DESYNC_LIMIT || offset &lt; FAST_JUMP_THRESHOLD) {
                             for (let i = 0; i &lt; videoDOMs.length; i++) {
                                 if (videoDOMs[i]) {
-                                    //console.info(`${videoDOMs[i].currentTime}`);
+                                    //console.log(`${videoDOMs[i].currentTime}`);
                                     videoDOMs[i].currentTime += offset;
                                 }
                             }
@@ -113,12 +116,12 @@ let SilenceCueManager = (() => {
                             prevTime = cues[0].endTime;
                             Panopto.Viewer.Viewer.position(cues[0].endTime);
                             lastSynced = 0;
-                            console.info("Synced using Panopto API");
+                            //console.log("Synced using Panopto API");
                         }
                         elapsedTime = (Date.now() - startTime) / 1000;
                         timeWatched = elapsedTime - timeSaved;
-                        console.info(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}, reduced by: ${cues[0].endTime - cues[0].startTime}`, `sync time: ${lastSynced}`);
-                        //console.info(`Time saved: ${timeSaved.toFixed(4)}`, `elapsed: ${elapsedTime}`, `multipler: ${(elapsedTime / timeWatched).toFixed(2)}x`);//,`${videoDOMs[0].currentTime}`);
+                        //console.log(`Jump made from ${cues[0].startTime} to ${cues[0].endTime}, reduced by: ${cues[0].endTime - cues[0].startTime}`, `sync time: ${lastSynced}`);
+                        //console.log(`Time saved: ${timeSaved.toFixed(4)}`, `elapsed: ${elapsedTime}`, `multipler: ${(elapsedTime / timeWatched).toFixed(2)}x`);//,`${videoDOMs[0].currentTime}`);
                         
                     }
                 };
@@ -127,19 +130,46 @@ let SilenceCueManager = (() => {
             ctxBridge.exec();
 
             //Set to show tracks after a brief delay (Doesn't work without delay, this is a hotfix)
+            this.updateVisibility();
+
+            console.log("Silence Cues loaded");
+        };
+
+        async updateVisibility() {
+            while (true) {
+                if (Settings.getDataAsObject()[Settings.keys.silencetrimming])
+                    await this.show();
+                else 
+                    await this.hide();
+
+                //Getting really tired of my subtitles not appearing so i'm going to long poll this
+                await sleep(this.updateVisibilitySleepTime);
+                if (this.updateVisibilitySleepTimeMax > this.updateVisibilitySleepTime)
+                    this.updateVisibilitySleepTime += this.updateVisibilitySleepTimeIncrement;
+            }
+        }
+
+        async hide() {
+            return await this.setState("disabled");
+        }
+
+        async show() {
+            return await this.setState("hidden");
+        }
+    
+        async setState(state) {
+            //Set to show subtitles after a brief delay (Doesn't work without delay, this is a hotfix)
             let showing = true;
             do {
                 showing = true;
                 await sleep(500);
                 //Show track(s)
-                SilenceCueManager.cueTrack.mode = "hidden";
+                SilenceCueManager.cueTrack.mode = state;
                 await sleep(200);
-                //Verify tracks are indeed not hidden
-                showing &amp;= SilenceCueManager.cueTrack.mode === "hidden";
+                //verify this.tracks are indeed showing
+                showing &amp;= SilenceCueManager.cueTrack.mode === state;
             } while(!showing);
-
-            console.log("Silence Cues loaded");
-        };
+        }
 
         /**
          * Convert id to index (e.g. "00012.ts" to 12)
@@ -230,13 +260,13 @@ let SilenceCueManager = (() => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptDisplay.html">TranscriptDisplay</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 12 2019 01:45:09 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 19 2019 19:03:23 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

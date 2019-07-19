@@ -46,59 +46,63 @@ DelayDisabler = (() => {
          * @return {undefined}
          */
         init() {
-            let injectedFunc = () => {
-                let firedToggle = false;
-                //I hate this method, but it's our hack in the bag
-                //Temporarily disable delay on click or on spacebar
-                let tmpDisable = () => {
-                    console.info("Tmp disable");
-                    firedToggle = true;
-                    window.setTimeout(() => {firedToggle = false}, 10);
-                }
-                $(window).keypress((e) => {
-                    if (e.which === 32) {
-                        tmpDisable();
-                    }
-                });
-                $("#playButton").click((e) => {
-                    tmpDisable();
-                });
-                
-                let videoDOMs = undefined;
-                let repeatableFunction = () => {
-                    //console.info('rF', firedToggle, Panopto.Viewer.Viewer.playState(), videoDOMs, videoDOMs[0].paused, videoDOMs[1].paused);
-                    if (!firedToggle &amp;&amp; Panopto.Viewer.Viewer.playState() === 1 &amp;&amp; videoDOMs.some((video) => video.paused)) {
-                        //Supposed to be playing but video is paused?!
-                        //lol...
+            VideosLoadedEvent.subscribe(() => {
+                let injectedFunc = () => {
+                    
+                    let firedToggle = false;
+                    //I hate this method, but it's our hack in the bag
+                    //Temporarily disable delay on click or on spacebar
+                    let tmpDisable = () => {
+                        console.log("Tmp disable");
                         firedToggle = true;
-                        videoDOMs.forEach((video) => {
-                            if (video) { video.play(); }
-                        });
-                        Panopto.Viewer.Viewer.setPlayState(1);
-                        console.info("Delay quickfix triggered");
-                        window.setTimeout(function() {
-                            firedToggle = false;
-                            repeatableFunction();
-                        }, 10);
+                        window.setTimeout(() => {firedToggle = false}, 10);
                     }
+                    $(window).keypress((e) => {
+                        if (e.which === 32) {
+                            tmpDisable();
+                        }
+                    });
+                    $("#playButton").click((e) => {
+                        tmpDisable();
+                    });
+                    
+                    let videoDOMs = undefined;
+                    let repeatableFunction = () => {
+                        //console.log('rF', firedToggle, Panopto.Viewer.Viewer.playState(), videoDOMs, videoDOMs[0].paused, videoDOMs[1].paused);
+                        if (!firedToggle &amp;&amp; Panopto.Viewer.Viewer.playState() === 1 &amp;&amp; videoDOMs.some((video) => video.paused)) {
+                            //Supposed to be playing but video is paused?!
+                            //lol...
+                            firedToggle = true;
+                            videoDOMs.forEach((video) => {
+                                if (video) { video.play(); }
+                            });
+                            Panopto.Viewer.Viewer.setPlayState(1);
+                            console.log("Delay quickfix triggered");
+                            window.setTimeout(function() {
+                                firedToggle = false;
+                                repeatableFunction();
+                            }, 10);
+                        }
+                    };
+                    
+                    Panopto.Core.Logger.log = ((msg) => {
+                        console.log(msg);
+                        //Secondary player started playing stream null: Stream stopped
+                        if (msg.indexOf("player changed play state to {1}") > -1 || msg.indexOf("player changed play state to 2") > -1) {
+                            //playstate: 1: playing (or at least supposed to be), 2: paused
+                            window.setTimeout(() => {
+                                //Must convert to array first
+                                videoDOMs = Array.from(document.getElementsByTagName("video"));
+                                if (!Panopto.Viewer.Viewer.activeSecondary()) videoDOMs.pop();
+                                repeatableFunction();
+                            }, 1);
+                        }
+                    });
+                    console.log("Delay disabler initialized");
                 };
-                Panopto.Core.Logger.log = ((msg) => {
-                    console.info(msg);
-                    //Secondary player started playing stream null: Stream stopped
-                    if (msg.indexOf("player changed play state to {1}") > -1 || msg.indexOf("player changed play state to 2") > -1) {
-                        //playstate: 1: playing (or at least supposed to be), 2: paused
-                        window.setTimeout(() => {
-                            //Must convert to array first
-                            videoDOMs = Array.from(document.getElementsByTagName("video"));
-                            if (!Panopto.Viewer.Viewer.activeSecondary()) videoDOMs.pop();
-                            repeatableFunction();
-                        }, 1);
-                    }
-                });
-                console.info("Delay disabler initialized");
-            };
-            let ctxBridge = new ContextBridge(injectedFunc);
-            ctxBridge.exec();
+                let ctxBridge = new ContextBridge(injectedFunc);
+                ctxBridge.exec();
+            });
         }
     }
     return DelayDisabler;
@@ -112,13 +116,13 @@ DelayDisabler = (() => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptDisplay.html">TranscriptDisplay</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 12 2019 01:45:09 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 19 2019 19:03:23 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

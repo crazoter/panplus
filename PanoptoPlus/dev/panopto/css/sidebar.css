@@ -134,3 +134,12 @@
 .viewer #viewerHeader div.header-right {
     float: none;
 }
+
+.viewer #viewerContent #leftPane #eventTabs #eventTabControl div.event-tab-header {
+    padding: 0;
+}
+
+.viewer #viewerContent #leftPane #eventTabs #eventTabControl div.event-tab-header span {
+    display: block;
+    padding: 4px 0px 3px 14px;
+}

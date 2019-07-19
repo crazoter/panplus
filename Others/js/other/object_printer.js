@@ -52,7 +52,7 @@ function printObject(object) {
             }
         }
     }
-    console.info(output);
+    console.log(output);
 }
 
 printObject(Panopto);

@@ -45,15 +45,18 @@ let ContextBridge = (() => {
         document.body.appendChild(this.script);
     }
     /**
-     * private function to wrap function with additional code to be injected
+     * private function to wrap function with additional code to be injected.
+     * In your injected script, you can call bridgeSendData(object) to send something back to the isolated extension environment.
+     * You can call bridgeReceiveDataCallback(function) to set a callback for when the script receives data from the isolated extension environment.
+     * You can also call 
      * @private
      * @static
      * @returns {undefined}
      */
     function buildConnectScript() {
         return `(() => { var bridgeCall = ${this.func}
-        ; var bridgeCallback = function (detail) {
-        document.dispatchEvent(new CustomEvent("${this.eventHandle}", {detail: detail})); };
+        ; var bridgeSendData = (detail) => { document.dispatchEvent(new CustomEvent("${this.eventHandle}", {detail: detail})); };
+        var bridgeReceiveDataCallback = (func) => { document.addEventListener("${this.eventHandle}_FROM_EXT", func); };
         bridgeCall(); })();`;
     }
     /**
@@ -64,8 +67,8 @@ let ContextBridge = (() => {
     class ContextBridge {
         /**
          * ContextBridge class for setting up linkages between the isolated code environment and the actual code environment of the user
-         * @param {function} func the function to be injected into the page. To trigger the eventHandle (and eventHandler) from within this function, call bridgeCallback().
-         * @param {String|undefined} eventHandle the string used for triggering &amp; detecting events for this particular bridge. Only required if using request or connect.
+         * @param {function} func the function to be injected into the page. To trigger the eventHandle (and eventHandler) from within this function, call bridgeSendData().
+         * @param {String|undefined} eventHandle the string used for triggering &amp; detecting events for this particular bridge. Only required if using request or connect. If using the send() function, the event handler will have a "_FROM_EXT" appended to the back.
          * @param {function|undefined} eventHandler the function called whenever the eventHandle is triggered (think of it as a callback). This function takes in 1 parameter. Only required if using connect.
          */
         constructor(func, eventHandle, eventHandler) {
@@ -115,6 +118,14 @@ let ContextBridge = (() => {
             this.script.remove();
             this.script = null;
         }
+        
+        /**
+         * Send an object back to a connected script
+         * @param {Object} data object to send back
+         */
+        send(data) {
+            document.dispatchEvent(new CustomEvent(this.eventHandle + "_FROM_EXT", {detail: data}));
+        }
 
         /**
          * Clean-up, remove scripts and event listeners. This is automatically handled if you used request or exec. 
@@ -142,13 +153,13 @@ let ContextBridge = (() => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptDisplay.html">TranscriptDisplay</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 12 2019 01:45:09 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 19 2019 19:03:23 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -127,7 +127,7 @@ function _parseMPEG2PESPacket(subview) { // @arg Object - subview, MPEG2-TS Audi
     // また http://linuxtv.org/pipermail/linux-dvb/2008-August/thread.html#27991 から始まるスレッドにも情報がある
     if (videoStream && PES_packet_length === 0) {
         if (MPEG2TS["VERBOSE"]) {
-            console.info("videoStream and PES_packet_length = 0");
+            console.log("videoStream and PES_packet_length = 0");
         }
         PES_packet_length = subview.source.length;
     }

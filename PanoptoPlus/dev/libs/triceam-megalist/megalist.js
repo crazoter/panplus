@@ -150,6 +150,7 @@ window.requestAnimFrame = (function(){
     onTouchStart: function ( event ) {
         if (!this.animating ) {
             this.animating = true;
+            this.$el.prop("animating", true);
             this.render();
         }  
         
@@ -201,6 +202,7 @@ window.requestAnimFrame = (function(){
     
     onTouchEnd: function ( event ) {
         this.animating = false;
+        this.$el.prop("animating", false);
         var id = this.$el.attr("id");
         
         this.inputEndCoordinates = this.inputCoordinates;
@@ -628,6 +630,7 @@ window.requestAnimFrame = (function(){
     
     scrollbarTouchStart: function( event ) {
         this.cleanupEventHandlers();
+        this.$el.prop("scrolling", true);
         this.scrollbarInputCoordinates = this.getInputCoordinates( event );
         
         $(document).bind( this.TOUCH_MOVE, this.scrollbarMoveHandler );
@@ -688,6 +691,7 @@ window.requestAnimFrame = (function(){
     
     scrollbarTouchEnd: function( event ) {
         this.cleanupEventHandlers();
+        this.$el.prop("scrolling", false);
         this.cleanupListItems();
         event.preventDefault();
         return false;

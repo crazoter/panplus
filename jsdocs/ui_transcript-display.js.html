@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ui/transcript-display.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ui/transcript-display.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @file TranscriptDisplay, includes code that will load the transcript, then inject the subtitles as cues into the first video's texttrack.
  * If there is a second video, then when the cue is reached, the subtitle will be injected into the second video.
  * This is to circumvent the issue of the variable offset between the 1st and 2nd video currentTime.
@@ -57,56 +85,44 @@ let TranscriptDisplay = (() => {
          */
         async initTranscriptTab(transcript) {
             if (transcript.data.length > 0) {
-                //Initialize the main tab
                 $('#megalist-transcript').megalist();
-                //Load data from transcript
                 $('#megalist-transcript').megalist('setDataProvider', (() => {
                     let result = [];
-                    for (let i = 0; i < transcript.data.length; i++) {
+                    for (let i = 0; i &lt; transcript.data.length; i++) {
                         result.push({
-                            //Make sure time displayed properly
                             time: (((transcript.data[i].time / 60) | 0) + ((transcript.data[i].time | 0) % 60 / 100)).toFixed(2).replace('.',':'),
                             text: transcript.data[i].text
                         });
                     }
                     return result;
                 })());
-                //Setup display for each ul
                 $('#megalist-transcript').megalist('setLabelFunction', (item) => {
-                    return `<div><b>${item.time}:</b> ${item.text}</div>`;
+                    return `&lt;div>&lt;b>${item.time}:&lt;/b> ${item.text}&lt;/div>`;
                 });
 
-                //We need to access Panopto.Viewer.Viewer to change position, so setup context bridge
                 let injectedFunc = () => {
                     let videoDOM = document.getElementsByTagName("video")[0];
                     let track = null;
-                    for(let i = 0; i < videoDOM.textTracks.length; i++) {
+                    for(let i = 0; i &lt; videoDOM.textTracks.length; i++) {
                         if (videoDOM.textTracks[i].label == "Machine Transcribed") {
                             track = videoDOM.textTracks[i];
                             break;
                         }
                     }
+
                     if (track == null) console.error("Track cannot be null");
+
                     bridgeReceiveDataCallback((event) => {
                         Panopto.Viewer.Viewer.position(track.cues[parseInt(event.detail)].startTime);
                     });
                 };
+
                 let ctxBridge = new ContextBridge(injectedFunc, "megalist_trigger");
                 ctxBridge.connect();
                 
-                //On user clicking a subtitle, send to DOM to request change position
                 $('#megalist-transcript').on('change', (event) => {
                     ctxBridge.send(event.selectedIndex);
                 });
-
-                //Initialize the tab on the second screen
-                /*
-                $("#eventTabControl").prepend(`<div id="machTranscriptTabHeader" class="event-tab-header accented-tab">
-                <i class="far fa-file-alt"></i><span class="text">Transcript</span></div>`);
-                $("#machTranscriptTabHeader").click(() => {
-                    $("#machTranscriptTabHeader").addClass("selected");
-                });*/
-
             }
         }
 
@@ -120,7 +136,7 @@ let TranscriptDisplay = (() => {
             console.log(cueArray.length + " Subtitle cues detected");
             //Stop if there are no cues in the first place
             if (cueArray.length == 0) {
-                $("#sidebar-tab-pg-2").html("No transcript & subtitles available for this webcast.");
+                $("#sidebar-tab-pg-2").html("No transcript &amp; subtitles available for this webcast.");
                 //alert("No subtitles available for this webcast.");
                 return;
             }
@@ -128,13 +144,13 @@ let TranscriptDisplay = (() => {
             //Add track(s) for video(s)
             //let tracks = [];
             this.tracks = [];
-            for (var i = 0; i < elements.all.length; i++) {
+            for (var i = 0; i &lt; elements.all.length; i++) {
                 this.tracks.push(elements.all[i].addTextTrack("captions", "Machine Transcribed", "en"));
             }
             //Add a sleep here to avoid issues with adding cues
             await sleep(100);
             //Add cues only for main video
-            for (let j = 0; j < cueArray.length; j++) {
+            for (let j = 0; j &lt; cueArray.length; j++) {
                 cueArray[j].id = j;
                 this.tracks[elements.primaryVideoIndex].addCue(cueArray[j]);
             }
@@ -146,11 +162,11 @@ let TranscriptDisplay = (() => {
                     //function is embedded in the code here because of the need to access previous variables for performance reasons
                     let cues = self.tracks[elements.primaryVideoIndex].activeCues;
                     //remove all cues before adding any new ones
-                    while (self.tracks[otherVideoIndex].cues && self.tracks[otherVideoIndex].cues.length > 0) {
+                    while (self.tracks[otherVideoIndex].cues &amp;&amp; self.tracks[otherVideoIndex].cues.length > 0) {
                         self.tracks[otherVideoIndex].removeCue(self.tracks[otherVideoIndex].cues[0]);
                     }
 
-                    if (cues && cues.length > 0) {
+                    if (cues &amp;&amp; cues.length > 0) {
                         //Entered into a new cue
                         //Implementation 1: Insert with fixed death time
                         /*
@@ -172,10 +188,9 @@ let TranscriptDisplay = (() => {
 
                         //Set selected index
                         let index = parseInt(cues[0].id);
+                        //debugger;
                         $('#megalist-transcript').megalist('setSelectedIndex', index);
-                        //If is not animating i.e. is not being scrolled, auto scroll
-                        if (!$("#megalist-transcript").prop("scrolling"))
-                            $('#megalist-transcript').megalist('scrollToIndex', index - 3);
+                        $('#megalist-transcript').megalist('scrollToIndex', index - 4);
                     }
                 };
             } else if (videoDOMs.length > 2) {
@@ -218,14 +233,36 @@ let TranscriptDisplay = (() => {
                 showing = true;
                 await sleep(500);
                 //Show track(s)
-                for (let i = 0; i < this.tracks.length; i++)
+                for (let i = 0; i &lt; this.tracks.length; i++)
                     this.tracks[i].mode = state;
                 await sleep(200);
                 //verify this.tracks are indeed showing
-                for (let i = 0; i < this.tracks.length; i++)
-                    showing &= this.tracks[i].mode === state;
+                for (let i = 0; i &lt; this.tracks.length; i++)
+                    showing &amp;= this.tracks[i].mode === state;
             } while(!showing);
         }
     }
     return TranscriptDisplay;
-})();
+})();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptDisplay.html">TranscriptDisplay</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 19 2019 19:03:23 GMT+0800 (Singapore Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

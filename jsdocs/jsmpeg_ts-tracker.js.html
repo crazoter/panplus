@@ -72,16 +72,16 @@ TSTracker = (() => {
                     switch (event.data.msgEnum) {
                         case MessageEnums.NORMAL_RESULTS:
                             //debugger;
-                            //console.info(event.data);
+                            //console.log("TSTracker NORMAL RES:", event.data);
                             //After merging, the start times are at their approprate locations
                             this.insertSilentSections(event.data.options.id, event.data.data.results);
                             break;
                         case MessageEnums.RAW_DATA_RESULTS: 
-                            //console.info(event.data.data);
+                            //console.log(event.data.data);
                             this.logDataForR(startTime, event.data.data);
                             break;
                         case MessageEnums.NOISE_RESULTS: 
-                            //console.info("TSTracker NOISE RES: ", event.data.data);
+                            console.log("TSTracker NOISE RES: ", event.data.data);
                             if (!event.data.data || !event.data.data.results) throw new Error("Invalid noise reference line features");
                             this.noiseReferenceLineFeatures = event.data.data.results;
                             this.noiseReferenceCallbacks.fire();
@@ -116,6 +116,8 @@ TSTracker = (() => {
                     }
                     
                     //Set configs for optimization
+                    //Disabled because causing some problems for some webcasts
+                    /*
                     players.forEach(player => {
                         player.engine.hlsjs.config.startFragPrefetch = true;
                         player.engine.hlsjs.currentLevel = 0;
@@ -125,21 +127,51 @@ TSTracker = (() => {
                         player.engine.hlsjs.config.maxMaxBufferLength = 600;
                         player.engine.hlsjs.config.maxBufferSize = 60000000;
                         player.engine.hlsjs.config.stretchShortVideoTrack = true;
-                    });
+                    });*/
+
+                    let promiseChain = null;
+                    let waitForPromiseChainResolve = null;
+                    let waitForPromiseChain = new Promise(resolve => { waitForPromiseChainResolve = resolve; });
 
                     var request = function(url, frag, options) {
-                        if (!options)
-                            options = {isNoiseSample: false, startProcessingFrom: 0};
-                        //console.log("hlsFragLoading: " + url);
-                        //https://stackoverflow.com/questions/33902299/using-jquery-ajax-to-download-a-binary-file
-                        //Make the request in the webpage environment in case there are any CORS issues
-                        var req = new XMLHttpRequest();
-                        req.open("GET", url, true);
-                        req.responseType = "arraybuffer";
-                        req.onload = function(e) {
-                            bridgeCallback({frag: frag, data: req.response, options: options});
-                        };
-                        req.send();
+                        if (!promiseChain) {
+                            //Initialize the promise chain with the noise request as the first promise
+                            if (options &amp;&amp; options.isNoiseSample) {
+                                promiseChain = requestFx(url, frag, options);
+                                waitForPromiseChainResolve();
+                            } else {
+                                //If there were others that came before, get them to wait, then add them to the chain later
+                                waitForPromiseChain.then(() => {
+                                    promiseChain.then(requestFx(url, frag, options));
+                                });
+                            }
+                        } else {
+                            //Initialized, chain more promises
+                            promiseChain.then(requestFx(url, frag, options));
+                        }
+                    }
+                    
+                    var requestFx = function(url, frag, options) {
+                        return new Promise((resolve) => {
+                            if (!options)
+                                options = {isNoiseSample: false, startProcessingFrom: 0};
+                            //https://stackoverflow.com/questions/33902299/using-jquery-ajax-to-download-a-binary-file
+                            //Make the request in the webpage environment in case there are any CORS issues
+                            var req = new XMLHttpRequest();
+                            req.open("GET", url, true);
+                            req.responseType = "arraybuffer";
+                            //console.log("TS Request", url);
+                            req.onload = function(e) {
+                                bridgeSendData({frag: {
+                                        relurl: frag.relurl,
+                                        start: frag.start,
+                                        duration: frag.duration,
+                                        url: frag.url
+                                    }, data: req.response, options: options});
+                                resolve();
+                            };
+                            req.send();
+                        });
                     }
 
                     var noiseTSParameters = async function(url) {
@@ -187,18 +219,39 @@ TSTracker = (() => {
                     let noiseSampleRequested = false;
                     //Make use of the flowplayer on the website to keep us updated on TS files are in use
                     //This automatically picks the 1st video which should carry the audio
-                    players[0].engine.hlsjs.observer.addListener("hlsFragLoading",(callbackId, details) => {
-                        if (!noiseSampleRequested) {
-                            noiseTSParameters(details.frag.url).then((params) => {
-                                if (params) {
-                                    request(params.url, details.frag, params.options);
-                                    noiseSampleRequested = true;
+                    let listenerFired = false;
+                    let fragsListened = {};
+                    let addListener = function() {
+                        players[0].engine.hlsjs.observer.addListener("hlsFragLoading",(callbackId, details) => {
+                            listenerFired = true;
+                            if(fragsListened[details.frag.relurl] == null) {
+                                fragsListened[details.frag.relurl] = 1;
+                                if (!noiseSampleRequested) {
+                                    noiseTSParameters(details.frag.url).then((params) => {
+                                        if (params) {
+                                            request(params.url, details.frag, params.options);
+                                            noiseSampleRequested = true;
+                                        }
+                                    });
                                 }
-                            });
-                        }
-                        request(details.frag.url, details.frag);
-                    });
-                    console.info("TS-Tracker initialized");
+                                request(details.frag.url, details.frag);
+                            }
+                        });
+                    };
+                    addListener();
+                    
+                    let loop = function() {
+                        window.setTimeout(function() {
+                            console.log("ListenerTracker", fragsListened, listenerFired);
+                            if (!listenerFired) {
+                                addListener();
+                                loop();
+                            }
+                        }, 500);
+                    }
+                    loop();
+
+                    console.log("TS-Tracker initialized");
                 };
                 //#endregion
 
@@ -209,16 +262,17 @@ TSTracker = (() => {
                             if (!event.detail.options.isNoiseSample) {
                                 self.processedTSFilesMap[event.detail.frag.relurl] = 1;
                             }
+                            /*
                             let options = {
                                 isNoiseSample: event.detail.options.isNoiseSample,
                                 startProcessingFrom: event.detail.options.startProcessingFrom,
                                 id: event.detail.options.id || event.detail.frag.relurl,
                                 startTime: event.detail.frag.start,
                                 duration: event.detail.frag.duration,
-                            };
+                            };*/
 
                             //return;
-                            //console.info(event.detail.data, event.detail.options);
+                            //console.log('TsTrackingEvent', event.detail.data, event.detail.options);
                             self.process(event.detail.data, {
                                 isNoiseSample: event.detail.options.isNoiseSample,
                                 startProcessingFrom: event.detail.options.startProcessingFrom,
@@ -227,6 +281,8 @@ TSTracker = (() => {
                                 duration: event.detail.frag.duration,
                             });
                         }
+                    } else {
+                        debugger;
                     }
                 });
                 ctxBridge.connect();
@@ -266,7 +322,7 @@ TSTracker = (() => {
          * @returns {undefined}
          */
         decodeAudioData(audioByteStream, options) {
-            //console.info(audioByteStream);
+            //console.log(audioByteStream);
             //https://stackoverflow.com/questions/8074152/is-there-a-way-to-use-the-web-audio-api-to-sample-audio-faster-than-real-time
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             audioCtx.decodeAudioData(Uint8ArrayToArrayBuffer(audioByteStream), 
@@ -275,6 +331,7 @@ TSTracker = (() => {
                     options.duration = audioBuffer.duration;
                     options.float32Length = audioBuffer.length;
                     options.silenceThreshold = Settings.getDataAsObject()[Settings.keys.silencethreshold];
+                    //console.log(options.silenceThreshold);
                     //Convert to ArrayBuffers for transfer
                     const channel0 = audioBuffer.getChannelData(0).buffer;
                     const channel1 = audioBuffer.getChannelData(1).buffer;
@@ -317,7 +374,6 @@ TSTracker = (() => {
                 hist(myData$dist, breaks=1000)
                 par(pch=22, col="red");heading = paste("type=","h");plot(myData$time, myData$dist, type="n", main=heading);lines(myData$time, myData$dist, type="h") 
                 */
-                debugger;
                 return dataCSV;//Only return something so they don't garbage collect my dataCSV
             }
         }
@@ -348,13 +404,13 @@ TSTracker = (() => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Subtitles.html">Subtitles</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Cache.html">Cache</a></li><li><a href="CarouselManager.html">CarouselManager</a></li><li><a href="ContextBridge.html">ContextBridge</a></li><li><a href="DelayDisabler.html">DelayDisabler</a></li><li><a href="LoggerDisabler.html">LoggerDisabler</a></li><li><a href="MinHeap.html">MinHeap</a></li><li><a href="Settings.html">Settings</a></li><li><a href="Sidebar.html">Sidebar</a></li><li><a href="SilenceCueManager.html">SilenceCueManager</a></li><li><a href="SpeedSlider.html">SpeedSlider</a></li><li><a href="Template.html">Template</a></li><li><a href="Transcript.html">Transcript</a></li><li><a href="TranscriptDisplay.html">TranscriptDisplay</a></li><li><a href="TranscriptRequester.html">TranscriptRequester</a></li><li><a href="TranscriptSource.html">TranscriptSource</a></li><li><a href="TranscriptSourcePanopto.html">TranscriptSourcePanopto</a></li><li><a href="TSTracker.html">TSTracker</a></li><li><a href="VADProcessor.html">VADProcessor</a></li><li><a href="VolumeBooster.html">VolumeBooster</a></li></ul><h3>Global</h3><ul><li><a href="global.html#concatUint8Arrays">concatUint8Arrays</a></li><li><a href="global.html#getModuleId">getModuleId</a></li><li><a href="global.html#getWebcastId">getWebcastId</a></li><li><a href="global.html#MessageEnums">MessageEnums</a></li><li><a href="global.html#resolvePrecept">resolvePrecept</a></li><li><a href="global.html#SettingsPage">SettingsPage</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#Uint8ArrayToArrayBuffer">Uint8ArrayToArrayBuffer</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 12 2019 01:45:09 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 19 2019 19:03:23 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

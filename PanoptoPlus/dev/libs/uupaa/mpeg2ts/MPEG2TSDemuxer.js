@@ -266,7 +266,7 @@ function _readTSPacketPayload(subview,          // @arg Object - subview for rea
         break;
     case "VIDEO":
         if (MPEG2TSDemuxer["VERBOSE"]) {
-            console.info("VIDEO PACKET. PID = 0x" + PID.toString(16),
+            console.log("VIDEO PACKET. PID = 0x" + PID.toString(16),
                          "PCR = "  + PCR  + "(" + (PCR  / MPEG2_BASE_CLOCK) + " sec)");
         }
         _storeTSPacketPayload(subview, header, mpeg2ts["VIDEO_TS_PACKET"]);
@@ -275,7 +275,7 @@ function _readTSPacketPayload(subview,          // @arg Object - subview for rea
         break;
     case "AUDIO":
         if (MPEG2TSDemuxer["VERBOSE"]) {
-            console.info("AUDIO PACKET. PID = 0x" + PID.toString(16),
+            console.log("AUDIO PACKET. PID = 0x" + PID.toString(16),
                          "PCR = "  + PCR  + "(" + (PCR  / MPEG2_BASE_CLOCK) + " sec)");
         }
         _storeTSPacketPayload(subview, header, mpeg2ts["AUDIO_TS_PACKET"]);
@@ -287,7 +287,7 @@ function _readTSPacketPayload(subview,          // @arg Object - subview for rea
         break;
     case "USER":
         if (MPEG2TSDemuxer["VERBOSE"]) {
-            console.info("USER DEFINED PID: 0x" + PID.toString(16));
+            console.log("USER DEFINED PID: 0x" + PID.toString(16));
         }
         break;
     default:
@@ -474,14 +474,14 @@ function _readPAT(subview,  // @arg Object - packet subview. { source, cursor }
             if (NET_PID.indexOf(pid) < 0) { // avoid duplicate PID
                 NET_PID.push(pid);
                 if (MPEG2TSDemuxer["VERBOSE"]) {
-                    console.info("collect NET_PID: 0x" + pid.toString(16));
+                    console.log("collect NET_PID: 0x" + pid.toString(16));
                 }
             }
         } else {
             if (PMT_PID.indexOf(pid) < 0) { // avoid duplicate PID
                 PMT_PID.push(pid);
                 if (MPEG2TSDemuxer["VERBOSE"]) {
-                    console.info("collect PMT_ID: 0x" + pid.toString(16));
+                    console.log("collect PMT_ID: 0x" + pid.toString(16));
                 }
             }
         }
@@ -642,7 +642,7 @@ function _readPMT(subview,  // @arg Object - packet subview. { source, cursor }
                 if (MPEG2TSDemuxer["VERBOSE"]) {
                     console.log("add VIDEO_STREAM_PID", elementary_PID);
                     console.log("Found Video Stream. stream_type: 0x" + stream_type.toString(16));
-                    console.info("Collect VIDEO_STREAM_PID: 0x" + elementary_PID.toString(16));
+                    console.log("Collect VIDEO_STREAM_PID: 0x" + elementary_PID.toString(16));
                 }
                 break;
             case TYPE_AUDIO:
@@ -651,7 +651,7 @@ function _readPMT(subview,  // @arg Object - packet subview. { source, cursor }
                 if (MPEG2TSDemuxer["VERBOSE"]) {
                     console.log("add AUDIO_STREAM_PID", elementary_PID);
                     console.log("Found Audio Stream. stream_type: 0x" + stream_type.toString(16));
-                    console.info("Collect AUDIO_STREAM_PID: 0x" + elementary_PID.toString(16));
+                    console.log("Collect AUDIO_STREAM_PID: 0x" + elementary_PID.toString(16));
                 }
                 break;
             case TYPE_META:
@@ -659,7 +659,7 @@ function _readPMT(subview,  // @arg Object - packet subview. { source, cursor }
                 if (MPEG2TSDemuxer["VERBOSE"]) {
                     console.log("add META_STREAM_PID", elementary_PID);
                     console.log("Found Meta Stream. stream_type: 0x" + stream_type.toString(16));
-                    console.info("Collect META_STREAM_PID: 0x" + elementary_PID.toString(16));
+                    console.log("Collect META_STREAM_PID: 0x" + elementary_PID.toString(16));
                 }
                 break;
             case TYPE_TEXT:
@@ -754,7 +754,7 @@ function _readDescriptor(desc_view) { // @arg Object - { source, cursor }
         MPEG4_audio_extension_descriptor(desc_data_view);
         break;
     default:
-        console.info("UNKNOWN DESCRIPTOR_TAG", descriptor_tag);
+        console.log("UNKNOWN DESCRIPTOR_TAG", descriptor_tag);
     }
  */
     return {

@@ -26,14 +26,9 @@
                         silenceCueManager: new SilenceCueManager(settings),
                         tsTracker: new TSTracker(settings),
                         carouselManager: new CarouselManager(settings),
-                        //loggerDisabler: new LoggerDisabler(settings),
+                        loggerDisabler: new LoggerDisabler(settings),
                         delayDisabler: new DelayDisabler(settings)
                     };
-                    /*
-                    let keys = Object.keys(App);
-                    keys.forEach((key) => { 
-                        App[key].init();
-                    });*/
 
                     //Initialize initial settings
                     console.log("FIN");

@@ -14,8 +14,10 @@ let Sidebar = (() => {
          * @param {Object} settings settings object
          */
         constructor(settings) { 
-            this.mainVideoIndex = 0;
-            this.init();
+            VideosLoadedEvent.subscribe(() => {
+                this.mainVideoIndex = 0;
+                this.init();
+            });
         }
 
         /**
@@ -63,11 +65,11 @@ let Sidebar = (() => {
                 });
 
                 //Add icons
-                $("#commentsTabHeader").prepend('<i class="far fa-comments"></i>');
-                $("#notesTabHeader").prepend('<i class="far fa-sticky-note"></i>');
-                $("#bookmarksTabHeader").prepend('<i class="far fa-bookmark"></i>');
+                //$("#commentsTabHeader").prepend('<i class="far fa-comments"></i>');
+                //$("#notesTabHeader").prepend('<i class="far fa-sticky-note"></i>');
+                //$("#bookmarksTabHeader").prepend('<i class="far fa-bookmark"></i>');
                 $("#hideEventsButton div").text("Hide Sidebar");
-                $("#hideEventsButton div").prepend('<i class="fas fa-chevron-left" style="padding-right:4px"></i>');
+                //$("#hideEventsButton div").prepend('<i class="fas fa-chevron-left" style="padding-right:4px"></i>');
                 $("#hideEventsButton").css({display: "initial", visibility: "visible"});
 
                 //Hide button
@@ -81,18 +83,24 @@ let Sidebar = (() => {
                 });
 
                 //Show button
-                //BUG: SOMETIMES THE EVENT DOESN'T FIRE IF CLICKING THE TABS BELOW SCREEN. LOW PRIORITY.
                 $("#sidebar-tabs .tabs-container .show-btn").click(() => {
                     $("#commentsTabHeader").click();
                 });
-                $("#commentsTabHeader").click(this.expand);
-                $("#commentsTabHeader span").click(this.expand);
-                $("#notesTabHeader").click(this.expand);
-                $("#notesTabHeader span").click(this.expand);
-                $("#bookmarksTabHeader").click(this.expand);
-                $("#bookmarksTabHeader span").click(this.expand);
-                $(".event-tab-header").click(this.expand);
-                $("#searchInput").click(this.expand);
+
+                //Inject code to trigger our own expand mechanism on top of the default
+                let injectedFunc = () => {
+                    Panopto.Viewer.Viewer.expandLeftPaneFx = Panopto.Viewer.Viewer.expandLeftPane;
+                    Panopto.Viewer.Viewer.expandLeftPane = () => {
+                        //expand function
+                        $("#sidebar-tabs").removeClass("compact");
+                        $("#sidebar-tabs .tabs-container .show-btn").hide();
+                        $("#sidebar-tabs .tabs-container .hide-btn").show();
+                        //original implementation
+                        Panopto.Viewer.Viewer.expandLeftPaneFx();
+                    };
+                };
+                let ctxBridge = new ContextBridge(injectedFunc);
+                ctxBridge.exec();
 
                 //Panopto literally switches the positions of the screens, so if the user toggles screens make sure it's on the right tab
                 //Making it such that it stays on the same tab is a KIV

@@ -23,24 +23,34 @@ DelayDisabler = (() => {
                     
                     let firedToggle = false;
                     //I hate this method, but it's our hack in the bag
-                    //Temporarily disable delay on click or on spacebar
+                    //Temporarily disable delay on click (play btn or video) or on spacebar
                     let tmpDisable = () => {
-                        console.info("Tmp disable");
+                        console.log("Tmp disable");
                         firedToggle = true;
-                        window.setTimeout(() => {firedToggle = false}, 10);
+                        window.setTimeout(() => {
+                            firedToggle = false;
+                            //If paused
+                            if ($("#playButton.paused").length == 1) {
+                                //Pause all players; this resolves the issue but doesn't seem to resolve the root cause
+                                for (let i = 0; i <= 1; i++) {
+                                    let tmp = flowplayer(i);
+                                    if (tmp && tmp.playing)
+                                        tmp.pause();
+                                }
+                            }
+                        }, 10);
                     }
-                    $(window).keypress((e) => {
+                    $(document).keypress((e) => {
                         if (e.which === 32) {
                             tmpDisable();
                         }
                     });
-                    $("#playButton").click((e) => {
-                        tmpDisable();
-                    });
+                    $("#playButton").click((e) => { tmpDisable(); });
+                    $(".fp-ui").click((e) => { tmpDisable(); });
                     
                     let videoDOMs = undefined;
                     let repeatableFunction = () => {
-                        //console.info('rF', firedToggle, Panopto.Viewer.Viewer.playState(), videoDOMs, videoDOMs[0].paused, videoDOMs[1].paused);
+                        //console.log('rF', firedToggle, Panopto.Viewer.Viewer.playState(), videoDOMs, videoDOMs[0].paused, videoDOMs[1].paused);
                         if (!firedToggle && Panopto.Viewer.Viewer.playState() === 1 && videoDOMs.some((video) => video.paused)) {
                             //Supposed to be playing but video is paused?!
                             //lol...
@@ -49,7 +59,7 @@ DelayDisabler = (() => {
                                 if (video) { video.play(); }
                             });
                             Panopto.Viewer.Viewer.setPlayState(1);
-                            console.info("Delay quickfix triggered");
+                            console.log("Delay quickfix triggered");
                             window.setTimeout(function() {
                                 firedToggle = false;
                                 repeatableFunction();
@@ -58,7 +68,7 @@ DelayDisabler = (() => {
                     };
                     
                     Panopto.Core.Logger.log = ((msg) => {
-                        console.info(msg);
+                        console.log("Logger.log", msg);
                         //Secondary player started playing stream null: Stream stopped
                         if (msg.indexOf("player changed play state to {1}") > -1 || msg.indexOf("player changed play state to 2") > -1) {
                             //playstate: 1: playing (or at least supposed to be), 2: paused
@@ -70,7 +80,7 @@ DelayDisabler = (() => {
                             }, 1);
                         }
                     });
-                    console.info("Delay disabler initialized");
+                    console.log("Delay disabler initialized");
                 };
                 let ctxBridge = new ContextBridge(injectedFunc);
                 ctxBridge.exec();

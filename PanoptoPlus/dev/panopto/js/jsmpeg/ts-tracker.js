@@ -44,16 +44,16 @@ TSTracker = (() => {
                     switch (event.data.msgEnum) {
                         case MessageEnums.NORMAL_RESULTS:
                             //debugger;
-                            //console.info("TSTracker NORMAL RES:", event.data);
+                            //console.log("TSTracker NORMAL RES:", event.data);
                             //After merging, the start times are at their approprate locations
                             this.insertSilentSections(event.data.options.id, event.data.data.results);
                             break;
                         case MessageEnums.RAW_DATA_RESULTS: 
-                            //console.info(event.data.data);
+                            //console.log(event.data.data);
                             this.logDataForR(startTime, event.data.data);
                             break;
                         case MessageEnums.NOISE_RESULTS: 
-                            console.info("TSTracker NOISE RES: ", event.data.data);
+                            console.log("TSTracker NOISE RES: ", event.data.data);
                             if (!event.data.data || !event.data.data.results) throw new Error("Invalid noise reference line features");
                             this.noiseReferenceLineFeatures = event.data.data.results;
                             this.noiseReferenceCallbacks.fire();
@@ -223,7 +223,7 @@ TSTracker = (() => {
                     }
                     loop();
 
-                    console.info("TS-Tracker initialized");
+                    console.log("TS-Tracker initialized");
                 };
                 //#endregion
 
@@ -244,7 +244,7 @@ TSTracker = (() => {
                             };*/
 
                             //return;
-                            //console.info('TsTrackingEvent', event.detail.data, event.detail.options);
+                            //console.log('TsTrackingEvent', event.detail.data, event.detail.options);
                             self.process(event.detail.data, {
                                 isNoiseSample: event.detail.options.isNoiseSample,
                                 startProcessingFrom: event.detail.options.startProcessingFrom,
@@ -294,7 +294,7 @@ TSTracker = (() => {
          * @returns {undefined}
          */
         decodeAudioData(audioByteStream, options) {
-            //console.info(audioByteStream);
+            //console.log(audioByteStream);
             //https://stackoverflow.com/questions/8074152/is-there-a-way-to-use-the-web-audio-api-to-sample-audio-faster-than-real-time
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             audioCtx.decodeAudioData(Uint8ArrayToArrayBuffer(audioByteStream), 
@@ -303,7 +303,7 @@ TSTracker = (() => {
                     options.duration = audioBuffer.duration;
                     options.float32Length = audioBuffer.length;
                     options.silenceThreshold = Settings.getDataAsObject()[Settings.keys.silencethreshold];
-                    //console.info(options.silenceThreshold);
+                    //console.log(options.silenceThreshold);
                     //Convert to ArrayBuffers for transfer
                     const channel0 = audioBuffer.getChannelData(0).buffer;
                     const channel1 = audioBuffer.getChannelData(1).buffer;
