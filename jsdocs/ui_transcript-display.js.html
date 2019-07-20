@@ -85,21 +85,26 @@ let TranscriptDisplay = (() => {
          */
         async initTranscriptTab(transcript) {
             if (transcript.data.length > 0) {
+                //Initialize the main tab
                 $('#megalist-transcript').megalist();
+                //Load data from transcript
                 $('#megalist-transcript').megalist('setDataProvider', (() => {
                     let result = [];
                     for (let i = 0; i &lt; transcript.data.length; i++) {
                         result.push({
+                            //Make sure time displayed properly
                             time: (((transcript.data[i].time / 60) | 0) + ((transcript.data[i].time | 0) % 60 / 100)).toFixed(2).replace('.',':'),
                             text: transcript.data[i].text
                         });
                     }
                     return result;
                 })());
+                //Setup display for each ul
                 $('#megalist-transcript').megalist('setLabelFunction', (item) => {
                     return `&lt;div>&lt;b>${item.time}:&lt;/b> ${item.text}&lt;/div>`;
                 });
 
+                //We need to access Panopto.Viewer.Viewer to change position, so setup context bridge
                 let injectedFunc = () => {
                     let videoDOM = document.getElementsByTagName("video")[0];
                     let track = null;
@@ -109,20 +114,42 @@ let TranscriptDisplay = (() => {
                             break;
                         }
                     }
-
                     if (track == null) console.error("Track cannot be null");
-
                     bridgeReceiveDataCallback((event) => {
                         Panopto.Viewer.Viewer.position(track.cues[parseInt(event.detail)].startTime);
                     });
                 };
-
                 let ctxBridge = new ContextBridge(injectedFunc, "megalist_trigger");
                 ctxBridge.connect();
                 
+                //On user clicking a subtitle, send to DOM to request change position
                 $('#megalist-transcript').on('change', (event) => {
                     ctxBridge.send(event.selectedIndex);
                 });
+
+                //Initialize the tab on the second screen
+                if (!VideosLoadedEvent.isSingleVideoStream()) {
+                    //Append transcript button if transcript exists
+                    $("#eventTabControl").prepend(`&lt;div id="machTranscriptTabHeader" class="event-tab-header accented-tab">&lt;span class="text">Transcript&lt;/span>&lt;/div>`);
+
+                    //Setup transcript button code to show
+                    $("#machTranscriptTabHeader").click(() => {
+                        $('#sidebar-tabs').addClass('secondScreenTranscriptShown');
+                        $('#sidebar-tab-pg-2').show(100);
+                        $('aside[role="complementary"]').hide(100);
+                        TranscriptDisplay.resizeTranscriptIf2ndScreen();
+                    });
+                    //Setup back button to hide
+                    $(".ssh-back-btn").click(() => {
+                        $('#sidebar-tabs').removeClass('secondScreenTranscriptShown');
+                        $('#sidebar-tab-pg-2').hide();
+                        $('aside[role="complementary"]').show(100);
+                    });
+                    //Setup resize function
+                    $(window).resize(() => {
+                        TranscriptDisplay.resizeTranscriptIf2ndScreen();
+                    });
+                }
             }
         }
 
@@ -188,9 +215,10 @@ let TranscriptDisplay = (() => {
 
                         //Set selected index
                         let index = parseInt(cues[0].id);
-                        //debugger;
                         $('#megalist-transcript').megalist('setSelectedIndex', index);
-                        $('#megalist-transcript').megalist('scrollToIndex', index - 4);
+                        //If is not animating i.e. is not being scrolled, auto scroll
+                        if (!$("#megalist-transcript").prop("scrolling"))
+                            $('#megalist-transcript').megalist('scrollToIndex', index - 2);
                     }
                 };
             } else if (videoDOMs.length > 2) {
@@ -241,6 +269,22 @@ let TranscriptDisplay = (() => {
                     showing &amp;= this.tracks[i].mode === state;
             } while(!showing);
         }
+
+        /**
+         * @static
+         * resize and reposition transcript if used in second screen
+         */
+        static resizeTranscriptIf2ndScreen() {
+            let $sidebar = $('#sidebar-tab-pg-2').not(".tab-shown");
+            if ($sidebar.length > 0) {
+                let top = $("#leftPlayerContainer").height() + $(".tabs-container").height();
+                let height = $(window).height() - $(".tabs-container").offset().top - top - 44;
+                $sidebar.css({ top: top });
+                $("#megalist-transcript").css({ height: height });
+                //Bug: scrollbar not updated properly for megalist on resize, but minor visual bug
+                //$('#megalist-transcript').megalist('onResize');
+            }
+        }
     }
     return TranscriptDisplay;
 })();</code></pre>
@@ -259,7 +303,7 @@ let TranscriptDisplay = (() => {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 19 2019 19:03:23 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Sat Jul 20 2019 15:49:45 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -60,6 +60,28 @@ let Sidebar = (() => {
                                     $('aside[role="complementary"]').hide();
                                 }
                             }
+
+                            //Manage tab on change, because now it's used for 2nd screen also
+                            if(ui.oldTab[0].id === "sidebar-tab-1" 
+                                && ui.newTab[0].id !== "sidebar-tab-2" 
+                                && $('#sidebar-tabs.secondScreenTranscriptShown').length > 0) {
+                                $('#sidebar-tabs').removeClass('secondScreenTranscriptShown');
+                                $('#sidebar-tab-pg-2').hide(100);
+                            }
+                            if (ui.newTab[0].id === "sidebar-tab-2") {
+                                $("#sidebar-tab-pg-2").addClass("tab-shown");
+                                $("#sidebar-tab-pg-2").removeAttr("style");
+                                $("#megalist-transcript").removeAttr("style");
+                            } else if (ui.oldTab[0].id === "sidebar-tab-2") {
+                                $("#sidebar-tab-pg-2").removeClass("tab-shown");
+                                let $sidebar = $('#sidebar-tab-pg-2').not(".tab-shown");
+                                if ($sidebar.length > 0) {
+                                    let top = $("#leftPlayerContainer").height() + $(".tabs-container").height();
+                                    let height = $(window).height() - $(".tabs-container").offset().top - top - 44;
+                                    $sidebar.css({ top: top });
+                                    $("#megalist-transcript").css({ height: height });
+                                }
+                            }
                         }
                     } 
                 });
@@ -77,14 +99,16 @@ let Sidebar = (() => {
                     $("#hideEventsButton").children()[0].click();
                 });
                 $("#hideEventsButton div").click(() => {
-                    $("#sidebar-tabs").addClass("compact");
+                    $("#sidebar-tabs").addClass("collapsed");
                     $("#sidebar-tabs .tabs-container .hide-btn").hide();
                     $("#sidebar-tabs .tabs-container .show-btn").css('display','block');
+                    sleep(400).then(() => TranscriptDisplay.resizeTranscriptIf2ndScreen());
                 });
 
                 //Show button
                 $("#sidebar-tabs .tabs-container .show-btn").click(() => {
                     $("#commentsTabHeader").click();
+                    sleep(400).then(() => TranscriptDisplay.resizeTranscriptIf2ndScreen());
                 });
 
                 //Inject code to trigger our own expand mechanism on top of the default
@@ -92,7 +116,7 @@ let Sidebar = (() => {
                     Panopto.Viewer.Viewer.expandLeftPaneFx = Panopto.Viewer.Viewer.expandLeftPane;
                     Panopto.Viewer.Viewer.expandLeftPane = () => {
                         //expand function
-                        $("#sidebar-tabs").removeClass("compact");
+                        $("#sidebar-tabs").removeClass("collapsed");
                         $("#sidebar-tabs .tabs-container .show-btn").hide();
                         $("#sidebar-tabs .tabs-container .hide-btn").show();
                         //original implementation
@@ -113,7 +137,7 @@ let Sidebar = (() => {
                 //Because we added the tabs, the max-height of the results part of the search feature needs to be modified on our side
                 $("div.event-tab-scroll-pane").css("max-height",'-=40');
 
-                //Initialize as compact if it is so
+                //Initialize as collapsed if it is so
                 if (VideosLoadedEvent.isSingleVideoStream()) {
                     $("#sidebar-tabs .tabs-container .hide-btn").click();
                 }
@@ -134,7 +158,7 @@ let Sidebar = (() => {
         }
 
         expand() {
-            $("#sidebar-tabs").removeClass("compact");
+            $("#sidebar-tabs").removeClass("collapsed");
             $("#sidebar-tabs .tabs-container .show-btn").hide();
             $("#sidebar-tabs .tabs-container .hide-btn").show();
         }

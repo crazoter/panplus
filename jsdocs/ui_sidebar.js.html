@@ -42,8 +42,10 @@ let Sidebar = (() => {
          * @param {Object} settings settings object
          */
         constructor(settings) { 
-            this.mainVideoIndex = 0;
-            this.init();
+            VideosLoadedEvent.subscribe(() => {
+                this.mainVideoIndex = 0;
+                this.init();
+            });
         }
 
         /**
@@ -86,16 +88,38 @@ let Sidebar = (() => {
                                     $('aside[role="complementary"]').hide();
                                 }
                             }
+
+                            //Manage tab on change, because now it's used for 2nd screen also
+                            if(ui.oldTab[0].id === "sidebar-tab-1" 
+                                &amp;&amp; ui.newTab[0].id !== "sidebar-tab-2" 
+                                &amp;&amp; $('#sidebar-tabs.secondScreenTranscriptShown').length > 0) {
+                                $('#sidebar-tabs').removeClass('secondScreenTranscriptShown');
+                                $('#sidebar-tab-pg-2').hide(100);
+                            }
+                            if (ui.newTab[0].id === "sidebar-tab-2") {
+                                $("#sidebar-tab-pg-2").addClass("tab-shown");
+                                $("#sidebar-tab-pg-2").removeAttr("style");
+                                $("#megalist-transcript").removeAttr("style");
+                            } else if (ui.oldTab[0].id === "sidebar-tab-2") {
+                                $("#sidebar-tab-pg-2").removeClass("tab-shown");
+                                let $sidebar = $('#sidebar-tab-pg-2').not(".tab-shown");
+                                if ($sidebar.length > 0) {
+                                    let top = $("#leftPlayerContainer").height() + $(".tabs-container").height();
+                                    let height = $(window).height() - $(".tabs-container").offset().top - top - 44;
+                                    $sidebar.css({ top: top });
+                                    $("#megalist-transcript").css({ height: height });
+                                }
+                            }
                         }
                     } 
                 });
 
                 //Add icons
-                $("#commentsTabHeader").prepend('&lt;i class="far fa-comments">&lt;/i>');
-                $("#notesTabHeader").prepend('&lt;i class="far fa-sticky-note">&lt;/i>');
-                $("#bookmarksTabHeader").prepend('&lt;i class="far fa-bookmark">&lt;/i>');
+                //$("#commentsTabHeader").prepend('&lt;i class="far fa-comments">&lt;/i>');
+                //$("#notesTabHeader").prepend('&lt;i class="far fa-sticky-note">&lt;/i>');
+                //$("#bookmarksTabHeader").prepend('&lt;i class="far fa-bookmark">&lt;/i>');
                 $("#hideEventsButton div").text("Hide Sidebar");
-                $("#hideEventsButton div").prepend('&lt;i class="fas fa-chevron-left" style="padding-right:4px">&lt;/i>');
+                //$("#hideEventsButton div").prepend('&lt;i class="fas fa-chevron-left" style="padding-right:4px">&lt;/i>');
                 $("#hideEventsButton").css({display: "initial", visibility: "visible"});
 
                 //Hide button
@@ -103,24 +127,32 @@ let Sidebar = (() => {
                     $("#hideEventsButton").children()[0].click();
                 });
                 $("#hideEventsButton div").click(() => {
-                    $("#sidebar-tabs").addClass("compact");
+                    $("#sidebar-tabs").addClass("collapsed");
                     $("#sidebar-tabs .tabs-container .hide-btn").hide();
                     $("#sidebar-tabs .tabs-container .show-btn").css('display','block');
+                    sleep(400).then(() => TranscriptDisplay.resizeTranscriptIf2ndScreen());
                 });
 
                 //Show button
-                //BUG: SOMETIMES THE EVENT DOESN'T FIRE IF CLICKING THE TABS BELOW SCREEN. LOW PRIORITY.
                 $("#sidebar-tabs .tabs-container .show-btn").click(() => {
                     $("#commentsTabHeader").click();
+                    sleep(400).then(() => TranscriptDisplay.resizeTranscriptIf2ndScreen());
                 });
-                $("#commentsTabHeader").click(this.expand);
-                $("#commentsTabHeader span").click(this.expand);
-                $("#notesTabHeader").click(this.expand);
-                $("#notesTabHeader span").click(this.expand);
-                $("#bookmarksTabHeader").click(this.expand);
-                $("#bookmarksTabHeader span").click(this.expand);
-                $(".event-tab-header").click(this.expand);
-                $("#searchInput").click(this.expand);
+
+                //Inject code to trigger our own expand mechanism on top of the default
+                let injectedFunc = () => {
+                    Panopto.Viewer.Viewer.expandLeftPaneFx = Panopto.Viewer.Viewer.expandLeftPane;
+                    Panopto.Viewer.Viewer.expandLeftPane = () => {
+                        //expand function
+                        $("#sidebar-tabs").removeClass("collapsed");
+                        $("#sidebar-tabs .tabs-container .show-btn").hide();
+                        $("#sidebar-tabs .tabs-container .hide-btn").show();
+                        //original implementation
+                        Panopto.Viewer.Viewer.expandLeftPaneFx();
+                    };
+                };
+                let ctxBridge = new ContextBridge(injectedFunc);
+                ctxBridge.exec();
 
                 //Panopto literally switches the positions of the screens, so if the user toggles screens make sure it's on the right tab
                 //Making it such that it stays on the same tab is a KIV
@@ -133,7 +165,7 @@ let Sidebar = (() => {
                 //Because we added the tabs, the max-height of the results part of the search feature needs to be modified on our side
                 $("div.event-tab-scroll-pane").css("max-height",'-=40');
 
-                //Initialize as compact if it is so
+                //Initialize as collapsed if it is so
                 if (VideosLoadedEvent.isSingleVideoStream()) {
                     $("#sidebar-tabs .tabs-container .hide-btn").click();
                 }
@@ -154,7 +186,7 @@ let Sidebar = (() => {
         }
 
         expand() {
-            $("#sidebar-tabs").removeClass("compact");
+            $("#sidebar-tabs").removeClass("collapsed");
             $("#sidebar-tabs .tabs-container .show-btn").hide();
             $("#sidebar-tabs .tabs-container .hide-btn").show();
         }
@@ -180,7 +212,7 @@ let Sidebar = (() => {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Jul 19 2019 19:03:23 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Sat Jul 20 2019 15:49:45 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

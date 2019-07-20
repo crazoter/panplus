@@ -17,43 +17,38 @@ To create a chrome extension to improve the webcasting experience for panopto. I
 5. Select "Load Unpacked" and select the "PanoptoPlus/dev" folder.
 6. The extension is loaded. Whenever you need to modify and test code, load the extension like in step 4 and reload the page.
 7. To build the documentation, execute `npm run make_docs`. Documentation uses jsdoc (refer to package.json).
-8. [IN DEVELOPMENT] To build the files for distribution, execute `npm run build`. Javascript files will be minified and placed in the dist folder for extension packaging. For developmental work, you can just stick with steps 3 - 6.
 
-### Deployment Instructions
-The extension can be used as is by following the development instructions. However, the production distribution is not ready yet.
-
-### Todo List
+### Feature List
 __User Interface__
   * __Double video webcast__
     * App specific sidebar [DONE]
     * Minimized carousel size [DONE]
-    * Persistent settings
-    * Subtitles toggle option
+    * Persistent settings [DONE]
+    * Subtitles toggle option [DONE]
   * __Single video webcast__
-    * App specific sidebar
-    * Minimize carousel size
-    * Consistent UI with Double video webcast
-  * __Mobile: Double video webcast__
-  * __Mobile: Single video webcast__
+    * App specific sidebar [DONE]
+    * Minimize carousel size [DONE]
+    * Consistent UI with Double video webcast [DONE]
+  * __Mobile: Double video webcast__ [Responsive, but only for PC]
+  * __Mobile: Single video webcast__ [Responsive, but only for PC]
+  * Others
+    * Volume booster [DONE]
+    * Customizable UI [DONE]
 
 __Transcripts__
 * Extraction of transcripts [DONE]
 * Separation of interface & implementation [DONE]
 * Conversion of transcripts to WebVTT tracks for subtitling [DONE]
-* Conversion of transcripts to DOM in sidebar³
+* Conversion of transcripts to DOM in sidebar [DONE]
 
 __Silence Trimming__
-* Implementation [DONE, NEEDS IN-DEPTH TESTING]
+* Implementation [DONE]
 
 __Complete Conversion to ES6__
 * Implementation [PARTIAL CONVERSION DONE. KIV, NOT PRIORITY]
 
 __Webpack for deployment__
-* Implementation
-
----
-³Will need to manage hundreds of transcript rows. Use something that can handle that: https://github.com/triceam/MegaList. Each transcript row also needs to be clickable and seek video to position.  
-
+* Implementation [KIV]
 
 ### Interesting Keep In View (KIV) Concepts
 * User submitted edits to subtitles 
@@ -69,18 +64,3 @@ __Webpack for deployment__
   * Burning the subs in (if configured by user): https://stackoverflow.com/questions/8672809/use-ffmpeg-to-add-text-subtitles
   * https://stackoverflow.com/questions/52543728/ffmpeg-adding-and-removing-subtitles-without-changing-the-video
 * Other non-critical features e.g. export notes
-
-### Known Bugs
-#### Most Likely fixed, but keep a look-out for
-* Race condition when loading page, videos fail to load due to replacement of speed flyouts
-
-#### Unfixed
-* No existing known bugs
-
-### Test URLs
-a) Double videos webcasts:
-https://nuscast.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=e8d44d91-652d-4e41-8482-a9d6003357fe
-
-b) Single video webcasts
-https://nuscast.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=626cd545-dfb4-4a8a-ae05-a9d8007dd2f8
-

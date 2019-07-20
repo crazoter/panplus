@@ -1,7 +1,10 @@
 /** @jsx preact.h */
 
 /**
- * Throw this into a Babel compiler https://babeljs.io/repl
+ * How to modify the settings-page.js? 
+ * 1. Modify this file
+ * 2. Throw this into a Babel compiler https://babeljs.io/repl
+ * 3. Paste output to settings-page.js
  */
 let SettingsPage = (() => {
   const SAVE_WEBCAST_ONLY = 0;
@@ -93,6 +96,15 @@ let SettingsPage = (() => {
       } else {
         $.notify("Some fields are invalid (all fields must be filled).", "warn");
       }
+    }
+    /**
+     * Make Panopto fullscreen
+     */
+
+
+    fullScreen() {
+      document.body.requestFullscreen();
+      $.notify("You can also go fullscreen by pressing F11.", "info");
     }
     /**
      * After component mounted, set form values
@@ -259,7 +271,7 @@ let SettingsPage = (() => {
         required: true,
         name: "settings_silencetrimming",
         value: "0"
-      }), preact.h("i", null, "Disabled"))), preact.h("div", null, "Noise Threshold (Default is 2.37, Increasing will increase true and false positives for noise)"), preact.h("div", {
+      }), preact.h("i", null, "Disabled"))), preact.h("div", null, "Noise z-value (Default is 2.37, determines interval of what will be classified as noise)"), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("input", {
         type: "number",
@@ -267,7 +279,16 @@ let SettingsPage = (() => {
         step: "0.01",
         value: "",
         required: true
-      }), preact.h("i", null)), preact.h("br", null), preact.h("hr", null), preact.h("div", {
+      }), preact.h("i", null)), preact.h("div", {
+        onClick: this.fullScreen,
+        class: "ui-state-default ui-button save-btns"
+      }, preact.h("a", {
+        href: "#",
+        class: "ui-tabs-text-lookalike"
+      }, preact.h("span", null, "Make Panopto Full-screen"))), preact.h("hr", null), preact.h("h4", null, "Bug Report"), preact.h("div", null, preact.h("a", {
+        href: "https://github.com/crazoter/panplus",
+        target: "_blank"
+      }, "Report a bug via GitHub")), preact.h("br", null), preact.h("hr", null), preact.h("div", {
         onClick: this.saveSettings.bind(this, SAVE_WEBCAST_ONLY),
         class: "ui-state-default ui-button save-btns"
       }, preact.h("a", {

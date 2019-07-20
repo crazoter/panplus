@@ -103,7 +103,7 @@
     }
 }
 
-#sidebar-tabs.compact .megalist {
+#sidebar-tabs.collapsed .megalist {
     height: calc(100vh - 200px);
     font-size: 10px;
 }

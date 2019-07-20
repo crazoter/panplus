@@ -100,13 +100,28 @@ let TranscriptDisplay = (() => {
                 });
 
                 //Initialize the tab on the second screen
-                /*
-                $("#eventTabControl").prepend(`<div id="machTranscriptTabHeader" class="event-tab-header accented-tab">
-                <i class="far fa-file-alt"></i><span class="text">Transcript</span></div>`);
-                $("#machTranscriptTabHeader").click(() => {
-                    $("#machTranscriptTabHeader").addClass("selected");
-                });*/
+                if (!VideosLoadedEvent.isSingleVideoStream()) {
+                    //Append transcript button if transcript exists
+                    $("#eventTabControl").prepend(`<div id="machTranscriptTabHeader" class="event-tab-header accented-tab"><span class="text">Transcript</span></div>`);
 
+                    //Setup transcript button code to show
+                    $("#machTranscriptTabHeader").click(() => {
+                        $('#sidebar-tabs').addClass('secondScreenTranscriptShown');
+                        $('#sidebar-tab-pg-2').show(100);
+                        $('aside[role="complementary"]').hide(100);
+                        TranscriptDisplay.resizeTranscriptIf2ndScreen();
+                    });
+                    //Setup back button to hide
+                    $(".ssh-back-btn").click(() => {
+                        $('#sidebar-tabs').removeClass('secondScreenTranscriptShown');
+                        $('#sidebar-tab-pg-2').hide();
+                        $('aside[role="complementary"]').show(100);
+                    });
+                    //Setup resize function
+                    $(window).resize(() => {
+                        TranscriptDisplay.resizeTranscriptIf2ndScreen();
+                    });
+                }
             }
         }
 
@@ -175,7 +190,7 @@ let TranscriptDisplay = (() => {
                         $('#megalist-transcript').megalist('setSelectedIndex', index);
                         //If is not animating i.e. is not being scrolled, auto scroll
                         if (!$("#megalist-transcript").prop("scrolling"))
-                            $('#megalist-transcript').megalist('scrollToIndex', index - 3);
+                            $('#megalist-transcript').megalist('scrollToIndex', index - 2);
                     }
                 };
             } else if (videoDOMs.length > 2) {
@@ -225,6 +240,22 @@ let TranscriptDisplay = (() => {
                 for (let i = 0; i < this.tracks.length; i++)
                     showing &= this.tracks[i].mode === state;
             } while(!showing);
+        }
+
+        /**
+         * @static
+         * resize and reposition transcript if used in second screen
+         */
+        static resizeTranscriptIf2ndScreen() {
+            let $sidebar = $('#sidebar-tab-pg-2').not(".tab-shown");
+            if ($sidebar.length > 0) {
+                let top = $("#leftPlayerContainer").height() + $(".tabs-container").height();
+                let height = $(window).height() - $(".tabs-container").offset().top - top - 44;
+                $sidebar.css({ top: top });
+                $("#megalist-transcript").css({ height: height });
+                //Bug: scrollbar not updated properly for megalist on resize, but minor visual bug
+                //$('#megalist-transcript').megalist('onResize');
+            }
         }
     }
     return TranscriptDisplay;

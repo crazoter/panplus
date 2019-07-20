@@ -39,7 +39,7 @@
     }
 }
 
-#sidebar-tabs.compact #sidebar-tab-pg-3[aria-hidden="false"] {
+#sidebar-tabs.collapsed #sidebar-tab-pg-3[aria-hidden="false"] {
     height: calc(100vh - 220px);
     font-size: 10px;
 }
@@ -49,7 +49,7 @@
     align-items: stretch;
 }
 
-#sidebar-tabs.compact .tabs-container {
+#sidebar-tabs.collapsed .tabs-container {
     display: block;
 }
 
@@ -73,7 +73,7 @@
     width: 80px;
 }
 
-#sidebar-tabs.compact .tabs-container ul li.sidebar-tab {
+#sidebar-tabs.collapsed .tabs-container ul li.sidebar-tab {
     width: 100%;
 }
 
@@ -99,6 +99,11 @@
     height: 32px;
 }
 
+.viewer #viewerContent #leftPane #searchRegion #placeholderSearchButton, .viewer #viewerContent #leftPane #searchRegion #clearButton, .viewer #viewerContent #leftPane #searchRegion div#searchButton {
+    height: 32px;
+    width: 32px;
+}
+
 #sidebar-tabs, #searchWrapper {
     font-size: 0.83em;
     font-family: Segoe UI,Helvetica,sans-serif;
@@ -110,7 +115,7 @@
     text-decoration: none;
     text-align: center;
 }
-#sidebar-tabs.compact .tabs-container .ui-state-default.ui-button .ui-tabs-text-lookalike {
+#sidebar-tabs.collapsed .tabs-container .ui-state-default.ui-button .ui-tabs-text-lookalike {
     padding-left: 8px;
     text-align: left;
 }
@@ -142,4 +147,49 @@
 .viewer #viewerContent #leftPane #eventTabs #eventTabControl div.event-tab-header span {
     display: block;
     padding: 4px 0px 3px 14px;
+}
+
+.secondScreenTranscriptShown #sidebar-tab-pg-2 {
+    width: 100%;
+    position: absolute;
+    transition: 0.5s;
+}
+
+.secondScreenTranscriptShown #sidebar-tab-pg-2.tab-shown {
+    position: relative;
+}
+
+#secondScreenHeader {
+    display: none;
+    padding: 4px;
+    transition: 0.5s;
+}
+
+.secondScreenTranscriptShown #sidebar-tab-pg-2 #secondScreenHeader {
+    display: flex;
+}
+
+.secondScreenTranscriptShown #sidebar-tab-pg-2.tab-shown #secondScreenHeader {
+    display: none;
+}
+
+.ssh-back-btn {
+    position: absolute;
+    cursor: pointer;
+    background: #FFF;
+    font-size: 11px;
+}
+
+.ssh-back-btn:hover {
+    color: #777;
+}
+
+.ssh-title {
+    display: inline;
+    flex: 1;
+    text-align: center; 
+}
+
+.collapsed .ssh-title {
+    text-align: right;
 }

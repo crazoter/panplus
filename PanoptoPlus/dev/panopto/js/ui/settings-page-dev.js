@@ -1,7 +1,10 @@
 /** @jsx preact.h */
 
 /**
- * Throw this into a Babel compiler https://babeljs.io/repl
+ * How to modify the settings-page.js? 
+ * 1. Modify this file
+ * 2. Throw this into a Babel compiler https://babeljs.io/repl
+ * 3. Paste output to settings-page.js
  */
 let SettingsPage = (() => {
     const SAVE_WEBCAST_ONLY = 0;
@@ -88,6 +91,14 @@ let SettingsPage = (() => {
         }
 
         /**
+         * Make Panopto fullscreen
+         */
+        fullScreen() {
+            document.body.requestFullscreen();
+            $.notify("You can also go fullscreen by pressing F11.","info");
+        }
+
+        /**
          * After component mounted, set form values
          * https://preactjs.com/guide/api-reference
          */
@@ -159,6 +170,10 @@ let SettingsPage = (() => {
                     <div onChange={this.settingsChange.bind(this)}>
                     <input type="number" name="settings_silencethreshold" step="0.01" value="" required/><i></i>
                     </div>
+                    <div onClick={this.fullScreen} class="ui-state-default ui-button save-btns"><a href="#" class="ui-tabs-text-lookalike"><span>Make Panopto Full-screen</span></a></div>
+                    <hr/>
+                    <h4>Bug Report</h4>
+                    <div><a href="https://github.com/crazoter/panplus" target="_blank">Report a bug via GitHub</a></div>
                     <br/>
                     <hr/>
                     <div onClick={this.saveSettings.bind(this, SAVE_WEBCAST_ONLY)} class="ui-state-default ui-button save-btns"><a href="#" class="ui-tabs-text-lookalike"><span>Save for this webcast only</span></a></div>
