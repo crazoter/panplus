@@ -173,7 +173,7 @@ let SettingsPage = (() => {
                     <div onClick={this.fullScreen} class="ui-state-default ui-button save-btns"><a href="#" class="ui-tabs-text-lookalike"><span>Make Panopto Full-screen</span></a></div>
                     <hr/>
                     <h4>Bug Report</h4>
-                    <div><a href="https://github.com/crazoter/panplus" target="_blank">Report a bug via GitHub</a></div>
+                    <div><a href="https://github.com/crazoter/panplus/issues" target="_blank">Report a bug via GitHub</a></div>
                     <br/>
                     <hr/>
                     <div onClick={this.saveSettings.bind(this, SAVE_WEBCAST_ONLY)} class="ui-state-default ui-button save-btns"><a href="#" class="ui-tabs-text-lookalike"><span>Save for this webcast only</span></a></div>

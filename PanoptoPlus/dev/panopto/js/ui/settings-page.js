@@ -286,7 +286,7 @@ let SettingsPage = (() => {
         href: "#",
         class: "ui-tabs-text-lookalike"
       }, preact.h("span", null, "Make Panopto Full-screen"))), preact.h("hr", null), preact.h("h4", null, "Bug Report"), preact.h("div", null, preact.h("a", {
-        href: "https://github.com/crazoter/panplus",
+        href: "https://github.com/crazoter/panplus/issues",
         target: "_blank"
       }, "Report a bug via GitHub")), preact.h("br", null), preact.h("hr", null), preact.h("div", {
         onClick: this.saveSettings.bind(this, SAVE_WEBCAST_ONLY),
