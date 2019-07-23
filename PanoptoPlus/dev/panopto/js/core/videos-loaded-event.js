@@ -23,20 +23,8 @@ let VideosLoadedEvent = (() => {
     async function waitForVideoLoad() {
         //MutationObserver suddenly stopped working so I'm going to use a more primitive method lmao
         let sleepMs = 50;
-        /*
-        let countDone = 0;
-        while ((countDone = Math.max(countDone, verifyVideoLoad(countDone))) < 2) {
-            //If one video is already loaded, wait 4 times. 
-            //If it doesn't load by then, then consider it loaded.
-            //countDone will result in a non-integer if it is only 1 video.
-            if (countDone >= 1)
-                countDone += 0.30;
-            await sleep(sleepMs++);
-        }
-        videosLoaded(countDone);
-        */
         while (!verifyVideoLoad()) {
-            await sleep(sleepMs++);
+            await sleep(sleepMs);
         }
         videosLoaded();
     };
@@ -48,19 +36,10 @@ let VideosLoadedEvent = (() => {
      * @returns {Number} Number of video elements loaded
      */
     function verifyVideoLoad() {
-        //Implementation 1 appears faulty
-        /*
-        let videoDOMs = document.querySelectorAll("video");
-        let count = 0;
-        for (let i = 0; i < videoDOMs.length; i++) {
-            if (videoDOMs[i].src !== "") {
-                count++;
-            }
-        }
-        return count;
-        */
-        //Implementation 2: Use time
-        return $("#timeElapsed").text() != "";
+        //Implementation 2: Use time display and make sure if autoplay is disabled, actually played (i.e. loaded video)
+        return $("#timeElapsed").text() != "" 
+            //&& $('video')[0].played.length > 0
+            //&& $('video')[0].played.end(0) > 0;
     }
 
     /**
@@ -91,7 +70,7 @@ let VideosLoadedEvent = (() => {
             };
         } else {
             //1 video stream
-            let video = $(".fp-engine.hlsjs-engine")[0];
+            let video = $(".fp-engine.hlsjs-engine")[0] || $(".fp-engine")[0];
             videoElements = {
                 all: [video],
                 primaryVideoIndex: 0,

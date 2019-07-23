@@ -11,10 +11,13 @@ let CarouselManager = (() => {
          */
         constructor(settings) {
             VideosLoadedEvent.subscribe(() => {
-                this.updateDesign();
-                //Change visibility based on setting
-                if (!settings[Settings.keys.carouselshown]) 
-                    this.toggleCarouselDisplay();
+                //if the website didn't hide the option to toggle the carousel, likely because the carousel isn't enabled
+                if ($("#toggleThumbnailsButton").css('display') != 'none') {
+                    this.updateDesign();
+                    //Change visibility based on setting
+                    if (!settings[Settings.keys.carouselshown]) 
+                        this.toggleCarouselDisplay();
+                }
             });
         }
 

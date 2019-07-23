@@ -193,7 +193,8 @@ let TranscriptDisplay = (() => {
                             $('#megalist-transcript').megalist('scrollToIndex', index - 2);
                     }
                 };
-            } else if (videoDOMs.length > 2) {
+            } if (elements.all.length > 2) {
+                debugger;
                 alert("Extension currently doesn't support subtitling of more than 2 video streams.");
             }
 

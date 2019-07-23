@@ -194,7 +194,8 @@ TSTracker = (() => {
                     let listenerFired = false;
                     let fragsListened = {};
                     let addListener = function() {
-                        players[0].engine.hlsjs.observer.addListener("hlsFragLoading",(callbackId, details) => {
+                        let hls = players[0].engine.hlsjs || players[0].engine.hls;
+                        hls.observer.addListener("hlsFragLoading",(callbackId, details) => {
                             listenerFired = true;
                             if(fragsListened[details.frag.relurl] == null) {
                                 fragsListened[details.frag.relurl] = 1;

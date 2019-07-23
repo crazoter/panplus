@@ -8,9 +8,15 @@
         "persistent": false,
         "scripts": ["libs/rob--w-chrome-api/worker_proxy.js"]
     },
+    "icons": { 
+        "16": "icon16.png",
+        "32": "icon32.png",
+        "48": "icon48.png",
+       "128": "icon128.png" 
+    },
     "content_scripts": [
         {
-            "matches": ["*://nuscast.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=*",
+            "matches": ["*://*.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=*",
                 "*://*.weblecture.nus.edu.sg/Panopto/Pages/Viewer.aspx?id=*",
                 "*://luminus.nus.edu.sg/iframe/lti-launch/panopto*"],
             "js": [

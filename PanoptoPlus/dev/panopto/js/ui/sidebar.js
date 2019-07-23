@@ -82,6 +82,15 @@ let Sidebar = (() => {
                                     $("#megalist-transcript").css({ height: height });
                                 }
                             }
+                        } else {
+                            //Single stream, no swapping of videos
+                            if (ui.newTab[0].id === "sidebar-tab-1") {//show
+                                $('aside[role="complementary"]').show();
+                                let ctxBridge = new ContextBridge(() => $(window).trigger('resize'));
+                                ctxBridge.exec();
+                            } else if (ui.oldTab[0].id === "sidebar-tab-1") {//hide
+                                $('aside[role="complementary"]').hide();
+                            }
                         }
                     } 
                 });
@@ -107,7 +116,8 @@ let Sidebar = (() => {
 
                 //Show button
                 $("#sidebar-tabs .tabs-container .show-btn").click(() => {
-                    $("#commentsTabHeader").click();
+                    //Shifted to injected function
+                    //$("#commentsTabHeader").click();
                     sleep(400).then(() => TranscriptDisplay.resizeTranscriptIf2ndScreen());
                 });
 
@@ -122,6 +132,10 @@ let Sidebar = (() => {
                         //original implementation
                         Panopto.Viewer.Viewer.expandLeftPaneFx();
                     };
+
+                    $("#sidebar-tabs .tabs-container .show-btn").click(() => {
+                        Panopto.Viewer.Viewer.expandLeftPane();
+                    });
                 };
                 let ctxBridge = new ContextBridge(injectedFunc);
                 ctxBridge.exec();
