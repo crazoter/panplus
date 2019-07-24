@@ -50,10 +50,11 @@ DelayDisabler = (() => {
                     
                     let videoDOMs = undefined;
                     let repeatableFunction = () => {
-                        //console.log('rF', firedToggle, Panopto.Viewer.Viewer.playState(), videoDOMs, videoDOMs[0].paused, videoDOMs[1].paused);
-                        if (!firedToggle && Panopto.Viewer.Viewer.playState() === 1 && videoDOMs.some((video) => video.paused)) {
-                            //Supposed to be playing but video is paused?!
-                            //lol...
+                        //If supposed to be playing but video is paused
+                        if (!firedToggle 
+                            && $("#playButton.paused").length == 0
+                            && Panopto.Viewer.Viewer.playState() === 1 
+                            && videoDOMs.some((video) => video.paused)) {
                             firedToggle = true;
                             videoDOMs.forEach((video) => {
                                 if (video) { video.play(); }

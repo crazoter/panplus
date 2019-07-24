@@ -172,9 +172,7 @@ let Sidebar = (() => {
         }
 
         expand() {
-            $("#sidebar-tabs").removeClass("collapsed");
-            $("#sidebar-tabs .tabs-container .show-btn").hide();
-            $("#sidebar-tabs .tabs-container .hide-btn").show();
+            $("#sidebar-tabs .tabs-container .show-btn").click();
         }
 
         openTab(index) {

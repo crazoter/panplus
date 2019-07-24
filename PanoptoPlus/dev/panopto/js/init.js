@@ -8,7 +8,8 @@
     MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
     var observer = new MutationObserver(function(mutations, observer) {
         //Check if DOM has been loaded
-        if (mutations.length > 200 || document.querySelector('header[role="banner"]') !== null) {
+        if (mutations.length > 200 
+            || (document.querySelector('header[role="banner"]') !== null && document.querySelector('header[role="banner"]').children[0].style.display !== "none")) {
             observer.disconnect();
             //Put initialization code here
             console.log("DOM loaded!");
@@ -26,7 +27,7 @@
                         silenceCueManager: new SilenceCueManager(settings),
                         tsTracker: new TSTracker(settings),
                         carouselManager: new CarouselManager(settings),
-                        loggerDisabler: new LoggerDisabler(settings),
+                        //loggerDisabler: new LoggerDisabler(settings),
                         delayDisabler: new DelayDisabler(settings)
                     };
 

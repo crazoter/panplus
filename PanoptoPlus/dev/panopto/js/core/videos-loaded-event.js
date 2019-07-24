@@ -37,7 +37,7 @@ let VideosLoadedEvent = (() => {
      */
     function verifyVideoLoad() {
         //Implementation 2: Use time display and make sure if autoplay is disabled, actually played (i.e. loaded video)
-        return $("#timeElapsed").text() != "" 
+        return $("#timeElapsed").text() != "";
             //&& $('video')[0].played.length > 0
             //&& $('video')[0].played.end(0) > 0;
     }

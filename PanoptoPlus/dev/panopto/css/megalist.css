@@ -60,6 +60,10 @@
     background:white;
 }
 
+.megalistItem:hover {
+	opacity: 0.7;
+}
+
 .megalistSelected {
 	color: #FFF;
 	border-top:1px solid #094C99;
