@@ -61,7 +61,7 @@ let SettingsPage = (() => {
         if (confirm(CONFIRM_MESSAGES[index])) {
           if (index == CLEAR_CACHE) {
             Cache.invalidateCache().then(() => {
-              $.notify("Cache Cleared!", "success");
+              $.notify("Cache Cleared!",{className: "success", position: "bottom left"});
             });
           } else {
             //Example data
@@ -92,12 +92,12 @@ let SettingsPage = (() => {
             }
 
             promise.then(() => {
-              $.notify("Settings Saved!", "success");
+              $.notify("Settings Saved! (Some settings require a page refresh)",{className: "success", position: "bottom left"});
             });
           }
         }
       } else {
-        $.notify("Some fields are invalid (all fields must be filled).", "warn");
+        $.notify("Some fields are invalid / empty.",{className: "error", position: "bottom left"});
       }
     }
     /**
@@ -107,7 +107,7 @@ let SettingsPage = (() => {
 
     fullScreen() {
       document.body.requestFullscreen();
-      $.notify("You can also go fullscreen by pressing F11.", "info");
+      $.notify("You can also go fullscreen by pressing F11.",{className: "info", position: "bottom left"});
     }
     /**
      * After component mounted, set form values
@@ -285,7 +285,7 @@ let SettingsPage = (() => {
         required: true,
         name: "settings_silencetrimming",
         value: "0"
-      }), preact.h("i", null, "Disabled"))), preact.h("div", null, "Noise z-value (Default is 2.37, min is 0.00, max is 3.99)"), preact.h("div", {
+      }), preact.h("i", null, "Disabled"))), preact.h("div", null, "Noise z-value (Default is 1.89, min is 0.00, max is 3.99)"), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("input", {
         type: "number",

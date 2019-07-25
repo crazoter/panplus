@@ -236,6 +236,18 @@ VADProcessor = (() => {
                 referenceLineFeatures = undefined;
                 this.result = undefined;
             }*/
+
+            /*
+            this.log('ref', 
+                [
+                this.referenceData,
+                this.headOfLastNonZeroLineFeatureIndexes, 
+                this.noiseFadeOutPaddingSamples, 
+                this.channelsZeroed,
+                startIndex,
+                endIndex,
+            ]);
+            this.logSend();*/
         }
 
         /**

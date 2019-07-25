@@ -100,7 +100,7 @@ let SettingsPage = (() => {
                 if (confirm(CONFIRM_MESSAGES[index])) {
                     if (index == CLEAR_CACHE) {
                         Cache.invalidateCache().then(() => {
-                            $.notify("Cache Cleared!","success");
+                            $.notify("Cache Cleared!",{className: "success", position: "bottom left"});
                         });
                     } else {
                         //Example data
@@ -124,12 +124,12 @@ let SettingsPage = (() => {
                                 break;
                         }
                         promise.then(() => {
-                            $.notify("Settings Saved!","success");
+                            $.notify("Settings Saved!",{className: "success", position: "bottom left"});
                         });
                     }
                 }
             } else {
-                $.notify("Some fields are invalid (all fields must be filled).", "warn");
+                $.notify("Some fields are invalid (all fields must be filled).",{className: "error", position: "bottom left"});
             }
         }
 
@@ -138,7 +138,7 @@ let SettingsPage = (() => {
          */
         fullScreen() {
             document.body.requestFullscreen();
-            $.notify("You can also go fullscreen by pressing F11.","info");
+            $.notify("You can also go fullscreen by pressing F11.",{className: "info", position: "bottom left"});
         }
 
         /**
@@ -218,7 +218,7 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_silencetrimming" value="1"/><i>Enabled</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_silencetrimming" value="0"/><i>Disabled</i></label>
                     </div>
-                    <div>Noise z-value (Default is 2.37, min is 0.00, max is 3.99)</div>
+                    <div>Noise z-value (Default is 1.89, min is 0.00, max is 3.99)</div>
                     <div onChange={this.settingsChange.bind(this)}>
                     <input type="number" name="settings_silencethreshold" min="0" max="3.99" step="0.01" required/>
                     <div>{zValuePercentage} confidence interval (smaller interval means less detected as noise)</div>

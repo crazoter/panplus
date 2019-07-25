@@ -159,10 +159,9 @@ TSTracker = (() => {
                         } catch (err) { console.error(err); }
                         if (indexFileData) {
                             indexFileData = indexFileData.split('\n');
-                            //Use the last 1.3s of the last TS file, assume the last 1s is just noise. 
                             //The noise reference will only use ~300ms
                             //Notice that panopto sometimes "Fades out" the last second of the webcast
-                            let startProcessingFrom = 1.3;
+                            let startProcessingFrom = 3;
                             let lastTSUrl = "";
                             let lastTSId = "";
                             let foundDataNeeded = 0;

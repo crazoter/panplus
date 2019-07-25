@@ -1,6 +1,6 @@
 {
     "name": "Panopto Plus",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Improve your webcasting experience!",
     "manifest_version": 2,
     "permissions": ["tabs", "storage"],

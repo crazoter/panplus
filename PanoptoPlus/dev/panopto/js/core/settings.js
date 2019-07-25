@@ -20,7 +20,7 @@ let Settings = (() => {
          * @returns default data
          */
         static initializeDefaults() {
-            let data = [{"name":"settings_sidebar","value":1},{"name":"settings_opentab","value":0},{"name":"settings_carouselshown","value":1},{"name":"settings_initialspeed","value":1},{"name":"settings_playbackoptions","value":2},{"name":"settings_carouseldesign","value":1},{"name":"settings_subtitles","value":1},{"name":"settings_machinetranscript","value":1},{"name":"settings_silencetrimming","value":1},{"name":"settings_silencethreshold","value":2.37}];
+            let data = [{"name":"settings_sidebar","value":1},{"name":"settings_opentab","value":0},{"name":"settings_carouselshown","value":1},{"name":"settings_initialspeed","value":1},{"name":"settings_playbackoptions","value":2},{"name":"settings_carouseldesign","value":1},{"name":"settings_subtitles","value":1},{"name":"settings_machinetranscript","value":1},{"name":"settings_silencetrimming","value":1},{"name":"settings_silencethreshold","value":1.89}];
             data.push({name: "time", value: new Date().getTime()});
             return data;
         }

@@ -33,7 +33,20 @@
 
                     //Initialize initial settings
                     console.log("FIN");
-                    $.notify("If there is an issue with silence trimming, please disable / configure in the settings tab.","info");
+                    $.notify("If there is an issue with silence trimming, please disable / configure in the settings tab.",{className: "info", position: "bottom right"});
+
+                    //Show notify for new users
+                    Cache.load(Cache.FIRST_TIME_KEY).then((result) => {
+                        if (!result) {
+                            sleep(1500).then(() => {
+                                $.notify("It appears this is your first time using this Chrome extension!",{className: "success", position: "bottom right", autoHideDelay: 10000});
+                            }).then(sleep(3000).then(() => {
+                                $.notify("You might want to access the settings tab on the right to customize your user interface.",{className: "success", position: "bottom right", autoHideDelay: 10000});
+                                sleep(1500).then(() => {$.notify("You can change tabs here.",{className: "success", position: "top left", autoHideDelay: 10000})});
+                            }));
+                            Cache.save(Cache.FIRST_TIME_KEY, true, 99999);
+                        }
+                    })
                 });
             });
         }
