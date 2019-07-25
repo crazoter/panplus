@@ -33,6 +33,7 @@
 
                     //Initialize initial settings
                     console.log("FIN");
+                    $.notify("If there is an issue with silence trimming, please disable / configure in the settings tab.","info");
                 });
             });
         }

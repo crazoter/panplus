@@ -55,14 +55,18 @@ TSTracker = (() => {
                         case MessageEnums.NOISE_RESULTS: 
                             console.log("TSTracker NOISE RES: ", event.data.data);
                             if (!event.data.data || !event.data.data.results) throw new Error("Invalid noise reference line features");
+                            //if (!event.data.data || !event.data.data.results) {
+                                //Retry
+                            //} else {
                             this.noiseReferenceLineFeatures = event.data.data.results;
                             this.noiseReferenceCallbacks.fire();
                             this.noiseReferenceCallbacks.empty();
+                            //}
                             break;
                         case MessageEnums.DEBUG: 
                             console.log("TSTracker DEBUG: ");
                             console.log(event.data.data);
-                            //debugger;
+                            debugger;
                             break;
                         case MessageEnums.DEBUG_HISTOGRAM:
                             break;
@@ -156,7 +160,7 @@ TSTracker = (() => {
                         if (indexFileData) {
                             indexFileData = indexFileData.split('\n');
                             //Use the last 1.3s of the last TS file, assume the last 1s is just noise. 
-                            //The noise reference will only use 100ms
+                            //The noise reference will only use ~300ms
                             //Notice that panopto sometimes "Fades out" the last second of the webcast
                             let startProcessingFrom = 1.3;
                             let lastTSUrl = "";
@@ -183,7 +187,8 @@ TSTracker = (() => {
                                 if (foundDataNeeded >= 2) 
                                     break;
                             }
-                            return {url: lastTSUrl, options: {isNoiseSample: true, startProcessingFrom: startProcessingFrom, id: lastTSId}};
+                            //Change in implementation, start of processing for noise reference is now dynamic
+                            return {url: lastTSUrl, options: {isNoiseSample: true, startProcessingFrom: 0, id: lastTSId}};
                         } else return null;
                         //return `${tmp}${new Array(url.length - tmp.length - 3).fill(0).join('')}.ts`;
                     }
