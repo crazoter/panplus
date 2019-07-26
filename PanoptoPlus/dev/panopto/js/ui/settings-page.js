@@ -61,7 +61,10 @@ let SettingsPage = (() => {
         if (confirm(CONFIRM_MESSAGES[index])) {
           if (index == CLEAR_CACHE) {
             Cache.invalidateCache().then(() => {
-              $.notify("Cache Cleared!",{className: "success", position: "bottom left"});
+              $.notify("Cache Cleared!", {
+                className: "success",
+                position: "bottom left"
+              });
             });
           } else {
             //Example data
@@ -92,12 +95,18 @@ let SettingsPage = (() => {
             }
 
             promise.then(() => {
-              $.notify("Settings Saved! (Some settings require a page refresh)",{className: "success", position: "bottom left"});
+              $.notify("Settings Saved!", {
+                className: "success",
+                position: "bottom left"
+              });
             });
           }
         }
       } else {
-        $.notify("Some fields are invalid / empty.",{className: "error", position: "bottom left"});
+        $.notify("Some fields are invalid (all fields must be filled).", {
+          className: "error",
+          position: "bottom left"
+        });
       }
     }
     /**
@@ -107,7 +116,10 @@ let SettingsPage = (() => {
 
     fullScreen() {
       document.body.requestFullscreen();
-      $.notify("You can also go fullscreen by pressing F11.",{className: "info", position: "bottom left"});
+      $.notify("You can also go fullscreen by pressing F11.", {
+        className: "info",
+        position: "bottom left"
+      });
     }
     /**
      * After component mounted, set form values
@@ -157,7 +169,15 @@ let SettingsPage = (() => {
         required: true,
         name: "settings_sidebar",
         value: "0"
-      }), preact.h("i", null, "Collapsed"))), preact.h("div", null, "Open Tab"), preact.h("div", {
+      }), preact.h("i", null, "Collapsed"))), preact.h("div", null, "Selected Tab", preact.h("div", {
+        class: "tool-tip"
+      }, preact.h("i", {
+        class: "tool-tip__icon"
+      }, "i"), preact.h("p", {
+        class: "tool-tip__info"
+      }, preact.h("span", {
+        class: "info"
+      }, "The tab that is selected when you open a webcast.")))), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("label", {
         class: "settings-checkbox"
@@ -173,7 +193,15 @@ let SettingsPage = (() => {
         required: true,
         name: "settings_opentab",
         value: "1"
-      }), preact.h("i", null, "Transcript"))), preact.h("div", null, "Carousel"), preact.h("div", {
+      }), preact.h("i", null, "Transcript"))), preact.h("div", null, "Carousel", preact.h("div", {
+        class: "tool-tip"
+      }, preact.h("i", {
+        class: "tool-tip__icon"
+      }, "i"), preact.h("p", {
+        class: "tool-tip__info"
+      }, preact.h("span", {
+        class: "info"
+      }, "Carousel refers to the clickable \"snapshots\" below the webcast.")))), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("label", {
         class: "settings-checkbox"
@@ -189,7 +217,15 @@ let SettingsPage = (() => {
         required: true,
         name: "settings_carouselshown",
         value: "0"
-      }), preact.h("i", null, "Hidden"))), preact.h("div", null, "Initial Playback Speed"), preact.h("div", {
+      }), preact.h("i", null, "Hidden"))), preact.h("div", null, "Initial Playback Speed", preact.h("div", {
+        class: "tool-tip"
+      }, preact.h("i", {
+        class: "tool-tip__icon"
+      }, "i"), preact.h("p", {
+        class: "tool-tip__info"
+      }, preact.h("span", {
+        class: "info"
+      }, "This determines the initial playback speed when you start the webcast.")))), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("input", {
         type: "number",
@@ -198,7 +234,15 @@ let SettingsPage = (() => {
         min: "0.5",
         max: "5",
         required: true
-      })), preact.h("hr", null), preact.h("h4", null, "Theme"), preact.h("div", null, "Playback Options"), preact.h("div", {
+      })), preact.h("hr", null), preact.h("h4", null, "Theme"), preact.h("div", null, "Playback Options", preact.h("div", {
+        class: "tool-tip"
+      }, preact.h("i", {
+        class: "tool-tip__icon"
+      }, "i"), preact.h("p", {
+        class: "tool-tip__info"
+      }, preact.h("span", {
+        class: "info"
+      }, "You can now customize how you want your playback options to look like. Try changing them and see which one you prefer!")))), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("label", {
         class: "settings-checkbox"
@@ -221,7 +265,15 @@ let SettingsPage = (() => {
         required: true,
         name: "settings_playbackoptions",
         value: "2"
-      }), preact.h("i", null, "Slider"))), preact.h("div", null, "Carousel"), preact.h("div", {
+      }), preact.h("i", null, "Slider"))), preact.h("div", null, "Carousel", preact.h("div", {
+        class: "tool-tip"
+      }, preact.h("i", {
+        class: "tool-tip__icon"
+      }, "i"), preact.h("p", {
+        class: "tool-tip__info"
+      }, preact.h("span", {
+        class: "info"
+      }, "Carousel refers to the clickable \"snapshots\" below the webcast.")))), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("label", {
         class: "settings-checkbox"
@@ -253,7 +305,17 @@ let SettingsPage = (() => {
         required: true,
         name: "settings_subtitles",
         value: "0"
-      }), preact.h("i", null, "Hidden"))), preact.h("hr", null), preact.h("h4", null, "Features"), preact.h("div", null, "(Changes after restarting)"), preact.h("div", null, "Machine Transcription"), preact.h("div", {
+      }), preact.h("i", null, "Hidden"))), preact.h("hr", null), preact.h("h4", {
+        style: "display: inline-block;"
+      }, "Features"), preact.h("span", null, " (Changes after restarting)"), preact.h("div", null, "Machine Transcription", preact.h("div", {
+        class: "tool-tip"
+      }, preact.h("i", {
+        class: "tool-tip__icon"
+      }, "i"), preact.h("p", {
+        class: "tool-tip__info"
+      }, preact.h("span", {
+        class: "info"
+      }, "This feature refers to the transcripts and subtitles. Disable it and refresh the page if there are issues.")))), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("label", {
         class: "settings-checkbox"
@@ -269,7 +331,15 @@ let SettingsPage = (() => {
         required: true,
         name: "settings_machinetranscript",
         value: "0"
-      }), preact.h("i", null, "Disabled"))), preact.h("div", null, "Silence Trimming"), preact.h("div", {
+      }), preact.h("i", null, "Disabled"))), preact.h("div", null, "Silence Trimming", preact.h("div", {
+        class: "tool-tip"
+      }, preact.h("i", {
+        class: "tool-tip__icon"
+      }, "i"), preact.h("p", {
+        class: "tool-tip__info"
+      }, preact.h("span", {
+        class: "info"
+      }, "This feature refers to the skipping of sections where the presenter is not speaking.")))), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("label", {
         class: "settings-checkbox"
@@ -285,7 +355,17 @@ let SettingsPage = (() => {
         required: true,
         name: "settings_silencetrimming",
         value: "0"
-      }), preact.h("i", null, "Disabled"))), preact.h("div", null, "Noise z-value (Default is 1.89, min is 0.00, max is 3.99)"), preact.h("div", {
+      }), preact.h("i", null, "Disabled"))), preact.h("div", null, "Silence z-value", preact.h("div", {
+        class: "tool-tip"
+      }, preact.h("i", {
+        class: "tool-tip__icon"
+      }, "i"), preact.h("p", {
+        class: "tool-tip__info"
+      }, preact.h("span", {
+        class: "info"
+      }, "Reduce this value if speech is being skipped and increase it if too little silence/noise is being skipped.", preact.h("table", {
+        class: "silence-table"
+      }, preact.h("tr", null, preact.h("th", null, "Scenario"), preact.h("th", null, "Suggested action or value")), preact.h("tr", null, preact.h("td", null, "Only speech is being removed"), preact.h("td", null, "Disable feature or try value 0.67")), preact.h("tr", null, preact.h("td", null, "Silence and speech being removed"), preact.h("td", null, "Reduce value, try 1.48")), preact.h("tr", null, preact.h("td", null, "Default value"), preact.h("td", null, "1.89")), preact.h("tr", null, preact.h("td", null, "Noise not removed"), preact.h("td", null, "Increase value, try 2.37"))))))), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("input", {
         type: "number",
@@ -294,7 +374,7 @@ let SettingsPage = (() => {
         max: "3.99",
         step: "0.01",
         required: true
-      }), preact.h("div", null, zValuePercentage, " confidence interval (smaller interval means less detected as noise)")), preact.h("div", {
+      }), preact.h("div", null, zValuePercentage, " confidence interval")), preact.h("div", {
         onClick: this.fullScreen,
         class: "ui-state-default ui-button save-btns"
       }, preact.h("a", {

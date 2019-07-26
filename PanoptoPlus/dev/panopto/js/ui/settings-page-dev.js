@@ -173,29 +173,64 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_sidebar" value="1"/><i>Expanded</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_sidebar" value="0"/><i>Collapsed</i></label>
                     </div>
-                    <div>Open Tab</div>
+                    <div>Selected Tab
+                        <div class="tool-tip">
+                            <i class="tool-tip__icon">i</i>
+                            <p class="tool-tip__info">
+                            <span class="info">The tab that is selected when you open a webcast.</span>
+                            </p>
+                        </div>
+                    </div>
                     <div onChange={this.settingsChange.bind(this)}>
                         <label class="settings-checkbox"><input type="radio" required name="settings_opentab" value="0"/><i>2nd Screen</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_opentab" value="1"/><i>Transcript</i></label>
                     </div>
-                    <div>Carousel</div>
+                    <div>Carousel 
+                        <div class="tool-tip">
+                            <i class="tool-tip__icon">i</i>
+                            <p class="tool-tip__info">
+                            <span class="info">Carousel refers to the clickable "snapshots" below the webcast.</span>
+                            </p>
+                        </div>
+                    </div>
                     <div onChange={this.settingsChange.bind(this)}>
                         <label class="settings-checkbox"><input type="radio" required name="settings_carouselshown" value="1"/><i>Shown</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_carouselshown" value="0"/><i>Hidden</i></label>
                     </div>
-                    <div>Initial Playback Speed</div>
+                    <div>Initial Playback Speed
+                        <div class="tool-tip">
+                            <i class="tool-tip__icon">i</i>
+                            <p class="tool-tip__info">
+                            <span class="info">This determines the initial playback speed when you start the webcast.</span>
+                            </p>
+                        </div>
+                    </div>
                     <div onChange={this.settingsChange.bind(this)}>
                         <input type="number" name="settings_initialspeed" step="0.1" min="0.5" max="5" required/>
                     </div>
                     <hr/>
                     <h4>Theme</h4>
-                    <div>Playback Options</div>
+                    <div>Playback Options
+                        <div class="tool-tip">
+                            <i class="tool-tip__icon">i</i>
+                            <p class="tool-tip__info">
+                            <span class="info">You can now customize how you want your playback options to look like. Try changing them and see which one you prefer!</span>
+                            </p>
+                        </div>
+                    </div>
                     <div onChange={this.settingsChange.bind(this)}>
                         <label class="settings-checkbox"><input type="radio" required name="settings_playbackoptions" value="0"/><i>Default</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_playbackoptions" value="1"/><i>More Buttons</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_playbackoptions" value="2"/><i>Slider</i></label>
                     </div>
-                    <div>Carousel</div>
+                    <div>Carousel
+                        <div class="tool-tip">
+                            <i class="tool-tip__icon">i</i>
+                            <p class="tool-tip__info">
+                            <span class="info">Carousel refers to the clickable "snapshots" below the webcast.</span>
+                            </p>
+                        </div>
+                    </div>
                     <div onChange={this.settingsChange.bind(this)}>
                         <label class="settings-checkbox"><input type="radio" required name="settings_carouseldesign" value="0"/><i>Default</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_carouseldesign" value="1"/><i>Smaller</i></label>
@@ -206,22 +241,52 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_subtitles" value="0"/><i>Hidden</i></label>
                     </div>
                     <hr/>
-                    <h4>Features</h4>
-                    <div>(Changes after restarting)</div>
-                    <div>Machine Transcription</div>
+                    <h4 style="display: inline-block;">Features</h4><span> (Changes after restarting)</span>
+                    <div>Machine Transcription
+                        <div class="tool-tip">
+                            <i class="tool-tip__icon">i</i>
+                            <p class="tool-tip__info">
+                            <span class="info">This feature refers to the transcripts and subtitles. Disable it and refresh the page if there are issues.</span>
+                            </p>
+                        </div>
+                    </div>
                     <div onChange={this.settingsChange.bind(this)}>
                         <label class="settings-checkbox"><input type="radio" required name="settings_machinetranscript" value="1"/><i>Enabled</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_machinetranscript" value="0"/><i>Disabled</i></label>
                     </div>
-                    <div>Silence Trimming</div>
+                    <div>Silence Trimming
+                        <div class="tool-tip">
+                            <i class="tool-tip__icon">i</i>
+                            <p class="tool-tip__info">
+                            <span class="info">This feature refers to the skipping of sections where the presenter is not speaking.</span>
+                            </p>
+                        </div>
+                    </div>
                     <div onChange={this.settingsChange.bind(this)}>
                         <label class="settings-checkbox"><input type="radio" required name="settings_silencetrimming" value="1"/><i>Enabled</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_silencetrimming" value="0"/><i>Disabled</i></label>
                     </div>
-                    <div>Noise z-value (Default is 1.89, min is 0.00, max is 3.99)</div>
+                    <div>Silence z-value 
+                        <div class="tool-tip">
+                            <i class="tool-tip__icon">i</i>
+                            <p class="tool-tip__info">
+                            <span class="info">Reduce this value if speech is being skipped and increase it if too little silence/noise is being skipped. 
+                                <table class="silence-table">
+                                    <tr><th>Scenario</th><th>Suggested action or value</th></tr>
+                                    <tr><td>Only speech is being removed</td><td>Disable feature or try value 0.67</td></tr>
+                                    <tr><td>Silence and speech being removed</td><td>Reduce value, try 1.48</td></tr>
+                                    <tr><td>Default value</td><td>1.89</td></tr>
+                                    <tr><td>Noise not removed</td><td>Increase value, try 2.37</td></tr>
+                                </table>
+                            </span>
+                            </p>
+                        </div>
+                    </div>
                     <div onChange={this.settingsChange.bind(this)}>
                     <input type="number" name="settings_silencethreshold" min="0" max="3.99" step="0.01" required/>
-                    <div>{zValuePercentage} confidence interval (smaller interval means less detected as noise)</div>
+                    <div>
+                        {zValuePercentage} confidence interval
+                    </div>
                     </div>
                     <div onClick={this.fullScreen} class="ui-state-default ui-button save-btns"><a href="#" class="ui-tabs-text-lookalike"><span>Make Panopto Full-screen</span></a></div>
                     <hr/>

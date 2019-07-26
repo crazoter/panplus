@@ -1,6 +1,6 @@
 {
     "name": "Panopto Plus",
-    "version": "1.1.2",
+    "version": "1.2.0",
     "description": "Improve your webcasting experience!",
     "manifest_version": 2,
     "permissions": ["tabs", "storage"],
@@ -70,7 +70,8 @@
                 "panopto/css/speed-slider.css",
                 "panopto/css/thumbnails.css",
                 "panopto/css/subtitles.css",
-                "panopto/css/sidebar.css"
+                "panopto/css/sidebar.css",
+                "panopto/css/tooltips.css"
             ],
             "all_frames": true
         },

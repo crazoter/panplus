@@ -1,0 +1,84 @@
+/************** Tool Tip Styles ********************************/
+/**Lifted off https://speckyboy.com/free-css-tooltip-snippets/ number 6*/
+.tool-tip {
+    display: inline-block;
+    position: relative;
+    margin-left: 0.2em;
+  }
+  .tool-tip .tool-tip__icon {
+    color: #27b1f0;
+    border: 1px solid #27b1f0;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-block;
+    font-style: italic;
+    font-family: times new roman;
+    height: 14px;
+    line-height: 1em;
+    text-align: center;
+    width: 14px;
+  }
+  .collapsed .tool-tip {
+      display: block;
+  }
+  .tool-tip .tool-tip__info {
+    background: #fff;
+    color: solid #27b1f0;
+    display: none;
+    border: 1px solid #27b1f0;
+    border-radius: 3px;
+    font-size: 0.875em;
+    padding: 0.3em;
+    position: absolute;
+    left: 30px;
+    top: -14px;
+    width: 225px;
+    z-index: 2;
+  }
+
+  .collapsed .tool-tip .tool-tip__info {
+      position: initial;
+      width: 100%;
+  }
+  .tool-tip .tool-tip__info:before, .tool-tip .tool-tip__info:after {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 7px;
+    border-style: solid;
+    border-width: 10px 10px 10px 0;
+    border-color: transparent #27b1f0;
+  }
+  .tool-tip .tool-tip__info:after {
+    left: -8px;
+    border-right-color: #fff;
+  }
+
+  .tool-tip .tool-tip__info .info {
+    display: block;
+  }
+  .tool-tip .tool-tip__info .info__title {
+    color: #fa00f3;
+  }
+  .tool-tip:hover .tool-tip__info, .tool-tip:focus .tool-tip__info {
+    display: inline-block;
+  }
+  
+  a:focus + .tool-tip .tool-tip__info {
+    display: inline-block;
+  }
+
+  .silence-table, .silence-table tr, .silence-table tr td, .silence-table tr th {
+      border: 1px solid gray;
+  }
+  .silence-table tr td {
+      padding: 3px;
+  }
+
+  .collapsed .silence-table {
+    font-size: 7px;
+  }
+
+  .collapsed .silence-table tr td {
+    padding: 1px;
+  }

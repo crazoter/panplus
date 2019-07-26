@@ -153,6 +153,11 @@ let TranscriptDisplay = (() => {
                 cueArray[j].id = j;
                 this.tracks[elements.primaryVideoIndex].addCue(cueArray[j]);
             }
+
+            //Play Controls DOM in the event of fullscreen, prevent subs from being blocked by bar
+            //let playControlsDom = document.getElementById('playControls');
+            //this.trackPlayControlsDomChanges(this.tracks, playControlsDom);
+
             //If 2 videos, sync by adding cue to currentTime when the cue is played.
             if (elements.all.length === 2) {
                 let otherVideoIndex = elements.primaryVideoIndex ^ 1;
@@ -160,25 +165,16 @@ let TranscriptDisplay = (() => {
                 this.tracks[elements.primaryVideoIndex].oncuechange = function () {
                     //function is embedded in the code here because of the need to access previous variables for performance reasons
                     let cues = self.tracks[elements.primaryVideoIndex].activeCues;
+
                     //remove all cues before adding any new ones
                     while (self.tracks[otherVideoIndex].cues && self.tracks[otherVideoIndex].cues.length > 0) {
                         self.tracks[otherVideoIndex].removeCue(self.tracks[otherVideoIndex].cues[0]);
                     }
 
                     if (cues && cues.length > 0) {
-                        //Entered into a new cue
-                        //Implementation 1: Insert with fixed death time
-                        /*
-                        if (this.tracks[otherVideoIndex].cues.getCueById(cues[0].startTime) === null) {
-                            //Add cue with offset only if it hasn't already been added
-                            let offset = elements.secondaryVideo.currentTime - elements.primaryVideo.currentTime;
-                            let cue = new VTTCue(cues[0].startTime + offset, 
-                                cues[0].endTime + offset, 
-                                cues[0].text);
-                            cue.id = cues[0].startTime;
-                            this.tracks[otherVideoIndex].addCue(cue);
-                        }*/
-                        //Implementation 2: Clear cues, then insert cue
+                        //Update subtitle vertical position 
+                        //self.updateSubtitleLine(self.tracks, playControlsDom);
+                        //Clear cues, then insert cue
                         let offset = elements.secondaryVideo.currentTime - elements.primaryVideo.currentTime;
                         let currentCue = new VTTCue(cues[0].startTime + offset, 
                             cues[0].endTime + offset, 
@@ -204,6 +200,47 @@ let TranscriptDisplay = (() => {
             await this.updateVisibility();
             console.log("TranscriptDisplay loaded");
         }
+
+        /*
+        trackPlayControlsDomChanges(tracks, playControlsDom) {
+            let self = this;
+            $(document).on('mozfullscreenchange webkitfullscreenchange fullscreenchange',function() {
+                self.updateSubtitleLine(tracks, playControlsDom);
+            });
+            //Detect if full screen and play controls visible and shift subtitles accordingly
+            let prevDisplayStyle = undefined;
+            let observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutationRecord) {
+                    if (prevDisplayStyle !== playControlsDom.style.display) {
+                        prevDisplayStyle = playControlsDom.style.display;
+                        self.updateSubtitleLine(tracks, playControlsDom);
+                    }
+                });    
+            });
+            observer.observe(playControlsDom, { attributes : true, attributeFilter : ['style'] });
+        }
+
+        updateSubtitleLine(tracks, playControlsDom) {
+            for (let i = 0; i < tracks.length; i++) {
+                if (tracks[i].activeCues.length > 0) {
+                    let expectedLineValue;
+                    if (document.fullscreen && playControlsDom.style.display !== "none")
+                        expectedLineValue = 10;
+                    else 
+                        expectedLineValue = "auto";
+                    if (tracks[i].activeCues[0].line === "auto") {
+                        //remove and re-add
+                        console.info(expectedLineValue);
+                        let cue = tracks[i].activeCues[0];
+                        let newCue = new VTTCue(cue.startTime, cue.endTime, cue.text);
+                        newCue.id = cue.id;
+                        newCue.line = expectedLineValue;
+                        tracks[i].removeCue(cue);
+                        tracks[i].addCue(newCue);
+                    }
+                }
+            }
+        }*/
 
         async updateVisibility() {
             while (true) {
