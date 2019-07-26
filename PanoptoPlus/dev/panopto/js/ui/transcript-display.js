@@ -154,17 +154,15 @@ let TranscriptDisplay = (() => {
                 this.tracks[elements.primaryVideoIndex].addCue(cueArray[j]);
             }
             //If 2 videos, sync by adding cue to currentTime when the cue is played.
-            if (elements.all.length <= 2) {
+            if (elements.all.length === 2) {
                 let otherVideoIndex = elements.primaryVideoIndex ^ 1;
                 let self = this;
                 this.tracks[elements.primaryVideoIndex].oncuechange = function () {
                     //function is embedded in the code here because of the need to access previous variables for performance reasons
                     let cues = self.tracks[elements.primaryVideoIndex].activeCues;
                     //remove all cues before adding any new ones
-                    if (elements.all.length === 2) {
-                        while (self.tracks[otherVideoIndex].cues && self.tracks[otherVideoIndex].cues.length > 0) {
-                            self.tracks[otherVideoIndex].removeCue(self.tracks[otherVideoIndex].cues[0]);
-                        }
+                    while (self.tracks[otherVideoIndex].cues && self.tracks[otherVideoIndex].cues.length > 0) {
+                        self.tracks[otherVideoIndex].removeCue(self.tracks[otherVideoIndex].cues[0]);
                     }
 
                     if (cues && cues.length > 0) {
@@ -181,13 +179,11 @@ let TranscriptDisplay = (() => {
                             this.tracks[otherVideoIndex].addCue(cue);
                         }*/
                         //Implementation 2: Clear cues, then insert cue
-                        if (elements.all.length === 2) {
-                            let offset = elements.secondaryVideo.currentTime - elements.primaryVideo.currentTime;
-                            let currentCue = new VTTCue(cues[0].startTime + offset, 
-                                cues[0].endTime + offset, 
-                                cues[0].text);
-                                self.tracks[otherVideoIndex].addCue(currentCue);
-                        }
+                        let offset = elements.secondaryVideo.currentTime - elements.primaryVideo.currentTime;
+                        let currentCue = new VTTCue(cues[0].startTime + offset, 
+                            cues[0].endTime + offset, 
+                            cues[0].text);
+                        self.tracks[otherVideoIndex].addCue(currentCue);
 
                         //Set selected index
                         let index = parseInt(cues[0].id);

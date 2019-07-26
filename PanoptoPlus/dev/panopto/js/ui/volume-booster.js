@@ -42,6 +42,11 @@ let VolumeBooster = (() => {
                                 });
                             }
                         });
+                        $('#vol-boost-gain').keydown((event) => {
+                            event.stopPropagation();
+                        }).keyup((event) => {
+                            event.stopPropagation();
+                        });
                     });
                 });
             });
