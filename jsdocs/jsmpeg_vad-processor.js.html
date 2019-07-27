@@ -99,7 +99,10 @@ VADProcessor = (() => {
 
             //Reserved values
             //this.referenceSamples
-            //this.referenceData = []
+            //this.referenceData = Array of 2 arrays containing line features (each an array of 5 values)
+            //this.headOfLastNonZeroLineFeatureIndexes = [-1,-1]
+            //this.prevLineRefWasZero = [false,false];
+            //this.noiseFadeOutPaddingSamples = Math.round(1 / timePerInterval); //When processing for noise reference, pad from the last zero line reference in case of fading out
         }
         
         /**
@@ -121,6 +124,9 @@ VADProcessor = (() => {
             const size = this.float32Length - initialOffset;
             const length = initialOffset + size - (size % FFT1_BIN_COUNT);
             this.currentTime = initialOffset / this.sampleRate;
+            if (this.isNoiseSample) { 
+                this.setupNoiseReferenceData();
+            }
             for (let ofs = initialOffset; ofs &lt; length; ofs += FFT1_BIN_COUNT) {
                 if (this.continueBuffering) {
                     //Make shallow copies of the next set of samples
@@ -133,13 +139,41 @@ VADProcessor = (() => {
                     this.currentTime += this.timePerInterval;
 
                     if (this.isNoiseSample) { 
-                        this.processReference();
+                        this.processNoiseReference();
                     } else { 
                         this.processData(true);
                     }
                 } else break;
             }
+
+            //if noise sample, get the last 30 samples with activity (with padding if necessary)
+            if (this.isNoiseSample) { 
+                this.compileNoiseReferenceResults();
+            }
+
             return this.results;
+        }
+
+        /**
+         * Setup the data structures for the noise reference
+         */
+        setupNoiseReferenceData() {
+            if (this.referenceSamples == null) {
+                this.referenceSamples = 0;
+                this.referenceData = [];
+                this.headOfLastNonZeroLineFeatureIndexes = [-1,-1];
+                this.noiseFadeOutPaddingSamples = Math.round(1 / this.timePerInterval);
+                this.prevLineRefWasZero = [false,false];
+                this.channelsZeroed = [true, true];
+                this.results = [];
+                for (let i = 0; i &lt; 2; i++) {
+                    this.referenceData.push([]);
+                    this.results.push([]);
+                    for (let j = 0; j &lt; 5; j++) {
+                        this.results[i].push({mean: 0, stddev: 0});
+                    }
+                }
+            }
         }
 
         /**
@@ -147,62 +181,121 @@ VADProcessor = (() => {
          * Store results in this.results.
          * @returns {undefined}
          */
-        processReference() {
-            if (this.referenceSamples == null) {
-                this.referenceSamples = 0;
-                this.referenceData = [];
-                this.results = [];
-                for (let i = 0; i &lt; 2; i++) {
-                    this.results.push([]);
-                    this.referenceData.push([]);
-                    for (let j = 0; j &lt; 5; j++) {
-                        this.referenceData[i].push([]);
-                        this.results[i].push({mean: 0, stddev: 0});
+        processNoiseReference() {
+            let newData = this.processData(false);
+            this.referenceSamples++;
+            for (let i = 0; i &lt; this.referenceData.length; i++) {
+                this.referenceData[i].push(newData[i]);
+                if (this.lineFeatureIsZero(newData[i])) {
+                    if (!this.prevLineRefWasZero[i]) {
+                        this.headOfLastNonZeroLineFeatureIndexes[i] = this.referenceData[i].length - 1;
+                    }
+                    this.prevLineRefWasZero[i] = true;
+                } else {
+                    this.prevLineRefWasZero[i] = false;
+                }
+
+                if (this.channelsZeroed[i] &amp;&amp; !this.lineFeatureIsZero(newData[i])) {
+                    this.channelsZeroed[i] = false;
+                }
+            }
+        }
+
+        /**
+         * using this.referenceSamples, dynamically detect last active line reference.
+         */
+        compileNoiseReferenceResults() {
+            //Determine bounds of noise reference
+            let endIndex = Math.max(0, this.referenceData[0].length - 1 - this.noiseFadeOutPaddingSamples);
+            //Must not be less than 0
+            for (let i = 0; i &lt; this.headOfLastNonZeroLineFeatureIndexes.length; i++) {
+                //If channel was in use and zero was detected
+                if (!this.channelsZeroed[i] &amp;&amp; this.headOfLastNonZeroLineFeatureIndexes[i] > 0) {
+                    //If endIndex was more, jump to new position
+                    if (endIndex > this.headOfLastNonZeroLineFeatureIndexes[i])
+                        endIndex = this.headOfLastNonZeroLineFeatureIndexes[i];
+                }
+            }
+            let startIndex = Math.max(0, endIndex - NOISE_SAMPLE_COUNT);
+            //Calculate sum of values in bounds
+            for (let i = 0; i &lt; this.referenceData.length; i++) {
+                for (let j = startIndex; j &lt;= endIndex; j++) {
+                    for (let k = 0; k &lt; 5; k++) {
+                        this.results[i][k].mean += this.referenceData[i][j][k];
                     }
                 }
             }
-            if (this.referenceSamples &lt; NOISE_SAMPLE_COUNT) {
-                let newData = this.processData(false);
-                this.referenceSamples++;
-                for (let i = 0; i &lt; this.referenceData.length; i++) {
-                    for (let j = 0; j &lt; this.referenceData[i].length; j++) {
-                        ////Push to array of data
-                        this.referenceData[i][j].push(newData[i][j]);
-                        //Sum for mean later
-                        this.results[i][j].mean += newData[i][j];
+
+            let length = endIndex - startIndex + 1;//this.referenceData[i].length;
+            //Calculate mean and std dev of each variable
+            for (let i = 0; i &lt; this.referenceData.length; i++) {
+                for (let k = 0; k &lt; 5; k++) {
+                    //Calculate mean
+                    this.results[i][k].mean /= length;
+                    //Calculate variance &amp; subsequently std dev
+                    //for (let k = 0; k &lt; this.referenceData[i][j].length; k++) {
+                    for (let j = startIndex; j &lt;= endIndex; j++) {
+                        this.results[i][k].stddev += Math.pow(this.referenceData[i][j][k] - this.results[i][k].mean, 2);
                     }
-                }
-                //Gathered enough samples
-                if (this.referenceSamples >= NOISE_SAMPLE_COUNT) {
-                    //Calculate mean and std dev of each variable
-                    for (let i = 0; i &lt; this.referenceData.length; i++) {
-                        for (let j = 0; j &lt; this.referenceData[i].length; j++) {
-                            //Calculate mean
-                            this.results[i][j].mean /= this.referenceData[i][j].length;
-                            //Calculate variance &amp; subsequently std dev
-                            for (let k = 0; k &lt; this.referenceData[i][j].length; k++) {
-                                this.results[i][j].stddev += Math.pow(this.referenceData[i][j][k] - this.results[i][j].mean, 2);
-                            }
-                            this.results[i][j].stddev /= this.referenceData[i][j].length - 1;
-                            this.results[i][j].stddev = Math.sqrt(this.results[i][j].stddev);
-                            //Calculate the final bounds for each variable
-                            this.results[i][j] = {
-                                lowerBound: this.results[i][j].mean - this.results[i][j].stddev * this.stddevDistance[j], 
-                                upperBound: this.results[i][j].mean + this.results[i][j].stddev * this.stddevDistance[j]
-                            };
-                        }
-                    }
-                    referenceLineFeatures = this.results;
-                    this.continueBuffering = false;
+                    this.results[i][k].stddev /= length - 1;
+                    this.results[i][k].stddev = Math.sqrt(this.results[i][k].stddev);
+                    //Calculate the final bounds for each variable
+                    this.results[i][k] = {
+                        lowerBound: this.results[i][k].mean - this.results[i][k].stddev * this.stddevDistance[k], 
+                        upperBound: this.results[i][k].mean + this.results[i][k].stddev * this.stddevDistance[k]
+                    };
                 }
             }
+            referenceLineFeatures = this.results;
+            this.continueBuffering = false;
+            /*
+            //Check if noise results are null
+            //If all zero, reject noise reference
+            let allZero = true;
+            for (let i = 0; i &lt; this.results.length; i++) {
+                for (let j = 0; j &lt; this.results[i].length; j++) {
+                    if (this.results[i][j] !== 0) {
+                        allZero = false;
+                        break;
+                    }
+                }
+            }
+            if (allZero) {
+                referenceLineFeatures = undefined;
+                this.result = undefined;
+            }*/
+
+            /*
+            this.log('ref', 
+                [
+                this.referenceData,
+                this.headOfLastNonZeroLineFeatureIndexes, 
+                this.noiseFadeOutPaddingSamples, 
+                this.channelsZeroed,
+                startIndex,
+                endIndex,
+            ]);
+            this.logSend();*/
+        }
+
+        /**
+         * Checks if a particular line feature is completely 0
+         * @param {Array.&lt;Number>} lineFeature Array of 5 numbers
+         */
+        lineFeatureIsZero(lineFeature) {
+            //this.log('lf',lineFeature);
+            for (let i = 0; i &lt; lineFeature.length; i++) {
+                if (lineFeature[i] !== 0)
+                    return false;
+            }
+            return true;
         }
 
         /**
          * VAD section
          * https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4142156/
          * @param {Boolean} checkForSpeech Check if speaking against reference.
-         * @returns {Array.&lt;Array.&lt;Number>>} array of line features, usually 2 line features of 5 variables
+         * @returns {Array.&lt;Array.&lt;Number>>} array of line features, usually array of 2 line features of 5 variables
          */
         processData(checkForSpeech) {
             //process for both channels
@@ -464,7 +557,7 @@ VADProcessor = (() => {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Sat Jul 20 2019 15:49:45 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Sat Jul 27 2019 21:07:29 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

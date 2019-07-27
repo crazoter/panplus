@@ -19,7 +19,7 @@ To create a chrome extension to improve the webcasting experience for panopto. I
 7. To build the documentation, execute `npm run make_docs`. Documentation uses jsdoc (refer to package.json).
 
 ### Download & Installation
-You can download and install this chrome extension from the store via this URL: [TO LIST].
+You can download and install this chrome extension from the store via this URL: https://tinyurl.com/panplus.
 
 ### FAQ
 
