@@ -201,47 +201,9 @@ let TranscriptDisplay = (() => {
             console.log("TranscriptDisplay loaded");
         }
 
-        /*
-        trackPlayControlsDomChanges(tracks, playControlsDom) {
-            let self = this;
-            $(document).on('mozfullscreenchange webkitfullscreenchange fullscreenchange',function() {
-                self.updateSubtitleLine(tracks, playControlsDom);
-            });
-            //Detect if full screen and play controls visible and shift subtitles accordingly
-            let prevDisplayStyle = undefined;
-            let observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutationRecord) {
-                    if (prevDisplayStyle !== playControlsDom.style.display) {
-                        prevDisplayStyle = playControlsDom.style.display;
-                        self.updateSubtitleLine(tracks, playControlsDom);
-                    }
-                });    
-            });
-            observer.observe(playControlsDom, { attributes : true, attributeFilter : ['style'] });
-        }
-
-        updateSubtitleLine(tracks, playControlsDom) {
-            for (let i = 0; i < tracks.length; i++) {
-                if (tracks[i].activeCues.length > 0) {
-                    let expectedLineValue;
-                    if (document.fullscreen && playControlsDom.style.display !== "none")
-                        expectedLineValue = 10;
-                    else 
-                        expectedLineValue = "auto";
-                    if (tracks[i].activeCues[0].line === "auto") {
-                        //remove and re-add
-                        console.info(expectedLineValue);
-                        let cue = tracks[i].activeCues[0];
-                        let newCue = new VTTCue(cue.startTime, cue.endTime, cue.text);
-                        newCue.id = cue.id;
-                        newCue.line = expectedLineValue;
-                        tracks[i].removeCue(cue);
-                        tracks[i].addCue(newCue);
-                    }
-                }
-            }
-        }*/
-
+        /**
+         * Set to show subtitles after a brief delay (Doesn't work without delay, this is a hotfix)
+         */
         async updateVisibility() {
             while (true) {
                 if (Settings.getDataAsObject()[Settings.keys.subtitles])
@@ -256,14 +218,24 @@ let TranscriptDisplay = (() => {
             }
         }
 
+        /**
+         * Set texttracks to be hidden
+         */
         async hide() {
             return await this.setState("hidden");
         }
 
+        /**
+         * Set texttracks to be shown
+         */
         async show() {
             return await this.setState("showing");
         }
     
+        /**
+         * Set mode of texttracks to hidden or showing
+         * @param {String} state state we want the texttrack(s) to be in
+         */
         async setState(state) {
             //Set to show subtitles after a brief delay (Doesn't work without delay, this is a hotfix)
             let showing = true;

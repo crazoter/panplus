@@ -235,7 +235,14 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_carouseldesign" value="0"/><i>Default</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_carouseldesign" value="1"/><i>Smaller</i></label>
                     </div>
-                    <div>Subtitles</div>
+                    <div>Subtitles
+                        <div class="tool-tip">
+                            <i class="tool-tip__icon">i</i>
+                            <p class="tool-tip__info">
+                            <span class="info">Use this to toggle subtitles (but not disable transcripts).</span>
+                            </p>
+                        </div>
+                    </div>
                     <div onChange={this.settingsChange.bind(this)}>
                         <label class="settings-checkbox"><input type="radio" required name="settings_subtitles" value="1"/><i>Shown</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_subtitles" value="0"/><i>Hidden</i></label>
@@ -276,7 +283,7 @@ let SettingsPage = (() => {
                                     <tr><td>Only speech is being removed</td><td>Disable feature or try value 0.67</td></tr>
                                     <tr><td>Silence and speech being removed</td><td>Reduce value, try 1.48</td></tr>
                                     <tr><td>Default value</td><td>1.89</td></tr>
-                                    <tr><td>Noise not removed</td><td>Increase value, try 2.37</td></tr>
+                                    <tr><td>Noise not removed</td><td>Increase value, try 2.37, 2.66, 3.24 or 3.54</td></tr>
                                 </table>
                             </span>
                             </p>

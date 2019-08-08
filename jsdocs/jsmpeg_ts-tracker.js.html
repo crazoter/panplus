@@ -71,10 +71,9 @@ TSTracker = (() => {
                 if (event.data) {
                     switch (event.data.msgEnum) {
                         case MessageEnums.NORMAL_RESULTS:
-                            //debugger;
                             //console.log("TSTracker NORMAL RES:", event.data);
                             //After merging, the start times are at their approprate locations
-                            this.insertSilentSections(event.data.options.id, event.data.data.results);
+                            this.insertSilentSections(event.data.options.id, event.data.options.startTime, event.data.options.endTime, event.data.data.results);
                             break;
                         case MessageEnums.RAW_DATA_RESULTS: 
                             //console.log(event.data.data);
@@ -120,18 +119,19 @@ TSTracker = (() => {
                     }
                     
                     //Set configs for optimization
-                    //Disabled because causing some problems for some webcasts
-                    /*
+                    //Initially disabled because causing some problems for some webcasts, but re-enabled because it helped somewhat with
+                    //buffering. To observe for bugs. 
                     players.forEach(player => {
-                        player.engine.hlsjs.config.startFragPrefetch = true;
-                        player.engine.hlsjs.currentLevel = 0;
-                        player.engine.hlsjs.config.maxFragLookUpTolerance = 0.20;
-                        player.engine.hlsjs.config.maxStarvationDelay = 0.5;
-                        player.engine.hlsjs.config.maxBufferLength = 360;
-                        player.engine.hlsjs.config.maxMaxBufferLength = 600;
-                        player.engine.hlsjs.config.maxBufferSize = 60000000;
-                        player.engine.hlsjs.config.stretchShortVideoTrack = true;
-                    });*/
+                        let hls = player.engine.hls || player.engine.hlsjs;
+                        //player.engine.hlsjs.config.startFragPrefetch = true;
+                        //player.engine.hlsjs.currentLevel = 0;
+                        //player.engine.hlsjs.config.maxFragLookUpTolerance = 0.20;
+                        //player.engine.hlsjs.config.maxStarvationDelay = 0.5;
+                        hls.config.maxBufferLength = 90;
+                        //hls.config.maxMaxBufferLength = 600;
+                        //player.engine.hlsjs.config.maxBufferSize = 60000000;
+                        //player.engine.hlsjs.config.stretchShortVideoTrack = true;
+                    });
 
                     let promiseChain = null;
                     let waitForPromiseChainResolve = null;
@@ -169,6 +169,7 @@ TSTracker = (() => {
                                 bridgeSendData({frag: {
                                         relurl: frag.relurl,
                                         start: frag.start,
+                                        end: frag.start + frag.duration,
                                         duration: frag.duration,
                                         url: frag.url
                                     }, data: req.response, options: options});
@@ -275,19 +276,19 @@ TSTracker = (() => {
                                 startTime: event.detail.frag.start,
                                 duration: event.detail.frag.duration,
                             };*/
-
-                            //return;
                             //console.log('TsTrackingEvent', event.detail.data, event.detail.options);
                             self.process(event.detail.data, {
                                 isNoiseSample: event.detail.options.isNoiseSample,
                                 startProcessingFrom: event.detail.options.startProcessingFrom,
                                 id: event.detail.options.id || event.detail.frag.relurl,
                                 startTime: event.detail.frag.start,
+                                endTime: event.detail.frag.end,
                                 duration: event.detail.frag.duration,
                             });
                         }
                     } else {
                         debugger;
+                        console.error("Something wrong happened with the fragment transportation");
                     }
                 });
                 ctxBridge.connect();
@@ -387,14 +388,15 @@ TSTracker = (() => {
          * Take the results from the webworklet and insert into the video as cues
          * @param {String} id relurl of the ts file being retrieved
          * @param {Number} startTime start time of the TS file
+         * @param {Number} endTime end time of the TS file
          * @param {Object} results array, [isSpeaking: true=was not speaking then started,false=was speaking then stopped, time: currentTime relative to start of TS file]
          * @returns {undefined}
          */
-        insertSilentSections(id, data) {
+        insertSilentSections(id, startTime, endTime, data) {
             //data.forEach(x => x.time += startTime);
             //Todo: cache
             SilenceCueManager.addToCache(id, data);
-            SilenceCueManager.addSilenceCues(id, data);
+            SilenceCueManager.addSilenceCues(id, startTime, endTime, data);
         }
     }
 
@@ -415,7 +417,7 @@ TSTracker = (() => {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Sat Jul 27 2019 21:07:29 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Thu Aug 08 2019 23:46:36 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

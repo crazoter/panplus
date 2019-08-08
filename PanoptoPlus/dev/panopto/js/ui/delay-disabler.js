@@ -67,7 +67,7 @@ DelayDisabler = (() => {
                             }, 10);
                         }
                     };
-                    
+
                     Panopto.Core.Logger.log = ((msg) => {
                         console.log("Logger.log", msg);
                         //Secondary player started playing stream null: Stream stopped

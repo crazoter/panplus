@@ -54,7 +54,7 @@ let SilenceCueManager = (() => {
                 }
                 //Units are in seconds
                 const videoDOMs = document.getElementsByTagName("video");
-                const FAST_JUMP_THRESHOLD = 0.04;
+                const FAST_JUMP_THRESHOLD = 0.2;
                 const DESYNC_LIMIT = 10;
                 let lastSynced = 0;
                 let timeSaved = 0;
@@ -107,6 +107,9 @@ let SilenceCueManager = (() => {
             console.log("Silence Cues loaded");
         };
 
+        /**
+         * TODO: abstractify this segment, because this is copied wholesale from the transcript display segment to apply it to silence cues.
+         */
         async updateVisibility() {
             while (true) {
                 if (Settings.getDataAsObject()[Settings.keys.silencetrimming])
@@ -159,35 +162,30 @@ let SilenceCueManager = (() => {
          * speaking -> !speaking: No modification
          * !speaking -> speaking: Addition of cue, !speaking = start time, speaking = end time
          * @param {String} id relurl of the TS file
+         * @param {Number} startTime Starting time of the TS file
+         * @param {Number} endTime Ending time of the TS file
          * @param {Array.<{isSpeaking: Boolean, time: Number}>} results results from prociessing a TS file
          * @returns {undefined}
          */
-        static addSilenceCues(id, results) {
-            let index = SilenceCueManager.idToIndex(id);
-            //Assume is not speaking at the start 
+        static addSilenceCues(id, startTime, endTime, results) {
+            //console.info(id, startTime, results);
+            //let index = SilenceCueManager.idToIndex(id);
+            //Assume is not speaking at the start, skip any time from start to next speaking
+            let skippedToFirstSpeech = false;
             for (let i = 0; i < results.length; i++) {
-                let tmp = null;
                 if (results[i].isSpeaking) {
-                    //If is speaking and first and the previous was not speaking
-                    if (i === 0 
-                        && (tmp = SilenceCueManager.cuesMap[index - 1]) != null
-                        && tmp.length > 0
-                        && !tmp[tmp.length - 1].isSpeaking) {
-                        //Link with previous
-                        SilenceCueManager.addSilentCue(tmp[tmp.length - 1].time, results[i].time);
+                    //If is first speech of results
+                    if (!skippedToFirstSpeech) {
+                        SilenceCueManager.addSilentCue(startTime, results[i].time);
+                        skippedToFirstSpeech = true;
                     }
-                    //Else do nothing
-                } else {
-                    //If is not speaking and last and next is speaking
-                    if (i === results.length - 1 
-                        && (tmp = SilenceCueManager.cuesMap[index + 1]) != null
-                        && tmp.length > 0
-                        && tmp[0].isSpeaking) {
-                        //Link with next
-                        SilenceCueManager.addSilentCue(results[i].time, tmp[tmp.length - 1].time);
-                    }
-                    //Else check if can link with next
-                    if (results[i + 1] != null && results[i + 1].isSpeaking) {
+                } else {//it is not speaking
+                    //Last, jump to end
+                    if (i >= results.length - 1) {
+                        //Jump to last since it is not speaking
+                        SilenceCueManager.addSilentCue(results[i].time, endTime);
+                    } else if (results[i + 1].isSpeaking) {
+                        //Else if next is speaking, jump to next
                         SilenceCueManager.addSilentCue(results[i].time, results[i + 1].time);
                     }
                 }
@@ -206,6 +204,7 @@ let SilenceCueManager = (() => {
 
         /**
          * Add results from TSTracker to cache
+         * INCOMPLETE!!
          * @param {String} id relurl of the TS file
          * @param {Array} results [{isSpeaking: Boolean, time: Number}, ...]
          * @returns {undefined}
@@ -213,7 +212,7 @@ let SilenceCueManager = (() => {
         static addToCache(id, results) {
             //Save to map
             SilenceCueManager.cuesMap[SilenceCueManager.idToIndex(id)] = results;
-            //Do other caching stuff
+            //TODO: Do other caching stuff
         }
     }
 

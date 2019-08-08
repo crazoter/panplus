@@ -289,7 +289,15 @@ let SettingsPage = (() => {
         required: true,
         name: "settings_carouseldesign",
         value: "1"
-      }), preact.h("i", null, "Smaller"))), preact.h("div", null, "Subtitles"), preact.h("div", {
+      }), preact.h("i", null, "Smaller"))), preact.h("div", null, "Subtitles", preact.h("div", {
+        class: "tool-tip"
+      }, preact.h("i", {
+        class: "tool-tip__icon"
+      }, "i"), preact.h("p", {
+        class: "tool-tip__info"
+      }, preact.h("span", {
+        class: "info"
+      }, "Use this to toggle subtitles (but not disable transcripts).")))), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("label", {
         class: "settings-checkbox"
@@ -365,7 +373,7 @@ let SettingsPage = (() => {
         class: "info"
       }, "Reduce this value if speech is being skipped and increase it if too little silence/noise is being skipped.", preact.h("table", {
         class: "silence-table"
-      }, preact.h("tr", null, preact.h("th", null, "Scenario"), preact.h("th", null, "Suggested action or value")), preact.h("tr", null, preact.h("td", null, "Only speech is being removed"), preact.h("td", null, "Disable feature or try value 0.67")), preact.h("tr", null, preact.h("td", null, "Silence and speech being removed"), preact.h("td", null, "Reduce value, try 1.48")), preact.h("tr", null, preact.h("td", null, "Default value"), preact.h("td", null, "1.89")), preact.h("tr", null, preact.h("td", null, "Noise not removed"), preact.h("td", null, "Increase value, try 2.37"))))))), preact.h("div", {
+      }, preact.h("tr", null, preact.h("th", null, "Scenario"), preact.h("th", null, "Suggested action or value")), preact.h("tr", null, preact.h("td", null, "Only speech is being removed"), preact.h("td", null, "Disable feature or try value 0.67")), preact.h("tr", null, preact.h("td", null, "Silence and speech being removed"), preact.h("td", null, "Reduce value, try 1.48")), preact.h("tr", null, preact.h("td", null, "Default value"), preact.h("td", null, "1.89")), preact.h("tr", null, preact.h("td", null, "Noise not removed"), preact.h("td", null, "Increase value, try 2.37, 2.66, 3.24 or 3.54"))))))), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("input", {
         type: "number",
