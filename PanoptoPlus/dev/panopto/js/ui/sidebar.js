@@ -142,7 +142,7 @@ let Sidebar = (() => {
 
                 //Panopto literally switches the positions of the screens, so if the user toggles screens make sure it's on the right tab
                 //Making it such that it stays on the same tab is a KIV
-                $(document).on('mouseup', '.player-layout-controls i', function(event) {
+                $(document).on('mouseup', '.player-layout-controls .swap-streams-button i', function(event) {
                     //$("#sidebar-tabs").tabs("option", "active", 0);
                     $("#sidebar-tabs").tabs("option", "active", 0);
                     swappedVideos = !swappedVideos;
