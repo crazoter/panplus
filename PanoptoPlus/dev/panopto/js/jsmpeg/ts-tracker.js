@@ -44,6 +44,7 @@ TSTracker = (() => {
                     switch (event.data.msgEnum) {
                         case MessageEnums.NORMAL_RESULTS:
                             //console.log("TSTracker NORMAL RES:", event.data);
+                            //debugger;
                             //After merging, the start times are at their approprate locations
                             this.insertSilentSections(event.data.options.id, event.data.options.startTime, event.data.options.endTime, event.data.data.results);
                             break;
@@ -93,6 +94,7 @@ TSTracker = (() => {
                     //Set configs for optimization
                     //Initially disabled because causing some problems for some webcasts, but re-enabled because it helped somewhat with
                     //buffering. To observe for bugs. 
+                    
                     players.forEach(player => {
                         let hls = player.engine.hls || player.engine.hlsjs;
                         //player.engine.hlsjs.config.startFragPrefetch = true;

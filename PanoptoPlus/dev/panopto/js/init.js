@@ -4,6 +4,7 @@
  */
 (() => {
     App = {};
+    //return;
     //Wait for page load
     MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
     var observer = new MutationObserver(function(mutations, observer) {
@@ -19,6 +20,7 @@
                     let settings = Settings.getDataAsObject();
                     //debugger;
                     //Initialize app
+                    
                     App = {
                         sidebar: new Sidebar(settings),
                         speedSlider: new SpeedSlider(settings),
@@ -27,7 +29,7 @@
                         silenceCueManager: new SilenceCueManager(settings),
                         tsTracker: new TSTracker(settings),
                         carouselManager: new CarouselManager(settings),
-                        //loggerDisabler: new LoggerDisabler(settings),
+                        //loggerDisabler: new LoggerDisabler(settings),//disabled
                         delayDisabler: new DelayDisabler(settings)
                     };
 

@@ -21,13 +21,16 @@ let VolumeBooster = (() => {
          */
         init() {
             VideosLoadedEvent.subscribe(() => {
-                this.setup();
+                //Setup prior to video autoplay causes issues
+                //this.setup();
+                let self = this;
                 //Get template
                 Template.get('volume-booster.html').then((template) => {
                     //Add volume booster
                     $("#volumeFlyout").append(template);
                     //Initialize enable button to reveal on enable
                     $("#vol-boost-btn-enable").click(() => {
+                        self.setup();
                         //Hide and show stuff
                         $("#vol-boost-btn-enable").hide();
                         $("#vol-boost-disclaimer").hide();

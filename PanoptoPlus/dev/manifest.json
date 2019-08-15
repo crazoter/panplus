@@ -1,6 +1,6 @@
 {
     "name": "Panopto Plus",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "description": "Improve your webcasting experience!",
     "manifest_version": 2,
     "permissions": ["tabs", "storage"],
@@ -76,7 +76,7 @@
             "all_frames": true
         },
         {
-            "matches": ["*://luminus.nus.edu.sg/modules/*/web-lectures"],
+            "matches": ["*://luminus.nus.edu.sg/*"],
             "css": [
                 "luminus/css/web-lecture.css"
             ]

@@ -1,16 +1,23 @@
 /*Override CSS to overlay Luminus' header with Panopto's and make more space for it*/
-header.full-screen-header[_ngcontent-c31] {
-    position: absolute;
-    height: 33px;
+/*I don't like using !important but doesn't work otherwise*/
+ng-component.ng-star-inserted header.full-screen-header {
+    position: absolute !important;
+    height: 39px !important;
     z-index: 2;
-    align-items: baseline;
+    align-items: baseline !important;
 }
 
-header.full-screen-header[_ngcontent-c31] small[_ngcontent-c31] {
-    margin-top: 1px;
+ng-component.ng-star-inserted header.full-screen-header small {
+    margin-top: 1px !important;
 }
 
-section.full-screen-body[_ngcontent-c31] {
-    top: 0px;
-    height: 100%;
+section.full-screen-body {
+    top: 0px !important;
+    height: 100% !important;
+}
+@media only screen and (max-width: 767px) {
+    section.single-module ng-component aside {
+        height: 39px !important;
+        overflow: hidden;
+    }
 }

@@ -171,24 +171,29 @@ let SilenceCueManager = (() => {
             //console.info(id, startTime, results);
             //let index = SilenceCueManager.idToIndex(id);
             //Assume is not speaking at the start, skip any time from start to next speaking
-            let skippedToFirstSpeech = false;
-            for (let i = 0; i < results.length; i++) {
-                if (results[i].isSpeaking) {
-                    //If is first speech of results
-                    if (!skippedToFirstSpeech) {
-                        SilenceCueManager.addSilentCue(startTime, results[i].time);
-                        skippedToFirstSpeech = true;
-                    }
-                } else {//it is not speaking
-                    //Last, jump to end
-                    if (i >= results.length - 1) {
-                        //Jump to last since it is not speaking
-                        SilenceCueManager.addSilentCue(results[i].time, endTime);
-                    } else if (results[i + 1].isSpeaking) {
-                        //Else if next is speaking, jump to next
-                        SilenceCueManager.addSilentCue(results[i].time, results[i + 1].time);
+            if (results.length > 0) {
+                let skippedToFirstSpeech = false;
+                for (let i = 0; i < results.length; i++) {
+                    if (results[i].isSpeaking) {
+                        //If is first speech of results
+                        if (!skippedToFirstSpeech) {
+                            SilenceCueManager.addSilentCue(startTime, results[i].time);
+                            skippedToFirstSpeech = true;
+                        }
+                    } else {//it is not speaking
+                        //Last, jump to end
+                        if (i >= results.length - 1) {
+                            //Jump to last since it is not speaking
+                            SilenceCueManager.addSilentCue(results[i].time, endTime);
+                        } else if (results[i + 1].isSpeaking) {
+                            //Else if next is speaking, jump to next
+                            SilenceCueManager.addSilentCue(results[i].time, results[i + 1].time);
+                        }
                     }
                 }
+            } else {
+                //if there's nothing, then no speech so skip entire segment
+                SilenceCueManager.addSilentCue(startTime, endTime);
             }
         }
 
