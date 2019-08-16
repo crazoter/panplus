@@ -161,8 +161,10 @@ let SettingsPage = (() => {
         render({}, {}) {
             let index = null;
             let form = document.getElementById("settings-form");
+            let zValueDivClassName = "";
             if (form) {
                 let value = form.elements["settings_silencethreshold"].value;
+                zValueDivClassName = form.elements["settings_noisedetection"].value == 1 ? "tempDisabled" : "";
                 index = Math.round(parseFloat(value) * 100);
             }
             let zValuePercentage = (zValuePercentages[index] || "Invalid") + "%";
@@ -273,28 +275,43 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_silencetrimming" value="1"/><i>Enabled</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_silencetrimming" value="0"/><i>Disabled</i></label>
                     </div>
-                    <div>Silence z-value 
+                    <div>Noise Detection Algorithm
                         <div class="tool-tip">
                             <i class="tool-tip__icon">i</i>
                             <p class="tool-tip__info">
-                            <span class="info">Reduce this value if speech is being skipped and increase it if too little silence/noise is being skipped. 
-                                <table class="silence-table">
-                                    <tr><th>Scenario</th><th>Suggested action or value</th></tr>
-                                    <tr><td>Only speech is being removed</td><td>Disable feature or try value 0.67</td></tr>
-                                    <tr><td>Silence and speech being removed</td><td>Reduce value, try 1.48</td></tr>
-                                    <tr><td>Default value</td><td>1.89</td></tr>
-                                    <tr><td>Noise not removed</td><td>Increase value, try 2.37, 2.66, 3.24 or 3.54</td></tr>
-                                </table>
-                            </span>
+                            <span class="info">Dynamic is the default. Set this to "Based on sample" if silence trimming doesn't work properly regardless of z-value.</span>
                             </p>
                         </div>
                     </div>
                     <div onChange={this.settingsChange.bind(this)}>
-                    <input type="number" name="settings_silencethreshold" min="0" max="3.99" step="0.01" required/>
-                    <div>
-                        {zValuePercentage} confidence interval
+                        <label class="settings-checkbox"><input type="radio" required name="settings_noisedetection" value="0"/><i>Dynamic</i></label>
+                        <label class="settings-checkbox"><input type="radio" required name="settings_noisedetection" value="1"/><i>Based on sample</i></label>
                     </div>
+                    <div className={zValueDivClassName}>
+                        <div>Silence z-value 
+                            <div class="tool-tip">
+                                <i class="tool-tip__icon">i</i>
+                                <p class="tool-tip__info">
+                                <span class="info">Used ONLY for dynamic noise detection. Reduce this value if speech is being skipped and increase it if too little silence/noise is being skipped. 
+                                    <table class="silence-table">
+                                        <tr><th>Scenario</th><th>Suggested action or value</th></tr>
+                                        <tr><td>Only speech is being removed</td><td>Disable feature, Change detection algorithm or try value 0.67</td></tr>
+                                        <tr><td>Silence and speech being removed</td><td>Reduce value, try 1.48</td></tr>
+                                        <tr><td>Default value</td><td>1.89</td></tr>
+                                        <tr><td>Noise not removed</td><td>Increase value, try 2.37, 2.66, 3.24 or 3.54</td></tr>
+                                    </table>
+                                </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div onChange={this.settingsChange.bind(this)}>
+                            <input type="number" name="settings_silencethreshold" min="0" max="3.99" step="0.01" required/>
+                            <div>
+                                {zValuePercentage} confidence interval
+                            </div>
+                        </div>
                     </div>
+                
                     <div onClick={this.fullScreen} class="ui-state-default ui-button save-btns"><a href="#" class="ui-tabs-text-lookalike"><span>Make Panopto Full-screen</span></a></div>
                     <hr/>
                     <h4>Bug Report</h4>

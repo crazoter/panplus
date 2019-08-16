@@ -20,7 +20,18 @@ let Settings = (() => {
          * @returns default data
          */
         static initializeDefaults() {
-            let data = [{"name":"settings_sidebar","value":1},{"name":"settings_opentab","value":0},{"name":"settings_carouselshown","value":1},{"name":"settings_initialspeed","value":1},{"name":"settings_playbackoptions","value":2},{"name":"settings_carouseldesign","value":1},{"name":"settings_subtitles","value":1},{"name":"settings_machinetranscript","value":1},{"name":"settings_silencetrimming","value":1},{"name":"settings_silencethreshold","value":1.89}];
+            let data = [{"name":"settings_sidebar","value":1},
+                {"name":"settings_opentab","value":0},
+                {"name":"settings_carouselshown","value":1},
+                {"name":"settings_initialspeed","value":1},
+                {"name":"settings_playbackoptions","value":2},
+                {"name":"settings_carouseldesign","value":1},
+                {"name":"settings_subtitles","value":1},
+                {"name":"settings_machinetranscript","value":1},
+                {"name":"settings_silencetrimming","value":1},
+                {"name":"settings_silencethreshold","value":1.89},
+                {"name":"settings_noisedetection","value":0}
+            ];
             data.push({name: "time", value: new Date().getTime()});
             return data;
         }
@@ -38,13 +49,25 @@ let Settings = (() => {
         }
 
         /**
-         * Convert settings data (which is in formdata format) to object format
+         * Convert settings data (which is in formdata format) to object format. Also checks if settings contains all values. if value is missing, set that value to default.
          */
         static updateDataObject() {
             dataObject = {};
+            //Grab map of keys
+            let validator = Settings.setupValidator();
             data.forEach((nameValuePair) => {
                 dataObject[nameValuePair.name] = nameValuePair.value;
+                //Delete from map if found
+                delete validator[nameValuePair.name];
             });
+            //One of the values not filled
+            if (Object.keys(validator).length > 0) {
+                //Fill in with default value
+                let defaultValues = Settings.initializeDefaults();
+                Object.keys(validator).forEach(key => {
+                    data[key] = defaultValues[key];
+                });
+            }
         }
         static getData() { return data; }
         static setData(d) {
@@ -58,9 +81,33 @@ let Settings = (() => {
             this.updateDataObject();
         }
         static getDataAsObject() { return dataObject; }
+
+        /**
+         * Setup map of keys for use in updateDataObject
+         * @returns map of keys
+         */
+        static setupValidator() {
+            let validator = {};
+            Object.keys(Settings.keys).forEach(key => {
+                validator[Settings.keys[key]] = 1;
+            });
+            return validator;
+        }
     }
 
-    Settings.keys = {sidebar: "settings_sidebar", opentab: "settings_opentab", carouselshown: "settings_carouselshown", initialspeed: "settings_initialspeed", playbackoptions: "settings_playbackoptions", carouseldesign: "settings_carouseldesign", subtitles: "settings_subtitles", machinetranscript: "settings_machinetranscript", silencetrimming: "settings_silencetrimming", silencethreshold: "settings_silencethreshold" };
+    Settings.keys = {
+        sidebar: "settings_sidebar", 
+        opentab: "settings_opentab", 
+        carouselshown: "settings_carouselshown", 
+        initialspeed: "settings_initialspeed", 
+        playbackoptions: "settings_playbackoptions", 
+        carouseldesign: "settings_carouseldesign", 
+        subtitles: "settings_subtitles", 
+        machinetranscript: "settings_machinetranscript", 
+        silencetrimming: "settings_silencetrimming", 
+        silencethreshold: "settings_silencethreshold",
+        noisedetection: "settings_noisedetection" 
+    };
     Settings.PLAYBACK_OPTIONS = {
         DEFAULT: 0,
         MORE_BUTTONS: 1,

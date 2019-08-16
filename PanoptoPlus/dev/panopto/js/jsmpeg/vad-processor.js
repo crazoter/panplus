@@ -70,6 +70,26 @@ VADProcessor = (() => {
             this.results = [];
             this.processedResults = false;
 
+            //If using fixed noise sample, just use this
+            if (!referenceLineFeatures && options.useFixedNoiseSample) {
+                referenceLineFeatures = [
+                    [
+                        {lowerBound: 5.222302787585955, upperBound: 8.18209849619599},
+                        {lowerBound: -2.720560653024017, upperBound: 14.561054287714768},
+                        {lowerBound: -4.433624334513411, upperBound: 21.18500421078679},
+                        {lowerBound: -13.13957874661612, upperBound: 47.54697782432633},
+                        {lowerBound: -64.13284327395473, upperBound: 228.51541204913292}
+                    ],
+                    [
+                        {lowerBound: 5.210286374498044, upperBound: 8.191514976778304},
+                        {lowerBound: -2.7224707609363428, upperBound: 14.563473340592378},
+                        {lowerBound: -4.435583830295101, upperBound: 21.187714859610132},
+                        {lowerBound: -13.162070808534374, upperBound: 47.53771603431636},
+                        {lowerBound: -64.23850958165923, upperBound: 228.47060367552376}
+                    ]
+                ];
+            }
+
             //Reserved values
             //this.referenceSamples
             //this.referenceData = Array of 2 arrays containing line features (each an array of 5 values)
@@ -97,8 +117,13 @@ VADProcessor = (() => {
             const size = this.float32Length - initialOffset;
             const length = initialOffset + size - (size % FFT1_BIN_COUNT);
             this.currentTime = initialOffset / this.sampleRate;
-            if (this.isNoiseSample) { 
-                this.setupNoiseReferenceData();
+            if (this.isNoiseSample) {
+                //If using fixed noise sample, just return the default values
+                if (referenceLineFeatures) {
+                    return referenceLineFeatures;
+                } else {
+                    this.setupNoiseReferenceData();
+                }
             }
             for (let ofs = initialOffset; ofs < length; ofs += FFT1_BIN_COUNT) {
                 if (this.continueBuffering) {

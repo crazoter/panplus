@@ -310,7 +310,9 @@ TSTracker = (() => {
                     options.sampleRate = audioBuffer.sampleRate;
                     options.duration = audioBuffer.duration;
                     options.float32Length = audioBuffer.length;
-                    options.silenceThreshold = Settings.getDataAsObject()[Settings.keys.silencethreshold];
+                    let settingsAsObject = Settings.getDataAsObject();
+                    options.silenceThreshold = settingsAsObject[Settings.keys.silencethreshold];
+                    options.useFixedNoiseSample = settingsAsObject[Settings.keys.noisedetection];
                     //console.log(options.silenceThreshold);
                     //Convert to ArrayBuffers for transfer
                     const channel0 = audioBuffer.getChannelData(0).buffer;

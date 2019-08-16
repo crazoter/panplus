@@ -193,3 +193,10 @@
 .collapsed .ssh-title {
     text-align: right;
 }
+
+.tempDisabled {
+    opacity: 0.4;
+}
+.tempDisabled:hover {
+    opacity: 1;
+}
