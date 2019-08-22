@@ -54,8 +54,8 @@ let SilenceCueManager = (() => {
                 }
                 //Units are in seconds
                 const videoDOMs = document.getElementsByTagName("video");
-                const FAST_JUMP_THRESHOLD = 0.2;
-                const DESYNC_LIMIT = 10;
+                const FAST_JUMP_THRESHOLD = 9;
+                const DESYNC_LIMIT = 9;
                 let lastSynced = 0;
                 let timeSaved = 0;
                 let startTime = Date.now();
