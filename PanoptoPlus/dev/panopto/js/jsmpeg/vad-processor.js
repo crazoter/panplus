@@ -67,27 +67,32 @@ VADProcessor = (() => {
             this.currentTime = 0;
             //48,000 samples per second, 1 interval is every FFT1_BIN_COUNT
             this.timePerInterval = FFT1_BIN_COUNT / this.sampleRate;
+            this.minSkipTime = this.timePerInterval * 4;
             this.results = [];
             this.processedResults = false;
 
             //If using fixed noise sample, just use this
-            if (!referenceLineFeatures && options.useFixedNoiseSample) {
-                referenceLineFeatures = [
-                    [
-                        {lowerBound: 5.222302787585955, upperBound: 8.18209849619599},
-                        {lowerBound: -2.720560653024017, upperBound: 14.561054287714768},
-                        {lowerBound: -4.433624334513411, upperBound: 21.18500421078679},
-                        {lowerBound: -13.13957874661612, upperBound: 47.54697782432633},
-                        {lowerBound: -64.13284327395473, upperBound: 228.51541204913292}
-                    ],
-                    [
-                        {lowerBound: 5.210286374498044, upperBound: 8.191514976778304},
-                        {lowerBound: -2.7224707609363428, upperBound: 14.563473340592378},
-                        {lowerBound: -4.435583830295101, upperBound: 21.187714859610132},
-                        {lowerBound: -13.162070808534374, upperBound: 47.53771603431636},
-                        {lowerBound: -64.23850958165923, upperBound: 228.47060367552376}
-                    ]
-                ];
+            if (!referenceLineFeatures && options.useFixedNoiseSample !== 0) {
+                switch (options.useFixedNoiseSample) {
+                    //in case we want to extend it to more options
+                    default: referenceLineFeatures = [
+                            [
+                                {lowerBound: 5.222302787585955, upperBound: 8.18209849619599},
+                                {lowerBound: -2.720560653024017, upperBound: 14.561054287714768},
+                                {lowerBound: -4.433624334513411, upperBound: 21.18500421078679},
+                                {lowerBound: -13.13957874661612, upperBound: 47.54697782432633},
+                                {lowerBound: -64.13284327395473, upperBound: 228.51541204913292}
+                            ],
+                            [
+                                {lowerBound: 5.210286374498044, upperBound: 8.191514976778304},
+                                {lowerBound: -2.7224707609363428, upperBound: 14.563473340592378},
+                                {lowerBound: -4.435583830295101, upperBound: 21.187714859610132},
+                                {lowerBound: -13.162070808534374, upperBound: 47.53771603431636},
+                                {lowerBound: -64.23850958165923, upperBound: 228.47060367552376}
+                            ]
+                        ];
+                        break;
+                }
             }
 
             //Reserved values
@@ -110,6 +115,8 @@ VADProcessor = (() => {
          * @returns {NoiseResult|NormalResult} If is noise sample: (2x5 matrix; 2 arrays 5 var). If is not, it will return Array.<{isSpeaking: Boolean, time: Number}>
          */
         process() {
+            //this.isNoiseSample = true;
+            //referenceLineFeatures = null;
             if (this.processedResults) return this.results;
             //Start from designated point
             let initialOffset = Math.floor(this.startProcessingFrom / this.duration * this.float32Length);
@@ -497,16 +504,21 @@ VADProcessor = (() => {
         }
 
         /**
-         * The threshold is now variant. Using recordDistance instead
+         * The threshold is now variant. Factors in minimum skip time to avoid stuttering.
          * Store into results upon changing speech
          * @param {Boolean} startedSpeech isSpeaking
          * @returns {undefined}
          */
         changedSpeech(startedSpeech) {
-            this.results.push({
-                isSpeaking: startedSpeech, 
-                time: this.startTime + this.currentTime - this.lagTime
-            });
+            let now = this.startTime + this.currentTime - this.lagTime;
+            if (this.results.length <= 0 || now - this.results[this.results.length - 1].time > this.minSkipTime) {
+                this.results.push({
+                    isSpeaking: startedSpeech, 
+                    time: now
+                });
+            } else {
+                this.results.pop();
+            }
         }
 
         /**

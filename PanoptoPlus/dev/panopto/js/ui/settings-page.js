@@ -148,7 +148,7 @@ let SettingsPage = (() => {
 
       if (form) {
         let value = form.elements["settings_silencethreshold"].value;
-        zValueDivClassName = form.elements["settings_noisedetection"].value == 1 ? "tempDisabled" : "";
+        zValueDivClassName = form.elements["settings_staticnoisedetection"].value == 0 ? "" : "tempDisabled";
         index = Math.round(parseFloat(value) * 100);
       }
 
@@ -380,14 +380,14 @@ let SettingsPage = (() => {
       }, preact.h("input", {
         type: "radio",
         required: true,
-        name: "settings_noisedetection",
+        name: "settings_staticnoisedetection",
         value: "0"
       }), preact.h("i", null, "Dynamic")), preact.h("label", {
         class: "settings-checkbox"
       }, preact.h("input", {
         type: "radio",
         required: true,
-        name: "settings_noisedetection",
+        name: "settings_staticnoisedetection",
         value: "1"
       }), preact.h("i", null, "Based on sample"))), preact.h("div", {
         className: zValueDivClassName

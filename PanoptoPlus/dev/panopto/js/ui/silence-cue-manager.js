@@ -82,7 +82,7 @@ let SilenceCueManager = (() => {
                             lastSynced = 0;
                             console.info("Synced using Panopto API");
                         }
-                        console.log(offset, lastSynced)
+                        //console.log(offset, lastSynced)
                     }
                 };
             }

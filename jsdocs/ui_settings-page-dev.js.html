@@ -189,8 +189,10 @@ let SettingsPage = (() => {
         render({}, {}) {
             let index = null;
             let form = document.getElementById("settings-form");
+            let zValueDivClassName = "";
             if (form) {
                 let value = form.elements["settings_silencethreshold"].value;
+                zValueDivClassName = form.elements["settings_staticnoisedetection"].value == 0 ? "" : "tempDisabled";
                 index = Math.round(parseFloat(value) * 100);
             }
             let zValuePercentage = (zValuePercentages[index] || "Invalid") + "%";
@@ -301,28 +303,43 @@ let SettingsPage = (() => {
                         &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_silencetrimming" value="1"/>&lt;i>Enabled&lt;/i>&lt;/label>
                         &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_silencetrimming" value="0"/>&lt;i>Disabled&lt;/i>&lt;/label>
                     &lt;/div>
-                    &lt;div>Silence z-value 
+                    &lt;div>Noise Detection Algorithm
                         &lt;div class="tool-tip">
                             &lt;i class="tool-tip__icon">i&lt;/i>
                             &lt;p class="tool-tip__info">
-                            &lt;span class="info">Reduce this value if speech is being skipped and increase it if too little silence/noise is being skipped. 
-                                &lt;table class="silence-table">
-                                    &lt;tr>&lt;th>Scenario&lt;/th>&lt;th>Suggested action or value&lt;/th>&lt;/tr>
-                                    &lt;tr>&lt;td>Only speech is being removed&lt;/td>&lt;td>Disable feature or try value 0.67&lt;/td>&lt;/tr>
-                                    &lt;tr>&lt;td>Silence and speech being removed&lt;/td>&lt;td>Reduce value, try 1.48&lt;/td>&lt;/tr>
-                                    &lt;tr>&lt;td>Default value&lt;/td>&lt;td>1.89&lt;/td>&lt;/tr>
-                                    &lt;tr>&lt;td>Noise not removed&lt;/td>&lt;td>Increase value, try 2.37, 2.66, 3.24 or 3.54&lt;/td>&lt;/tr>
-                                &lt;/table>
-                            &lt;/span>
+                            &lt;span class="info">Dynamic is the default. Set this to "Based on sample" if silence trimming doesn't work properly regardless of z-value.&lt;/span>
                             &lt;/p>
                         &lt;/div>
                     &lt;/div>
                     &lt;div onChange={this.settingsChange.bind(this)}>
-                    &lt;input type="number" name="settings_silencethreshold" min="0" max="3.99" step="0.01" required/>
-                    &lt;div>
-                        {zValuePercentage} confidence interval
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_staticnoisedetection" value="0"/>&lt;i>Dynamic&lt;/i>&lt;/label>
+                        &lt;label class="settings-checkbox">&lt;input type="radio" required name="settings_staticnoisedetection" value="1"/>&lt;i>Based on sample&lt;/i>&lt;/label>
                     &lt;/div>
+                    &lt;div className={zValueDivClassName}>
+                        &lt;div>Silence z-value 
+                            &lt;div class="tool-tip">
+                                &lt;i class="tool-tip__icon">i&lt;/i>
+                                &lt;p class="tool-tip__info">
+                                &lt;span class="info">Used ONLY for dynamic noise detection. Reduce this value if speech is being skipped and increase it if too little silence/noise is being skipped. 
+                                    &lt;table class="silence-table">
+                                        &lt;tr>&lt;th>Scenario&lt;/th>&lt;th>Suggested action or value&lt;/th>&lt;/tr>
+                                        &lt;tr>&lt;td>Only speech is being removed&lt;/td>&lt;td>Disable feature, Change detection algorithm or try value 0.67&lt;/td>&lt;/tr>
+                                        &lt;tr>&lt;td>Silence and speech being removed&lt;/td>&lt;td>Reduce value, try 1.48&lt;/td>&lt;/tr>
+                                        &lt;tr>&lt;td>Default value&lt;/td>&lt;td>1.89&lt;/td>&lt;/tr>
+                                        &lt;tr>&lt;td>Noise not removed&lt;/td>&lt;td>Increase value, try 2.37, 2.66, 3.24 or 3.54&lt;/td>&lt;/tr>
+                                    &lt;/table>
+                                &lt;/span>
+                                &lt;/p>
+                            &lt;/div>
+                        &lt;/div>
+                        &lt;div onChange={this.settingsChange.bind(this)}>
+                            &lt;input type="number" name="settings_silencethreshold" min="0" max="3.99" step="0.01" required/>
+                            &lt;div>
+                                {zValuePercentage} confidence interval
+                            &lt;/div>
+                        &lt;/div>
                     &lt;/div>
+                
                     &lt;div onClick={this.fullScreen} class="ui-state-default ui-button save-btns">&lt;a href="#" class="ui-tabs-text-lookalike">&lt;span>Make Panopto Full-screen&lt;/span>&lt;/a>&lt;/div>
                     &lt;hr/>
                     &lt;h4>Bug Report&lt;/h4>
@@ -378,7 +395,7 @@ Save for all webcasts
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri Aug 16 2019 02:21:13 GMT+0800 (Singapore Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Wed Aug 28 2019 16:58:39 GMT+0800 (Singapore Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

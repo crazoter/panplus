@@ -30,7 +30,7 @@ let Settings = (() => {
                 {"name":"settings_machinetranscript","value":1},
                 {"name":"settings_silencetrimming","value":1},
                 {"name":"settings_silencethreshold","value":1.89},
-                {"name":"settings_noisedetection","value":0}
+                {"name":"settings_staticnoisedetection","value":1}
             ];
             data.push({name: "time", value: new Date().getTime()});
             return data;
@@ -106,7 +106,7 @@ let Settings = (() => {
         machinetranscript: "settings_machinetranscript", 
         silencetrimming: "settings_silencetrimming", 
         silencethreshold: "settings_silencethreshold",
-        noisedetection: "settings_noisedetection" 
+        noisedetection: "settings_staticnoisedetection" 
     };
     Settings.PLAYBACK_OPTIONS = {
         DEFAULT: 0,

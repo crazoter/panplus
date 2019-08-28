@@ -164,7 +164,7 @@ let SettingsPage = (() => {
             let zValueDivClassName = "";
             if (form) {
                 let value = form.elements["settings_silencethreshold"].value;
-                zValueDivClassName = form.elements["settings_noisedetection"].value == 1 ? "tempDisabled" : "";
+                zValueDivClassName = form.elements["settings_staticnoisedetection"].value == 0 ? "" : "tempDisabled";
                 index = Math.round(parseFloat(value) * 100);
             }
             let zValuePercentage = (zValuePercentages[index] || "Invalid") + "%";
@@ -284,8 +284,8 @@ let SettingsPage = (() => {
                         </div>
                     </div>
                     <div onChange={this.settingsChange.bind(this)}>
-                        <label class="settings-checkbox"><input type="radio" required name="settings_noisedetection" value="0"/><i>Dynamic</i></label>
-                        <label class="settings-checkbox"><input type="radio" required name="settings_noisedetection" value="1"/><i>Based on sample</i></label>
+                        <label class="settings-checkbox"><input type="radio" required name="settings_staticnoisedetection" value="0"/><i>Dynamic</i></label>
+                        <label class="settings-checkbox"><input type="radio" required name="settings_staticnoisedetection" value="1"/><i>Based on sample</i></label>
                     </div>
                     <div className={zValueDivClassName}>
                         <div>Silence z-value 
