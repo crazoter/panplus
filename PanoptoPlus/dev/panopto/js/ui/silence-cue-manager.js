@@ -67,7 +67,7 @@ let SilenceCueManager = (() => {
                         let offset = cues[0].endTime - cues[0].startTime;
                         lastSynced += offset;
                         //If don't have secondary or still within desync limit
-                        if (!Panopto.Viewer.Viewer.activeSecondary() || offset < FAST_JUMP_THRESHOLD) {
+                        if (!Panopto.Viewer.Viewer.activeSecondary() || offset > FAST_JUMP_THRESHOLD) {
                             for (let i = 0; i < videoDOMs.length; i++) {
                                 if (videoDOMs[i]) {
                                     //console.log(`${videoDOMs[i].currentTime}`);
