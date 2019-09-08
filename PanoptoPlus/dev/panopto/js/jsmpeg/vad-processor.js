@@ -9,13 +9,15 @@ VADProcessor = (() => {
     const MessageEnums = {INITIALIZATION_PARAMS: 0,INITIALIZATION_SUCCESS: 1,NOISE_RESULTS: 2,NORMAL_RESULTS: 3,REQUEST_RESULTS: 4,DEBUG: 5,DEBUG_HISTOGRAM: 6, RAW_DATA_RESULTS: 7, ERROR: 8};
     //Number of variables that must exceed before considered speech or not noise
     const VARIABLES_FAIL_BEFORE_SIGNIFICANT = 3;
-    const FIRST_BIN = 0;//unused
+    //const FIRST_BIN = 0;//unused
     const LAST_BIN = 80;//MUST be 80. Otherwise, LINE_COEFFS must be updated
     const FFT1_BIN_COUNT = 512;
     const FFT2_BIN_COUNT = 128;
     const SILENCE_TIME_THRESHOLD = 1;
     const FFT512 = new FFTJS(FFT1_BIN_COUNT);
     const FFT128 = new FFTJS(FFT2_BIN_COUNT);
+    const MIN_SKIP_TIME_MULTIPLIER = 5;
+    const FRONT_PADDING_VALUE_MULITIPLIER = 1;
     //Take 30 samples for central limit theorem, then we can assume a normal distribution of values
     const NOISE_SAMPLE_COUNT = 30; // 512 / 48000 * 30 = 320ms
 
@@ -67,7 +69,8 @@ VADProcessor = (() => {
             this.currentTime = 0;
             //48,000 samples per second, 1 interval is every FFT1_BIN_COUNT
             this.timePerInterval = FFT1_BIN_COUNT / this.sampleRate;
-            this.minSkipTime = this.timePerInterval * 4;
+            this.minSkipTime = this.timePerInterval * MIN_SKIP_TIME_MULTIPLIER;
+            this.resultsValueFrontPadding = this.timePerInterval * FRONT_PADDING_VALUE_MULITIPLIER;
             this.results = [];
             this.processedResults = false;
 
@@ -511,7 +514,15 @@ VADProcessor = (() => {
          */
         changedSpeech(startedSpeech) {
             let now = this.startTime + this.currentTime - this.lagTime;
+            //If current results length is greater than the minimum time skipped, add.
             if (this.results.length <= 0 || now - this.results[this.results.length - 1].time > this.minSkipTime) {
+                //If it is the start of speech, add padding to time
+                if (startedSpeech) {
+                    now -= this.resultsValueFrontPadding;
+                    if (now < 0) {
+                        now = 0;
+                    }
+                }
                 this.results.push({
                     isSpeaking: startedSpeech, 
                     time: now
