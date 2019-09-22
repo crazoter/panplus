@@ -1,6 +1,6 @@
 {
     "name": "Panopto Plus",
-    "version": "1.3.7",
+    "version": "1.3.8",
     "description": "Improve your webcasting experience!",
     "manifest_version": 2,
     "permissions": ["tabs", "storage"],
@@ -49,6 +49,7 @@
                 "panopto/js/ui/silence-cue-manager.js",
                 "panopto/js/ui/speed-slider.js",
                 "panopto/js/ui/volume-booster.js",
+                "panopto/js/ui/white-noise-reducer.js",
                 "panopto/js/ui/sidebar.js",
                 "panopto/js/ui/settings-page.js",
                 "panopto/js/ui/transcript-display.js",

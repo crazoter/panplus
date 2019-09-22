@@ -30,7 +30,8 @@
                         tsTracker: new TSTracker(settings),
                         carouselManager: new CarouselManager(settings),
                         //loggerDisabler: new LoggerDisabler(settings),//disabled
-                        delayDisabler: new DelayDisabler(settings)
+                        delayDisabler: new DelayDisabler(settings),
+                        whiteNoiseReducer: new WhiteNoiseReducer(settings),
                     };
 
                     //Initialize initial settings

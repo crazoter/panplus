@@ -29,8 +29,8 @@ let Settings = (() => {
                 {"name":"settings_subtitles","value":1},
                 {"name":"settings_machinetranscript","value":1},
                 {"name":"settings_silencetrimming","value":1},
-                {"name":"settings_silencethreshold","value":1.89},
-                {"name":"settings_staticnoisedetection","value":1}
+                {"name":"settings_silencethreshold","value":2.66},
+                {"name":"settings_staticnoisedetection","value":0}
             ];
             data.push({name: "time", value: new Date().getTime()});
             return data;
