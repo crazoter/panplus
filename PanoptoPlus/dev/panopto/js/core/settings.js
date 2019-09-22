@@ -44,6 +44,7 @@ let Settings = (() => {
             Object.keys(data).forEach(key => {
                 results.push({"name": key, "value": data[key]});
             });
+            return results;
         }
 
         /**
