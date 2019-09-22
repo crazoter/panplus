@@ -42,6 +42,7 @@
                 "panopto/js/core/context-bridge.js",
                 "panopto/js/core/template.js",
                 "panopto/js/core/videos-loaded-event.js",
+                "panopto/js/core/white-noise-reducer.js",
                 "panopto/js/transcript/transcript.js",
                 "panopto/js/transcript/transcript-source.js",
                 "panopto/js/transcript/transcript-source-panopto.js",
@@ -49,7 +50,6 @@
                 "panopto/js/ui/silence-cue-manager.js",
                 "panopto/js/ui/speed-slider.js",
                 "panopto/js/ui/volume-booster.js",
-                "panopto/js/ui/white-noise-reducer.js",
                 "panopto/js/ui/sidebar.js",
                 "panopto/js/ui/settings-page.js",
                 "panopto/js/ui/transcript-display.js",
@@ -58,6 +58,7 @@
                 "panopto/js/ui/carousel-manager.js",
                 "panopto/js/jsmpeg/message-enums.js",
                 "panopto/js/jsmpeg/ts-tracker.js",
+                "panopto/js/core/video-audio-context-manager.js",
                 "panopto/js/init.js"
             ],
             "css": [

@@ -24,14 +24,15 @@
                     App = {
                         sidebar: new Sidebar(settings),
                         speedSlider: new SpeedSlider(settings),
-                        volumeBooster: new VolumeBooster(settings),
                         transcriptDisplay: new TranscriptDisplay(settings),
                         silenceCueManager: new SilenceCueManager(settings),
                         tsTracker: new TSTracker(settings),
                         carouselManager: new CarouselManager(settings),
                         //loggerDisabler: new LoggerDisabler(settings),//disabled
                         delayDisabler: new DelayDisabler(settings),
-                        whiteNoiseReducer: new WhiteNoiseReducer(settings),
+                        videoAudioContextManager: new VideoAudioContextManager(settings),
+                        //volumeBooster: new VolumeBooster(settings),//Moved into VideoAudioContextManager
+                        //whiteNoiseReducer: new WhiteNoiseReducer(settings),//Moved into VideoAudioContextManager
                     };
 
                     //Initialize initial settings

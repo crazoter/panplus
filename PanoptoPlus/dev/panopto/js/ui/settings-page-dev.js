@@ -311,6 +311,18 @@ let SettingsPage = (() => {
                             </div>
                         </div>
                     </div>
+                    <div>White Noise Reduction
+                        <div class="tool-tip">
+                            <i class="tool-tip__icon">i</i>
+                            <p class="tool-tip__info">
+                            <span class="info">This feature refers to the reduction of white noise (may cause differences in sound quality/volume).</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div onChange={this.settingsChange.bind(this)}>
+                        <label class="settings-checkbox"><input type="radio" required name="settings_whitenoiseremoval" value="1"/><i>Enabled</i></label>
+                        <label class="settings-checkbox"><input type="radio" required name="settings_whitenoiseremoval" value="0"/><i>Disabled</i></label>
+                    </div>
                 
                     <div onClick={this.fullScreen} class="ui-state-default ui-button save-btns"><a href="#" class="ui-tabs-text-lookalike"><span>Make Panopto Full-screen</span></a></div>
                     <hr/>

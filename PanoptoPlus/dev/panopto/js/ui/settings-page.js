@@ -410,7 +410,31 @@ let SettingsPage = (() => {
         max: "3.99",
         step: "0.01",
         required: true
-      }), preact.h("div", null, zValuePercentage, " confidence interval"))), preact.h("div", {
+      }), preact.h("div", null, zValuePercentage, " confidence interval"))), preact.h("div", null, "White Noise Reduction", preact.h("div", {
+        class: "tool-tip"
+      }, preact.h("i", {
+        class: "tool-tip__icon"
+      }, "i"), preact.h("p", {
+        class: "tool-tip__info"
+      }, preact.h("span", {
+        class: "info"
+      }, "This feature refers to the reduction of white noise (may cause differences in sound quality/volume).")))), preact.h("div", {
+        onChange: this.settingsChange.bind(this)
+      }, preact.h("label", {
+        class: "settings-checkbox"
+      }, preact.h("input", {
+        type: "radio",
+        required: true,
+        name: "settings_whitenoiseremoval",
+        value: "1"
+      }), preact.h("i", null, "Enabled")), preact.h("label", {
+        class: "settings-checkbox"
+      }, preact.h("input", {
+        type: "radio",
+        required: true,
+        name: "settings_whitenoiseremoval",
+        value: "0"
+      }), preact.h("i", null, "Disabled"))), preact.h("div", {
         onClick: this.fullScreen,
         class: "ui-state-default ui-button save-btns"
       }, preact.h("a", {
