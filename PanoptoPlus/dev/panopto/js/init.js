@@ -39,7 +39,7 @@
                     console.log("FIN");
 
                     //Todo: Abstract this to another class
-                    const UPDATE_MESSAGE = "Update: Panplus now supports white noise reduction. You can enable it in the settings page.";
+                    const UPDATE_MESSAGE = "Update: Panplus now supports white noise reduction. You can disable it in the settings page.";
                     //Show notify for new users, or update prompt
                     Cache.load(Cache.FIRST_TIME_KEY).then((result) => {
                         if (!result) {
@@ -59,7 +59,6 @@
                             })
 
                             $.notify("If there is an issue with silence trimming, please disable / configure in the settings tab.",{className: "info", position: "bottom right", autoHideDelay: 7000});
-                            $.notify("For headphone users, you may want to consider enabling the white noise reduction feature.",{className: "info", position: "bottom right", autoHideDelay: 7000});
                         }
                     })
                 });

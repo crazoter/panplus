@@ -31,7 +31,7 @@ let Settings = (() => {
                 "settings_machinetranscript": 1,
                 "settings_silencetrimming": 1,
                 "settings_silencethreshold": 2.66,
-                "settings_staticnoisedetection": 0,
+                "settings_staticnoisedetection": 1,
                 "settings_whitenoiseremoval": 1,
                 "time": new Date().getTime()
             };
