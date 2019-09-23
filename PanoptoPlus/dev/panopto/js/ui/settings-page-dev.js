@@ -315,7 +315,7 @@ let SettingsPage = (() => {
                         <div class="tool-tip">
                             <i class="tool-tip__icon">i</i>
                             <p class="tool-tip__info">
-                            <span class="info">This feature refers to the reduction of white noise (may cause differences in sound quality/volume).</span>
+                            <span class="info">This feature refers to the reduction of white noise (may cause differences in sound quality/volume). Best for headphone users.</span>
                             </p>
                         </div>
                     </div>

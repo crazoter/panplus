@@ -418,7 +418,7 @@ let SettingsPage = (() => {
         class: "tool-tip__info"
       }, preact.h("span", {
         class: "info"
-      }, "This feature refers to the reduction of white noise (may cause differences in sound quality/volume).")))), preact.h("div", {
+      }, "This feature refers to the reduction of white noise (may cause differences in sound quality/volume). Best for headphone users.")))), preact.h("div", {
         onChange: this.settingsChange.bind(this)
       }, preact.h("label", {
         class: "settings-checkbox"

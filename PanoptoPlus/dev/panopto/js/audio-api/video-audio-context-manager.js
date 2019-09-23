@@ -20,15 +20,25 @@ let VideoAudioContextManager = (() => {
                         doms[i].onplay = null;
                         let audioContextWithMetadata = self.prepareAudioContextWithMetadata(doms[i]);
                         audioContextsWithMetadata.push(audioContextWithMetadata);
-                        //Add white noise
-                        if ((settings[Settings.keys.whitenoiseremoval])) {
-                            audioContextWithMetadata.currentSource = 
-                                WhiteNoiseReducer.linkToAudioContextThenReturnTail(
-                                    audioContextWithMetadata.context, audioContextWithMetadata.currentSource);
-                        }
+
+                        //Gain
                         audioContextWithMetadata.currentSource = 
                             volumeBooster.linkToAudioContextThenReturnTail(
                                     audioContextWithMetadata.context, audioContextWithMetadata.currentSource);
+
+                        //Add white noise
+                        if ((settings[Settings.keys.whitenoiseremoval])) {
+                            //Filter
+                            audioContextWithMetadata.currentSource = 
+                                WhiteNoiseReducer.linkToAudioContextThenReturnTail(
+                                    audioContextWithMetadata.context, audioContextWithMetadata.currentSource);
+                            
+                            //Compressor (Using it without filter causes more white noise)
+                            audioContextWithMetadata.currentSource = 
+                                AudioCompressor.linkToAudioContextThenReturnTail(
+                                    audioContextWithMetadata.context, audioContextWithMetadata.currentSource);
+                        }
+
                         //Finish linkages
                         audioContextWithMetadata.currentSource.connect(audioContextWithMetadata.context.destination);
                     };

@@ -37,18 +37,29 @@
 
                     //Initialize initial settings
                     console.log("FIN");
-                    $.notify("If there is an issue with silence trimming, please disable / configure in the settings tab.",{className: "info", position: "bottom right"});
 
-                    //Show notify for new users
+                    //Todo: Abstract this to another class
+                    const UPDATE_MESSAGE = "Update: Panplus now supports white noise reduction. You can enable it in the settings page.";
+                    //Show notify for new users, or update prompt
                     Cache.load(Cache.FIRST_TIME_KEY).then((result) => {
                         if (!result) {
                             sleep(1500).then(() => {
-                                $.notify("It appears this is your first time using this Chrome extension!",{className: "success", position: "bottom right", autoHideDelay: 10000});
+                                $.notify("It appears this is your first time using this Chrome extension!",{className: "success", position: "bottom right", autoHideDelay: 15000});
                             }).then(sleep(3000).then(() => {
-                                $.notify("You might want to access the settings tab on the right to customize your user interface.",{className: "success", position: "bottom right", autoHideDelay: 10000});
-                                sleep(1500).then(() => {$.notify("You can change tabs here.",{className: "success", position: "top left", autoHideDelay: 10000})});
+                                $.notify("You might want to access the settings tab on the right to customize your user interface.",{className: "success", position: "bottom right", autoHideDelay: 15000});
+                                sleep(1500).then(() => {$.notify("You can change tabs here.",{className: "success", position: "top left", autoHideDelay: 15000})});
                             }));
                             Cache.save(Cache.FIRST_TIME_KEY, true, 99999);
+                        } else {
+                            Cache.load(Cache.UPDATE_MESSAGE).then((result) => {
+                                if (!result || UPDATE_MESSAGE !== result) {
+                                    $.notify(UPDATE_MESSAGE,{className: "info", position: "top right", autoHide: false, clickToHide: true});
+                                    Cache.save(Cache.UPDATE_MESSAGE, UPDATE_MESSAGE, 99999);
+                                }
+                            })
+
+                            $.notify("If there is an issue with silence trimming, please disable / configure in the settings tab.",{className: "info", position: "bottom right", autoHideDelay: 7000});
+                            $.notify("For headphone users, you may want to consider enabling the white noise reduction feature.",{className: "info", position: "bottom right", autoHideDelay: 7000});
                         }
                     })
                 });
