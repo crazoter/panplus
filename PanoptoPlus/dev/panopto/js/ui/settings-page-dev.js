@@ -170,12 +170,12 @@ let SettingsPage = (() => {
             let zValuePercentage = (zValuePercentages[index] || "Invalid") + "%";
             return <form id="settings-form">
                     <h4>On Startup</h4>
-                    <div>Sidebar</div>
+                    <div><b>Sidebar</b></div>
                     <div onChange={this.settingsChange.bind(this)}>
                         <label class="settings-checkbox"><input type="radio" required name="settings_sidebar" value="1"/><i>Expanded</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_sidebar" value="0"/><i>Collapsed</i></label>
                     </div>
-                    <div>Selected Tab
+                    <div><b>Selected Tab</b>
                         <div class="tool-tip">
                             <i class="tool-tip__icon">i</i>
                             <p class="tool-tip__info">
@@ -187,7 +187,7 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_opentab" value="0"/><i>2nd Screen</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_opentab" value="1"/><i>Transcript</i></label>
                     </div>
-                    <div>Carousel 
+                    <div><b>Carousel </b>
                         <div class="tool-tip">
                             <i class="tool-tip__icon">i</i>
                             <p class="tool-tip__info">
@@ -199,7 +199,7 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_carouselshown" value="1"/><i>Shown</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_carouselshown" value="0"/><i>Hidden</i></label>
                     </div>
-                    <div>Initial Playback Speed
+                    <div><b>Initial Playback Speed</b>
                         <div class="tool-tip">
                             <i class="tool-tip__icon">i</i>
                             <p class="tool-tip__info">
@@ -212,7 +212,7 @@ let SettingsPage = (() => {
                     </div>
                     <hr/>
                     <h4>Theme</h4>
-                    <div>Playback Options
+                    <div><b>Playback Options</b>
                         <div class="tool-tip">
                             <i class="tool-tip__icon">i</i>
                             <p class="tool-tip__info">
@@ -225,7 +225,7 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_playbackoptions" value="1"/><i>More Buttons</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_playbackoptions" value="2"/><i>Slider</i></label>
                     </div>
-                    <div>Carousel
+                    <div><b>Carousel</b>
                         <div class="tool-tip">
                             <i class="tool-tip__icon">i</i>
                             <p class="tool-tip__info">
@@ -237,7 +237,7 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_carouseldesign" value="0"/><i>Default</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_carouseldesign" value="1"/><i>Smaller</i></label>
                     </div>
-                    <div>Subtitles
+                    <div><b>Subtitles</b>
                         <div class="tool-tip">
                             <i class="tool-tip__icon">i</i>
                             <p class="tool-tip__info">
@@ -251,7 +251,7 @@ let SettingsPage = (() => {
                     </div>
                     <hr/>
                     <h4 style="display: inline-block;">Features</h4><span> (Changes after restarting)</span>
-                    <div>Machine Transcription
+                    <div><b>Machine Transcription</b>
                         <div class="tool-tip">
                             <i class="tool-tip__icon">i</i>
                             <p class="tool-tip__info">
@@ -263,7 +263,7 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_machinetranscript" value="1"/><i>Enabled</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_machinetranscript" value="0"/><i>Disabled</i></label>
                     </div>
-                    <div>Silence Trimming
+                    <div><b>Silence Trimming</b>
                         <div class="tool-tip">
                             <i class="tool-tip__icon">i</i>
                             <p class="tool-tip__info">
@@ -275,11 +275,11 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_silencetrimming" value="1"/><i>Enabled</i></label>
                         <label class="settings-checkbox"><input type="radio" required name="settings_silencetrimming" value="0"/><i>Disabled</i></label>
                     </div>
-                    <div>Noise Detection Algorithm
+                    <div><b>Noise Detection Algorithm</b>
                         <div class="tool-tip">
                             <i class="tool-tip__icon">i</i>
                             <p class="tool-tip__info">
-                            <span class="info">Dynamic is the default. Set this to "Based on sample" if silence trimming doesn't work properly regardless of z-value.</span>
+                            <span class="info">"Based on sample" is the default. Set this to Dynamic if silence trimming doesn't work properly.</span>
                             </p>
                         </div>
                     </div>
@@ -288,7 +288,7 @@ let SettingsPage = (() => {
                         <label class="settings-checkbox"><input type="radio" required name="settings_staticnoisedetection" value="1"/><i>Based on sample</i></label>
                     </div>
                     <div className={zValueDivClassName}>
-                        <div>Silence z-value 
+                        <div><b>Silence z-value </b>
                             <div class="tool-tip">
                                 <i class="tool-tip__icon">i</i>
                                 <p class="tool-tip__info">
@@ -296,9 +296,9 @@ let SettingsPage = (() => {
                                     <table class="silence-table">
                                         <tr><th>Scenario</th><th>Suggested action or value</th></tr>
                                         <tr><td>Only speech is being removed</td><td>Disable feature, Change detection algorithm or try value 0.67</td></tr>
-                                        <tr><td>Silence and speech being removed</td><td>Reduce value, try 1.48</td></tr>
-                                        <tr><td>Default value</td><td>1.89</td></tr>
-                                        <tr><td>Noise not removed</td><td>Increase value, try 2.37, 2.66, 3.24 or 3.54</td></tr>
+                                        <tr><td>Silence and speech being removed</td><td>Reduce value, try 1.48, 1.89 or 2.37.</td></tr>
+                                        <tr><td>Default value</td><td>2.66</td></tr>
+                                        <tr><td>Noise not removed</td><td>Increase value, try 3.24 or 3.54</td></tr>
                                     </table>
                                 </span>
                                 </p>
@@ -310,6 +310,18 @@ let SettingsPage = (() => {
                                 {zValuePercentage} confidence interval
                             </div>
                         </div>
+                    </div>
+                    <div><b>White Noise Reduction</b>
+                        <div class="tool-tip">
+                            <i class="tool-tip__icon">i</i>
+                            <p class="tool-tip__info">
+                            <span class="info">This feature refers to the reduction of white noise (may cause differences in sound quality/volume).</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div onChange={this.settingsChange.bind(this)}>
+                        <label class="settings-checkbox"><input type="radio" required name="settings_whitenoiseremoval" value="1"/><i>Enabled</i></label>
+                        <label class="settings-checkbox"><input type="radio" required name="settings_whitenoiseremoval" value="0"/><i>Disabled</i></label>
                     </div>
                 
                     <div onClick={this.fullScreen} class="ui-state-default ui-button save-btns"><a href="#" class="ui-tabs-text-lookalike"><span>Make Panopto Full-screen</span></a></div>

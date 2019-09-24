@@ -19,21 +19,32 @@ let Settings = (() => {
          * Get default data if not found in cache
          * @returns default data
          */
-        static initializeDefaults() {
-            let data = [{"name":"settings_sidebar","value":1},
-                {"name":"settings_opentab","value":0},
-                {"name":"settings_carouselshown","value":1},
-                {"name":"settings_initialspeed","value":1},
-                {"name":"settings_playbackoptions","value":2},
-                {"name":"settings_carouseldesign","value":1},
-                {"name":"settings_subtitles","value":1},
-                {"name":"settings_machinetranscript","value":1},
-                {"name":"settings_silencetrimming","value":1},
-                {"name":"settings_silencethreshold","value":1.89},
-                {"name":"settings_staticnoisedetection","value":1}
-            ];
-            data.push({name: "time", value: new Date().getTime()});
+        static initializeDefaultsAsMap() {
+            let data = {
+                "settings_sidebar": 1,
+                "settings_opentab": 0,
+                "settings_carouselshown": 1,
+                "settings_initialspeed": 1,
+                "settings_playbackoptions": 2,
+                "settings_carouseldesign": 1,
+                "settings_subtitles": 1,
+                "settings_machinetranscript": 1,
+                "settings_silencetrimming": 1,
+                "settings_silencethreshold": 2.66,
+                "settings_staticnoisedetection": 1,
+                "settings_whitenoiseremoval": 1,
+                "time": new Date().getTime()
+            };
             return data;
+        }
+
+        static initializeDefaultsAsArr() {
+            let data = Settings.initializeDefaultsAsMap();
+            let results = [];
+            Object.keys(data).forEach(key => {
+                results.push({"name": key, "value": data[key]});
+            });
+            return results;
         }
 
         /**
@@ -43,7 +54,7 @@ let Settings = (() => {
             //Assuming that cache is already prepared
             data = await Cache.loadSettings();
             if (data == null) {
-                data = Settings.initializeDefaults();
+                data = Settings.initializeDefaultsAsArr();
             }
             this.updateDataObject();
         }
@@ -63,12 +74,14 @@ let Settings = (() => {
             //One of the values not filled
             if (Object.keys(validator).length > 0) {
                 //Fill in with default value
-                let defaultValues = Settings.initializeDefaults();
+                let defaultValuesMap = Settings.initializeDefaultsAsMap();
                 Object.keys(validator).forEach(key => {
-                    data[key] = defaultValues[key];
+                    data.push({"name": key, "value": defaultValuesMap[key]});
+                    dataObject[key] = defaultValuesMap[key];
                 });
             }
         }
+
         static getData() { return data; }
         static setData(d) {
             data = d;
@@ -106,7 +119,8 @@ let Settings = (() => {
         machinetranscript: "settings_machinetranscript", 
         silencetrimming: "settings_silencetrimming", 
         silencethreshold: "settings_silencethreshold",
-        noisedetection: "settings_staticnoisedetection" 
+        noisedetection: "settings_staticnoisedetection",
+        whitenoiseremoval: "settings_whitenoiseremoval",
     };
     Settings.PLAYBACK_OPTIONS = {
         DEFAULT: 0,
