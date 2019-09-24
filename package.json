@@ -4,7 +4,7 @@
         "jsdoc": "^3.6.2"
     },
     "scripts": {
-        "make_docs": "jsdoc -d jsdocs/ -r PanoptoPlus/dev/",
+        "make_docs": "jsdoc -d docs/jsdocs/ -r PanoptoPlus/dev/",
         "build": "webpack"
     }
 }
