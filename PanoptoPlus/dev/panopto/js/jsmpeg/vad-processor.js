@@ -78,6 +78,26 @@ VADProcessor = (() => {
             if (!referenceLineFeatures && options.useFixedNoiseSample !== 0) {
                 switch (options.useFixedNoiseSample) {
                     //in case we want to extend it to more options
+                    /*
+                    default: referenceLineFeatures = [
+                        [
+                            {lowerBound: 4.888785711454075, upperBound: 6.783195750496256},
+                            {lowerBound: 2.1059212543708576, upperBound: 6.2027694188546185},
+                            {lowerBound: 2.731769271190809, upperBound: 7.5631685867822185},
+                            {lowerBound: 3.3279498376197383, upperBound: 12.767826545633696},
+                            {lowerBound: 15.056480962156463, upperBound: 60.7670527762376},
+                        ],
+                        [
+                            {lowerBound: 4.888785711454075, upperBound: 6.783195750496256},
+                            {lowerBound: 2.1059212543708576, upperBound: 6.2027694188546185},
+                            {lowerBound: 2.731769271190809, upperBound: 7.5631685867822185},
+                            {lowerBound: 3.3279498376197383, upperBound: 12.767826545633696},
+                            {lowerBound: 15.056480962156463, upperBound: 60.7670527762376}
+                        ]
+                    ];
+                    break;*/
+                     //*/
+                     
                     default: referenceLineFeatures = [
                             [
                                 {lowerBound: 5.222302787585955, upperBound: 8.18209849619599},
@@ -95,6 +115,7 @@ VADProcessor = (() => {
                             ]
                         ];
                         break;
+                        
                 }
             }
 
