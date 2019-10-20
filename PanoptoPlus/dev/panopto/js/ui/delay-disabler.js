@@ -67,20 +67,41 @@ DelayDisabler = (() => {
                             }, 10);
                         }
                     };
-
-                    Panopto.Core.Logger.log = ((msg) => {
-                        console.log("Logger.log", msg);
-                        //Secondary player started playing stream null: Stream stopped
-                        if (msg.indexOf("player changed play state to {1}") > -1 || msg.indexOf("player changed play state to 2") > -1) {
-                            //playstate: 1: playing (or at least supposed to be), 2: paused
-                            window.setTimeout(() => {
-                                //Must convert to array first
-                                videoDOMs = Array.from(document.getElementsByTagName("video"));
-                                if (!Panopto.Viewer.Viewer.activeSecondary()) videoDOMs.pop();
-                                repeatableFunction();
-                            }, 1);
-                        }
-                    });
+                    if (Panopto && Panopto.Core && Panopto.Core.Logger) {
+                        //Override Panopto's own logger
+                        Panopto.Core.Logger.log = ((msg) => {
+                            console.log("Logger.log", msg);
+                            //Secondary player started playing stream null: Stream stopped
+                            if (msg.indexOf("player changed play state to {1}") > -1 || msg.indexOf("player changed play state to 2") > -1) {
+                                //playstate: 1: playing (or at least supposed to be), 2: paused
+                                window.setTimeout(() => {
+                                    //Must convert to array first
+                                    videoDOMs = Array.from(document.getElementsByTagName("video"));
+                                    if (!Panopto.Viewer.Viewer.activeSecondary()) videoDOMs.pop();
+                                    repeatableFunction();
+                                }, 1);
+                            }
+                        });
+                    } else {
+                        //Override console.log instead if it has been removed
+                        originalConsoleLog = console.log;
+                        console.log = ((msg) => {
+                            if (msg.indexOf("Running trigger pause from state playing") > -1) {
+                                originalConsoleLog("Logger.log", msg);
+                                //If player stopped running when it is supposed to run
+                                if (msg.indexOf("Running trigger pause from state playing")) {
+                                    window.setTimeout(() => {
+                                        //Must convert to array first
+                                        videoDOMs = Array.from(document.getElementsByTagName("video"));
+                                        if (!Panopto.Viewer.Viewer.activeSecondary()) videoDOMs.pop();
+                                        repeatableFunction();
+                                    }, 1);
+                                }
+                            } else {
+                                originalConsoleLog(msg);
+                            }
+                        });
+                    }
                     console.log("Delay disabler initialized");
                 };
                 let ctxBridge = new ContextBridge(injectedFunc);

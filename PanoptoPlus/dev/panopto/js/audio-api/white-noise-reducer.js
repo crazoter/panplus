@@ -15,7 +15,7 @@ let WhiteNoiseReducer = (() => {
             let filter = audioContext.createBiquadFilter();
 
             filter.type = 'highshelf';
-            filter.frequency.value = 1000;
+            filter.frequency.value = 2500;
             filter.Q.value = 0;
             filter.gain.value = -30;
 
