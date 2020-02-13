@@ -7,7 +7,10 @@ To create a chrome extension to improve the webcasting experience for panopto. I
 
 2. Add transcript & subtitles. The idea is to add this into the user interface as subtitles and as a transcript section on the page that users can click and the video will skip to that part like in Youtube (example video which has transcripts / subtitles https://www.youtube.com/watch?v=xa-4IAR_9Yw). This should be implemented in the non-fullscreen and full-screen version.
 
-3. Remove / Speed up sections where the prof is not speaking in the webcast (inspired by https://www.youtube.com/watch?v=DQ8orIurGxw). This will shorten the duration of the webcast and improve UX.
+3. Remove / Speed up sections where the prof is not speaking in the webcast (inspired by https://www.youtube.com/watch?v=DQ8orIurGxw). This will shorten the duration of the webcast and improve UX. Implementation was however based on Double Combined Fourier Transform (DCFT) outlined in this paper: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4142156/ which was implemented using webworkers instead of using ffmpeg which would require pre-processing & webasm (on top of various potential licensing issues). AudioWorklets were attempted but implementation was discarded due to an browser-based bug that introduced memory leaks.
+
+### Implementation Details
+Full Implementation details can be found under the Skylab Documentation section in the repository. A URL to the report on the project's features can be found here: https://docs.google.com/document/d/1SSKt7AarU6Eq0sDjX5Z_V_kLHgVvYx65-W42pP7GObI/edit#.
 
 ### Development Instructions
 1. Clone this git repository on your computer.
