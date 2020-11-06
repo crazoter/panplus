@@ -24,13 +24,15 @@ You can download and install this chrome extension from the store via this URL: 
 ### FAQ
 
 ##### I've encountered a bug / Something is not working! What do I do?
-Please submit a new issue @ https://github.com/crazoter/panplus/issues.
+Please submit a new issue @ https://github.com/crazoter/panplus/issues. However, as the repository is no longer being actively maintained, your issue may or may not be resolved.
 
 ##### Silence Trimming is glitching the webcast / is not working!
 If the silence trimming fails to work properly, please either disable it or adjust the noise z-value. Explanation: The current silence trimming implementation uses a ~330ms segment from the webcast as a reference point to define "noise". For silence trimming to work properly, this reference point needs to be noise. The selection of this segment is not rigorous; it is pulled 1.3s before the end of the webcast (because Panopto fades out the video and audio at the last second). Based on testing, this implementation works for webcasts in general, but there may be exceptions to this.
 
 ##### The extension isn't enabled / working properly on my webcast page?
-Please submit a new issue @ https://github.com/crazoter/panplus/issues so that we can resolve it. Explanation: NUS has numerous domains for Panopto, each with their own database of webcasts (presumably to separate webcasts by faculty or category). This means, however, that we might've missed out a domain OR a domain might be running a different version of Panopto (resulting in your version of the chrome extension appearing/operating differently than expected). 
+Please submit a new issue @ https://github.com/crazoter/panplus/issues. Explanation: NUS has numerous domains for Panopto, each with their own database of webcasts (presumably to separate webcasts by faculty or category). This means, however, that we might've missed out a domain OR a domain might be running a different version of Panopto (resulting in your version of the chrome extension appearing/operating differently than expected). 
+
+If you're using Panopto and you're not from NUS, the chrome extension would obviously fail to include the domain name of your organization. To resolve this, fork the repository and modify the `manifest.json` to add your organization's domain name.
 
 The list of Panopto sites currently supported by this chrome extension:
 * LumiNUS (Uses Panopto in an iframe)

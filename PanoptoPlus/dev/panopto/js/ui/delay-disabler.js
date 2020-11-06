@@ -1,5 +1,7 @@
 /**
  * @file Panopto's viewer implementation adds periodic delays (presumably between TS files) which greatly negatively affects the implementation.. This hack fixes that.
+ * EDIT AS OF 11/3/2020: I have discovered that the bug is due to the Panopto system not being able to effectively sync the two videos at speeds x2 and above.
+ * 
  */
 DelayDisabler = (() => {
     /**
@@ -48,7 +50,32 @@ DelayDisabler = (() => {
                     $("#playButton").click((e) => { tmpDisable(); });
                     $(".fp-ui").click((e) => { tmpDisable(); });
                     
-                    let videoDOMs = undefined;
+                    // let videoDOMs = undefined;
+                    let videoDOMs = Array.from(document.getElementsByTagName("video"));
+                    if (videoDOMs.length > 1 && !Panopto.Viewer.Viewer.activeSecondary()) videoDOMs.pop();
+                    console.assert(videoDOMs.length > 0, "delay-disabler.js: videoDOMs length = 0");
+
+                    videoDOMs.forEach((video) => {
+                        let fun = (event) => {
+                            if ($("#playButton.paused").length == 0
+                            && Panopto.Viewer.Viewer.playState() === 1) {
+                                let playPromise = video.play();
+                                if (playPromise !== undefined) {
+                                    playPromise.then(_ => {
+                                        // Video playback started 
+                                        console.log("???");
+                                    }).catch(error => {
+                                        // Auto-play was prevented
+                                        // Try again later
+                                        fun();
+                                    });
+                                }
+                            }
+                        };
+                        video.addEventListener("pause", fun);
+                    });
+
+                    /*
                     let repeatableFunction = () => {
                         //If supposed to be playing but video is paused
                         if (!firedToggle 
@@ -57,7 +84,20 @@ DelayDisabler = (() => {
                             && videoDOMs.some((video) => video.paused)) {
                             firedToggle = true;
                             videoDOMs.forEach((video) => {
-                                if (video) { video.play(); }
+                                console.log("p");
+                                if (video) { 
+                                    let playPromise = video.play();
+                                    if (playPromise !== undefined) {
+                                        playPromise.then(_ => {
+                                          // Video playback started 
+                                          console.log("???");
+                                        }).catch(error => {
+                                          // Auto-play was prevented
+                                          // Try again later
+                                          console.log("ugh");
+                                        });
+                                    }
+                                }
                             });
                             Panopto.Viewer.Viewer.setPlayState(1);
                             console.log("Delay quickfix triggered");
@@ -67,6 +107,9 @@ DelayDisabler = (() => {
                             }, 10);
                         }
                     };
+                    repeatableFunction();
+                    */
+                    /*
                     if (Panopto && Panopto.Core && Panopto.Core.Logger) {
                         //Override Panopto's own logger
                         Panopto.Core.Logger.log = ((msg) => {
@@ -102,6 +145,7 @@ DelayDisabler = (() => {
                             }
                         });
                     }
+                    */
                     console.log("Delay disabler initialized");
                 };
                 let ctxBridge = new ContextBridge(injectedFunc);

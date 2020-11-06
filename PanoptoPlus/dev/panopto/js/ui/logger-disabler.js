@@ -19,11 +19,13 @@ LoggerDisabler = (() => {
          * @return {undefined}
          */
         init() {
-            //Inject script to toggle console.log
+            // Inject script to toggle console.log
             //https://stackoverflow.com/questions/1215392/how-to-quickly-and-conveniently-disable-all-console-log-statements-in-my-code
             let injectedFunc = () => {
                 let logger = (() => {
                     let oldConsoleLog = null;
+                    // Always allow crucial logs through
+                    window['console']['mylog'] = oldConsoleLog;
                     let pub = {};
 
                     pub.enableLogger =  () => {
@@ -33,6 +35,7 @@ LoggerDisabler = (() => {
                     };
 
                     pub.disableLogger = () => {
+                        // Disable spammy logs (e.g. those from Panopto's own code)
                         oldConsoleLog = console.log;
                         window['console']['log'] = () => {};
                     };

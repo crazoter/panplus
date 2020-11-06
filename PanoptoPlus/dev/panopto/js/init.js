@@ -22,13 +22,13 @@
                     //Initialize app
                     
                     App = {
+                        // loggerDisabler: new LoggerDisabler(settings),
                         sidebar: new Sidebar(settings),
                         speedSlider: new SpeedSlider(settings),
                         transcriptDisplay: new TranscriptDisplay(settings),
                         silenceCueManager: new SilenceCueManager(settings),
                         tsTracker: new TSTracker(settings),
                         carouselManager: new CarouselManager(settings),
-                        //loggerDisabler: new LoggerDisabler(settings),//disabled
                         delayDisabler: new DelayDisabler(settings),
                         videoAudioContextManager: new VideoAudioContextManager(settings),
                         //volumeBooster: new VolumeBooster(settings),//Moved into VideoAudioContextManager
@@ -39,7 +39,7 @@
                     console.log("FIN");
 
                     //Todo: Abstract this to another class
-                    const UPDATE_MESSAGE = "Update: Panplus now supports white noise reduction. You can disable it in the settings page.";
+                    const UPDATE_MESSAGE = "Update: Resolved issue preventing silence trimming.";
                     //Show notify for new users, or update prompt
                     Cache.load(Cache.FIRST_TIME_KEY).then((result) => {
                         if (!result) {

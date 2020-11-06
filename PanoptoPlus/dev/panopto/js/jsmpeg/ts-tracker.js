@@ -91,20 +91,23 @@ TSTracker = (() => {
                         players.push(flowplayer(1));
                     }
                     
+                    console.assert(players.length > 0, {num: players.length, errMsg: "Players not properly initialized"});
                     //Set configs for optimization
                     //Initially disabled because causing some problems for some webcasts, but re-enabled because it helped somewhat with
                     //buffering. To observe for bugs. 
                     
                     players.forEach(player => {
                         let hls = player.engine.hls || player.engine.hlsjs;
-                        //player.engine.hlsjs.config.startFragPrefetch = true;
-                        //player.engine.hlsjs.currentLevel = 0;
-                        //player.engine.hlsjs.config.maxFragLookUpTolerance = 0.20;
-                        //player.engine.hlsjs.config.maxStarvationDelay = 0.5;
-                        hls.config.maxBufferLength = 90;
-                        //hls.config.maxMaxBufferLength = 600;
-                        //player.engine.hlsjs.config.maxBufferSize = 60000000;
-                        //player.engine.hlsjs.config.stretchShortVideoTrack = true;
+                        if (hls) {
+                            //player.engine.hlsjs.config.startFragPrefetch = true;
+                            //player.engine.hlsjs.currentLevel = 0;
+                            //player.engine.hlsjs.config.maxFragLookUpTolerance = 0.20;
+                            //player.engine.hlsjs.config.maxStarvationDelay = 0.5;
+                            hls.config.maxBufferLength = 90;
+                            //hls.config.maxMaxBufferLength = 600;
+                            //player.engine.hlsjs.config.maxBufferSize = 60000000;
+                            //player.engine.hlsjs.config.stretchShortVideoTrack = true;
+                        }
                     });
 
                     let promiseChain = null;
@@ -202,7 +205,9 @@ TSTracker = (() => {
                     let fragsListened = {};
                     let addListener = function() {
                         let hls = players[0].engine.hlsjs || players[0].engine.hls;
-                        hls.observer.addListener("hlsFragLoading",(callbackId, details) => {
+                        let hlsObserver = hls.observer || hls;
+                        hlsObserver.addListener("hlsFragLoading",(callbackId, details) => {
+                            console.log("HLS Frag Loading");
                             listenerFired = true;
                             if(fragsListened[details.frag.relurl] == null) {
                                 fragsListened[details.frag.relurl] = 1;
@@ -315,10 +320,15 @@ TSTracker = (() => {
                     options.useFixedNoiseSample = settingsAsObject[Settings.keys.noisedetection];
                     //console.log(options.silenceThreshold);
                     //Convert to ArrayBuffers for transfer
-                    const channel0 = audioBuffer.getChannelData(0).buffer;
-                    const channel1 = audioBuffer.getChannelData(1).buffer;
-                    //Send to VADWorker for processing
-                    this.VADWorker.postMessage({data: [channel0, channel1], options: options}, [channel0, channel1]);
+                    if (audioBuffer.numberOfChannels > 1) {
+                        const channel0 = audioBuffer.getChannelData(0).buffer;
+                        const channel1 = audioBuffer.getChannelData(1).buffer;
+                        //Send to VADWorker for processing
+                        this.VADWorker.postMessage({data: [channel0, channel1], options: options}, [channel0, channel1]);
+                    } else {
+                        const channel0 = audioBuffer.getChannelData(0).buffer;
+                        this.VADWorker.postMessage({data: [channel0], options: options}, [channel0]);
+                    }
                     audioCtx.close();
                 },
                 (err) => { console.error("Error with decoding audio data" + err.err); });
