@@ -18,7 +18,8 @@
         {
             "matches": ["*://*.ap.panopto.com/Panopto/Pages/Viewer.aspx?id=*",
                 "*://*.weblecture.nus.edu.sg/Panopto/Pages/Viewer.aspx?id=*",
-                "*://luminus.nus.edu.sg/iframe/lti-launch/panopto*"],
+                "*://luminus.nus.edu.sg/iframe/lti-launch/panopto*",
+                "*://tau.cloud.panopto.eu/*"],
             "js": [
                 "libs/preact/preact.min.js",
                 "libs/indutny-fft-js/fft.min.js",
